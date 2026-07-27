@@ -1,0 +1,10 @@
+{
+  "name": "English Adventure",
+  "short_name": "English",
+  "description": "Playful, bite-sized English lessons that work offline.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f3ff",
+  "theme_color": "#6757d9"
+}

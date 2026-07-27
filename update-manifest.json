@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "released": "2026-07-27",
+  "minimumVersion": "1.0.0",
+  "notes": [
+    "Initial English Adventure release",
+    "Six interactive lessons with pronunciation practice",
+    "Progress tracking, quizzes, install support, and offline access"
+  ]
+}
