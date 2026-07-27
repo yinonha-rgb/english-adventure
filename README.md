@@ -1,34 +1,48 @@
-# English Adventure
+# English Adventure — הרפתקה באנגלית
 
-A friendly, mobile-first English learning web app with short lessons, browser-based pronunciation, quizzes, progress tracking, and offline support.
+A warm, bilingual, child-friendly English learning PWA for ages 6–12. It runs entirely in the browser with no account, server, analytics, advertising, or third-party API.
 
-## Features
+## Highlights
 
-- Six practical lessons for beginner and elementary learners
-- English speech playback using the Web Speech API
-- Instant quiz feedback and per-lesson scoring
-- Progress saved locally in the browser
-- Installable Progressive Web App with offline caching
-- Responsive, dependency-free design
+- Hebrew-first parent-facing interface with an English switch and complete RTL support
+- Multiple editable child profiles with separate progress stored in `localStorage`
+- 22 practical lessons across greetings, family, colors, numbers, food, home, school, animals, body, clothing, weather, emotions, shopping, café, directions, and travel
+- English text-to-speech and optional Web Speech Recognition pronunciation scoring
+- Quizzes, sentence ordering, lesson review, XP, levels, streaks, badges, trophies, daily goals, and guarded one-time awards
+- Per-child mistake bank with timestamp-based spaced review
+- Parent dashboard behind a local four-digit convenience PIN, including progress, recent activity, reset, JSON export, and JSON import
+- Offline caching, install support, versioned updates, keyboard navigation, focus trapping, and reduced-motion support
 
-## Run locally
+## Install and run
 
-The app has no build step. Because it loads JSON and registers a service worker, serve the directory over HTTP rather than opening `index.html` directly.
+The published app is available at [https://yinonha-rgb.github.io/english-adventure/](https://yinonha-rgb.github.io/english-adventure/).
+
+To run locally, serve the directory over HTTP (service workers do not work from `file://`):
 
 ```bash
 python -m http.server 8000
 ```
 
-Then visit `http://localhost:8000`.
+Open `http://localhost:8000`. On supported browsers, use the **Install** button or the browser’s installation menu.
 
-## GitHub Pages
+## Browser support
 
-This repository is designed to deploy from the root of the `main` branch. Relative asset paths allow it to work at the project URL without configuration changes.
+Current Chrome, Edge, Firefox, and Safari support the core lessons, profiles, quizzes, progress, and offline use. Speech synthesis availability and installed voices vary by device. Speech recognition currently works best in Chromium-based browsers; when unavailable, the app explains that listening and spoken repetition remain usable. Microphone permission is requested only after the microphone button is pressed.
 
-## Content
+## Privacy and local PIN
 
-Lesson copy and quiz questions live in `content.json`. Each lesson contains metadata, phrases, and quiz entries, so new adventures can be added without changing the application logic.
+All names, progress, mistakes, and activity stay on the learner’s device in browser storage. Nothing is transmitted. The four-digit parent PIN is only a local convenience lock; it is not encryption or real security. Clearing site data removes local progress unless it was exported first.
 
-## License
+## Updates
 
-Use and adapt this educational starter for your own learning projects.
+`sw.js` uses a versioned cache. A newly installed service worker waits while a lesson is open; the app then displays a **New version available** prompt. Pressing **Update** activates the new cache and reloads cleanly. `update-manifest.json` records the user-facing release version and notes.
+
+## Project structure
+
+- `index.html` — accessible responsive interface and styles
+- `app.js` — profiles, learning flow, speech, review, gamification, parent tools, and updates
+- `content.json` — bilingual lesson and quiz content
+- `manifest.json` — PWA metadata, icons, and shortcuts
+- `sw.js` — offline cache and update lifecycle
+- `update-manifest.json` — release metadata
+- `icon.svg` and `icon-maskable.svg` — locally generated PWA icons

@@ -1,10 +1,1 @@
-{
-  "version": "1.0.0",
-  "released": "2026-07-27",
-  "minimumVersion": "1.0.0",
-  "notes": [
-    "Initial English Adventure release",
-    "Six interactive lessons with pronunciation practice",
-    "Progress tracking, quizzes, install support, and offline access"
-  ]
-}
+{"version":"2.0.0","released":"2026-07-27","minimumVersion":"2.0.0","notes":["Hebrew-first bilingual interface with full RTL support","Child profiles with separate local progress","22 lessons, pronunciation practice, review scheduling, XP, levels, streaks, badges, and daily goals","PIN-gated local parent dashboard with JSON export and import","Improved offline cache and clean in-app update flow"]}
