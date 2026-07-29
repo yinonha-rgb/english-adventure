@@ -1,0 +1,13 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+const Core=require('../../teacher-modes-core.js');
+const configured={endpoint:'https://example.test/teacher',demoMode:false};
+test('free teacher is enabled and selected without API configuration',()=>{assert.equal(Core.DEFAULTS.allowedFree,true);assert.equal(Core.DEFAULTS.defaultMode,'free');assert.equal(Core.resolveMode(null,Core.DEFAULTS,{endpoint:'',demoMode:true}).mode,'free')});
+test('advanced teacher is disabled by default',()=>assert.equal(Core.DEFAULTS.allowedAdvanced,false));
+test('parent block cannot be bypassed by a child selection',()=>{const result=Core.resolveMode('advanced',{...Core.DEFAULTS,allowedAdvanced:false,advancedConsent:true},configured);assert.deepEqual(result,{mode:'free',fallback:true,reason:'parent-blocked'})});
+test('advanced mode requires explicit consent',()=>assert.equal(Core.advancedAvailable({...Core.DEFAULTS,allowedAdvanced:true},configured).reason,'consent-required'));
+test('advanced mode falls back when configuration or network is unavailable',()=>{const s={...Core.DEFAULTS,allowedAdvanced:true,advancedConsent:true};assert.equal(Core.resolveMode('advanced',s,{endpoint:'',demoMode:true}).mode,'free');assert.equal(Core.resolveMode('advanced',s,configured,false).reason,'offline')});
+test('configured and consented advanced mode may be selected',()=>{const s={...Core.DEFAULTS,allowedAdvanced:true,advancedConsent:true};assert.equal(Core.resolveMode('advanced',s,configured).mode,'advanced')});
+test('answer matching accepts simple expected answers',()=>{assert.equal(Core.answerMatches('The sky is blue',['blue']),true);assert.equal(Core.answerMatches('red',['blue']),false)});
+test('shared lesson context keeps goals, vocabulary, level, mistakes and requirements',()=>{const c=Core.sharedContext({child:{id:'c',level:3},lesson:{id:'colors',description:'Colors',phrases:[{english:'blue'}],quiz:[{id:'q'}]},mistakes:[{qid:'q'}]});assert.equal(c.lessonId,'colors');assert.deepEqual(c.targetVocabulary,['blue']);assert.equal(c.childLevel,3);assert.equal(c.previousMistakes.length,1);assert.equal(c.completionRequirements.questions,1)});
+test('session reports include compatible mode and progress fields',()=>{const r=Core.sessionReport({teacherMode:'free',correctAnswers:2,retries:1,hebrewHelpCount:1,phrases:['hello'],mistakes:['name']});assert.equal(r.teacherMode,'free');assert.deepEqual(r.wordsPracticed,['hello']);assert.deepEqual(r.wordsNeedingReview,['name']);assert.equal(r.completionStatus,'completed')});
+test('free mode does not depend on speech recognition or connectivity',()=>{const r=Core.resolveMode('free',Core.DEFAULTS,{endpoint:'',demoMode:true},false);assert.equal(r.mode,'free');assert.equal(r.fallback,false)});
