@@ -1,0 +1,16 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+const Core=require('../../teacher-modes-core.js'),content=require('../../content.json');
+const colorSpec=Core.validationSpec({lessonId:'colors',exerciseId:'color-red',expectedAnswers:['red'],acceptedSynonyms:['crimson'],pronunciationVariations:['read'],recognitionAlternatives:['its red'],requiredKeywords:['red'],contextKeywords:['color','red'],kind:'single-word',minimumThreshold:.82});
+const sentenceSpec=Core.validationSpec({lessonId:'hello',exerciseId:'nice-meet',expectedAnswers:['Nice to meet you'],recognitionAlternatives:['Nice meeting you'],requiredKeywords:['nice','meet'],kind:'sentence',minimumThreshold:.68});
+
+test('correct single-word answer and safe wrappers are accepted',()=>{for(const answer of ['red',"it's red",'the color is red'])assert.equal(Core.validateAnswer(answer,colorSpec).valid,true,answer)});
+test('approved synonym is accepted',()=>assert.equal(Core.validateAnswer('crimson',colorSpec).valid,true));
+test('approved pronunciation or recognition variation is accepted',()=>{assert.equal(Core.validateAnswer('read',colorSpec).valid,true);assert.equal(Core.validateAnswer('its red',colorSpec).valid,true)});
+test('unrelated word is rejected',()=>{const v=Core.validateAnswer('banana',colorSpec);assert.equal(v.valid,false);assert.equal(v.reason,'missing-required-keyword')});
+test('random sentence remains rejected even when it contains the target word',()=>assert.equal(Core.validateAnswer('banana red dog hello',colorSpec).valid,false));
+test('silence and background noise are rejected explicitly',()=>{assert.equal(Core.validateAnswer('',colorSpec).reason,'silence');assert.equal(Core.validateAnswer('uh hmm noise',colorSpec).reason,'background-noise')});
+test('low recognition confidence never produces a correct result',()=>{const v=Core.validateAnswer('red',colorSpec,{confidence:.2});assert.equal(v.valid,false);assert.equal(v.reason,'low-confidence')});
+test('meaning-equivalent sentence is accepted without exact wording',()=>assert.equal(Core.validateAnswer('nice to meet',sentenceSpec).valid,true));
+test('partial sentence missing an important keyword is rejected',()=>{const v=Core.validateAnswer('nice',sentenceSpec);assert.equal(v.valid,false);assert.equal(v.reason,'missing-required-keyword')});
+test('repeated wrong answers have a finite retry, hint, explanation, continue sequence',()=>assert.deepEqual([1,2,3,4].map(Core.retryAction),['retry','hint','explain-and-repeat','continue']));
+test('all existing lessons receive complete validation contracts',()=>{let exercises=0;for(const lesson of content.lessons){const shared=Core.sharedContext({lesson,child:{level:1},mistakes:[]});for(const exercise of [...shared.lesson.phrases,...shared.lesson.quiz]){exercises++;const v=exercise.validation;assert.ok(v.expectedAnswers.length,`${lesson.id} expected`);assert.ok(Array.isArray(v.acceptedSynonyms),`${lesson.id} synonyms`);assert.ok(Array.isArray(v.pronunciationVariations),`${lesson.id} pronunciation`);assert.ok(Array.isArray(v.recognitionAlternatives),`${lesson.id} recognition`);assert.ok(v.requiredKeywords.length,`${lesson.id} keywords`);assert.ok(v.minimumThreshold>=.68,`${lesson.id} threshold`)}}assert.equal(exercises,110)});
