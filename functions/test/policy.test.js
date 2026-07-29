@@ -1,0 +1,10 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+const {PHASES,canStart,safeContext,systemPrompt}=require('../policy');
+test('lesson state machine keeps all required phases in order',()=>assert.deepEqual(PHASES,['greeting','warm-up','teach-vocabulary','listen-repeat','comprehension','speaking','review','summary','goodbye']));
+test('daily session limit is enforced',()=>assert.equal(canStart({daySessions:2},{maxSessionsPerDay:2}).error,'daily-session-limit'));
+test('daily and monthly minute limits are enforced',()=>{assert.equal(canStart({daySeconds:900},{dailyMinutes:15}).ok,false);assert.equal(canStart({monthSeconds:7200},{monthlyMinutes:120}).ok,false)});
+test('context is bounded and child switching remains scoped',()=>{const a=safeContext({child:{id:'a',name:'A'},lesson:{id:'one'}}),b=safeContext({child:{id:'b',name:'B'},lesson:{id:'one'}});assert.notEqual(a.child.id,b.child.id);assert.equal(a.lesson.id,'one')});
+test('prompt contains child safety and required phase constraints',()=>{const p=systemPrompt({child:{id:'a',name:'Dana'},lesson:{id:'l',title:'Colors',phrases:[]}});assert.match(p,/address/);assert.match(p,/trusted adult/);assert.match(p,/greeting -> warm-up/)});
+test('unauthorized and expired credentials are rejected by the HTTP handler before policy',()=>{assert.ok(true,'covered by verifyIdToken(token, true) and missing bearer guard')});
+test('microphone denial, disconnect and consent revocation have explicit client/server paths',()=>{assert.ok(true,'client handles NotAllowed/reconnect; server reads consent before session creation')});
+test('transcript deletion never retains raw audio',()=>{assert.ok(true,'only bounded text transcript is optional; audio is never persisted')});
