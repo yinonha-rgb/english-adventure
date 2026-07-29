@@ -20,6 +20,22 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // AI teacher records are written only by the trusted Cloud Function.
+    // The authenticated parent may read their own summaries and usage.
+    match /users/{uid}/teacherSessions/{sessionId} {
+      allow read: if signedInAs(uid);
+      allow write: if false;
+    }
+
+    match /users/{uid}/teacherUsage/{monthId} {
+      allow read: if signedInAs(uid);
+      allow write: if false;
+    }
+
+    match /users/{uid}/teacherRate/{dayId} {
+      allow read, write: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

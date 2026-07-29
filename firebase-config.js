@@ -10,3 +10,11 @@ export const firebaseConfig = {
   appId: "1:664015801855:web:c79489840897d556e92bca",
   measurementId: "G-J3G4H1BVEZ"
 };
+
+// Leave endpoint empty until the authenticated Cloud Function is deployed.
+// Demo mode remains available without an OpenAI request or paid usage.
+export const teacherAIConfig = {
+  endpoint: "",
+  demoMode: true,
+  appCheckSiteKey: ""
+};

@@ -13,6 +13,8 @@ A warm, bilingual, child-friendly English learning PWA for ages 6–12. Core lea
 - Parent dashboard behind a local four-digit convenience PIN, including progress, recent activity, reset, JSON export, and JSON import
 - Optional Google parent sign-in and near-real-time UID-isolated Firestore synchronization
 - Conflict-safe Hebrew migration, offline change queue, manual sync, cloud deletion backup, and account controls
+- Interactive lesson-scoped AI voice teacher with a nine-phase teaching flow and a no-cost local demo mode
+- Optional secure Firebase Functions bridge for short-lived OpenAI Realtime WebRTC credentials; the permanent API key never reaches GitHub Pages
 - Offline caching, install support, versioned updates, keyboard navigation, focus trapping, and reduced-motion support
 
 ## Install and run
@@ -37,6 +39,14 @@ Cloud sync is disabled until `firebase-config.js` is filled in. Follow the compl
 
 Firebase web configuration can be committed because it identifies the public web app; it is not a private credential. Security relies on Google Authentication and Firestore rules. Never commit service-account JSON, Admin SDK private keys, access tokens, or other server credentials.
 
+## AI voice teacher
+
+The teacher actively runs a structured lesson through greeting, warm-up, vocabulary teaching, listen-and-repeat, comprehension, speaking, review, summary, and goodbye. It includes microphone controls, conservative pronunciation feedback, reconnection behavior, parent consent and limits, optional transcript retention, usage reporting, Hebrew parent summaries, and a child achievement screen.
+
+The repository ships with `teacherAIConfig.demoMode: true`, so the interface can be tested locally without a paid API request. Real voice conversation requires the included authenticated Cloud Function, Firebase billing, a Secret Manager entry named `OPENAI_API_KEY`, and a deployed endpoint. Follow [TEACHER_AI_SETUP_HE.md](TEACHER_AI_SETUP_HE.md). OpenAI API usage creates external charges; neither this project nor Firebase makes that usage free.
+
+The browser never receives the permanent OpenAI key. It requests a Firebase-authenticated, short-lived Realtime credential from `teacherApi` and uses WebRTC directly for low-latency audio. Raw microphone audio is not stored by default. The server rechecks parent consent, scopes records to the parent UID and child ID, enforces daily/monthly limits transactionally, bounds lesson context, and applies a child-safety system prompt.
+
 The cloud document model is `users/{uid}/state/main`, with immutable deletion backups under `users/{uid}/backups/{backupId}`. Online writes use Firestore transactions with schema and revision fields. Offline edits remain queued locally and merge automatically when connectivity returns. Completed lessons and award ledgers are unioned, activity is deduplicated by stable IDs, tombstones protect profile deletion, and stale snapshots cannot blindly replace newer progress.
 
 ## Privacy and parent PIN
@@ -52,9 +62,12 @@ Without sign-in, all names, progress, mistakes, and activity stay on the learner
 - `index.html` — accessible responsive interface and styles
 - `app.js` — profiles, learning flow, speech, review, gamification, parent tools, and updates
 - `firebase-sync.js` — authentication, merging, transactions, live snapshots, offline queue, and account UI
+- `teacher-ai.js` — voice-teacher UI, state machine, WebRTC client, demo mode, recovery, reports, and parent controls
 - `firebase-config.js` — public Firebase Web configuration; disabled placeholder until setup
 - `firestore.rules` — UID-isolated Firestore authorization rules
 - `FIREBASE_SETUP_HE.md` — beginner-friendly Firebase setup and testing guide in Hebrew
+- `TEACHER_AI_SETUP_HE.md` — billing, secrets, Functions, usage limits, App Check, microphone and Realtime setup in Hebrew
+- `functions/` — authenticated server endpoint, short-lived Realtime credential creation, usage enforcement, and policy tests
 - `content.json` — bilingual lesson and quiz content
 - `manifest.json` — PWA metadata, icons, and shortcuts
 - `sw.js` — offline cache and update lifecycle
