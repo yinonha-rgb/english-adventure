@@ -41,6 +41,10 @@ Firebase web configuration can be committed because it identifies the public web
 
 ## AI voice teacher
 
+Version 4.1 provides two clearly separated teacher modes. The **Free Guided Teacher** is the default, runs entirely with browser speech features and scripted lesson logic, and never calls a paid API. The optional **Advanced AI Teacher** uses the prepared authenticated backend and remains disabled until billing, secrets, deployment, and explicit parent consent are configured.
+
+Hebrew guides: [teacher-mode comparison](TEACHER_MODES_HE.md), [free teacher](FREE_VOICE_TEACHER_HE.md), and [advanced setup](ADVANCED_AI_TEACHER_SETUP_HE.md).
+
 The teacher actively runs a structured lesson through greeting, warm-up, vocabulary teaching, listen-and-repeat, comprehension, speaking, review, summary, and goodbye. It includes microphone controls, conservative pronunciation feedback, reconnection behavior, parent consent and limits, optional transcript retention, usage reporting, Hebrew parent summaries, and a child achievement screen.
 
 The repository ships with `teacherAIConfig.demoMode: true`, so the interface can be tested locally without a paid API request. Real voice conversation requires the included authenticated Cloud Function, Firebase billing, a Secret Manager entry named `OPENAI_API_KEY`, and a deployed endpoint. Follow [TEACHER_AI_SETUP_HE.md](TEACHER_AI_SETUP_HE.md). OpenAI API usage creates external charges; neither this project nor Firebase makes that usage free.
