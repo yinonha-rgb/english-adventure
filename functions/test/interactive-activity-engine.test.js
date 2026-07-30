@@ -52,7 +52,7 @@ test('validators accept correct participation and reject unrelated choices',()=>
 });
 
 test('microphone fallback and touch alternatives are always present',()=>{
-  assert.match(source,/if\(!SR\)return this\.feedback/);
+  assert.match(source,/if\(!SR\)\{this\.speechLog\('recognition unavailable'\);return this\.feedback/);
   assert.match(source,/לחצו “אמרתי” כדי להמשיך/);
   assert.match(source,/this\.button\('✅ אמרתי'/);
   assert.match(source,/onclick/);
@@ -68,9 +68,17 @@ test('progress resumes per child and completion awards remain idempotent',()=>{
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.18\.1/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.18\.1/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.18\.2/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.18\.2/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
+});
+
+test('daily interactive teacher handles the complete Chrome recognition lifecycle',()=>{
+  for(const event of ['recognition created','recognition started','recognition ended','recognition restarted','onstart','onspeechstart','onspeechend','onaudiostart','onaudioend','onresult','onerror','transcript final'])assert.match(source,new RegExp(event));
+  assert.match(source,/interimResults=true/);
+  assert.match(source,/result\.isFinal/);
+  assert.match(source,/speech without final transcript/);
+  assert.match(source,/interactiveSpeechDebug/);
 });
 
 test('activity canvas is isolated from speech, vocabulary and controls',()=>{
