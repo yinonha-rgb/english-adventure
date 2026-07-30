@@ -68,8 +68,8 @@ test('progress resumes per child and completion awards remain idempotent',()=>{
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.16\.0/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.16\.0/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.17\.0/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.17\.0/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
 
@@ -86,7 +86,7 @@ test('activity canvas is isolated from speech, vocabulary and controls',()=>{
 
 test('premium stage keeps teacher, scenery and gameplay alive together',()=>{
   assert.match(source,/id="interactiveTeacherVisual"/);
-  assert.match(source,/EATeacherVisual\.createController/);
+  assert.match(source,/EATeacherSystem\?\.createLessonTeacher/);
   assert.match(source,/setVisualState\('speaking'\)/);
   assert.match(source,/setVisualState\('listening'\)/);
   assert.match(source,/positive\?'success':'retry'/);
