@@ -23,11 +23,11 @@ const profile=(id='child-a')=>({id,p:{xp:0,completed:[],mistakes:[],voiceReview:
 const day=new Date('2026-07-30T10:00:00Z');
 
 test('a prominent accessible daily lesson button is present on the home page',()=>{
-  assert.match(html,/id="dailyLessonBtn"[^>]*data-i="startDailyLesson"/);
+  assert.match(html,/id="dailyLessonBtn"[^>]*data-i="startDailyTeacher"/);
   assert.match(html,/class="primary daily-start"/);
   assert.match(html,/min-height:64px/);
-  assert.match(translations,/Start Daily Lesson/);
-  assert.match(translations,/התחל שיעור יומי/);
+  assert.match(translations,/Start Daily Lesson with Teacher/);
+  assert.match(translations,/התחל שיעור יומי עם המורה/);
 });
 
 test('different children receive deterministic but potentially different recommendations',()=>{
@@ -68,7 +68,7 @@ test('selection and completion survive JSON persistence and daily credit is idem
 
 test('daily flow is local-only, offline cached and independent of Advanced AI or OpenAI',()=>{
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|teacher-ai/i);
-  assert.match(sw,/daily-lesson-core\.js\?v=4\.10\.0/);
+  assert.match(sw,/daily-lesson-core\.js\?v=4\.11\.0/);
   assert.match(app,/startDailyLesson/);
   assert.match(app,/startLesson\(lesson\)/);
   assert.match(app,/daily-lesson-complete/);
