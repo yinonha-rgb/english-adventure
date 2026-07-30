@@ -118,6 +118,7 @@
       this.recognition=null;
       this.selectedWord=null;
       this.matched=new Set();
+      this.visual=null;
     }
     start(){
       this.ensureUI();
@@ -132,7 +133,7 @@
         modal.setAttribute('role','dialog');
         modal.setAttribute('aria-modal','true');
         modal.setAttribute('aria-labelledby','interactiveTeacherTitle');
-        modal.innerHTML=`<article class="panel interactive-panel" data-focus="speaking"><header class="interactive-top"><div class="interactive-teacher-mini" aria-hidden="true">👩‍🏫</div><div class="interactive-child"><strong id="interactiveChildName"></strong><small id="interactiveState" aria-live="polite">המורה מדברת</small></div><div class="interactive-progress" aria-label="התקדמות בשיעור"><span></span></div><button class="btn interactive-pause" id="interactivePause" type="button" aria-label="השהיית השיעור">⏸️</button><button class="close" type="button" data-close aria-label="סגירת החלון">×</button></header><main class="interactive-center" aria-label="אזור הפעילות"><div id="interactiveActivity"></div></main><footer class="interactive-bottom"><div class="interactive-speech" id="interactiveInstruction" aria-live="polite"></div><div class="interactive-vocabulary" id="interactiveVocabulary" aria-label="מילות השיעור"></div><div class="interactive-answer-controls" id="interactiveAnswerControls"></div><p class="interactive-feedback" id="interactiveFeedback" role="status"></p><div class="interactive-tools"><button class="btn" id="interactiveReplay">🔊 שוב</button><button class="btn" id="interactiveHint">💡 רמז</button><button class="danger" id="interactiveEnd">סיום</button></div></footer></article>`;
+        modal.innerHTML=`<article class="panel interactive-panel" data-focus="speaking" data-teacher-state="speaking"><header class="interactive-top"><div class="interactive-teacher-mini" aria-hidden="true">👩‍🏫</div><div class="interactive-child"><strong id="interactiveChildName"></strong><small id="interactiveState" aria-live="polite">המורה מדברת</small></div><div class="interactive-progress" aria-label="התקדמות בשיעור"><span></span></div><button class="btn interactive-pause" id="interactivePause" type="button" aria-label="השהיית השיעור">⏸️</button><button class="close" type="button" data-close aria-label="סגירת החלון">×</button></header><main class="interactive-center" aria-label="אזור הפעילות"><section class="adventure-stage" aria-label="במת משחק מונפשת"><div class="stage-sky" aria-hidden="true"><i></i><i></i><i></i></div><div class="stage-scenery" aria-hidden="true"><span class="stage-sun">☀️</span><span class="stage-hill hill-a"></span><span class="stage-hill hill-b"></span><span class="stage-sparkles">✦ · ✧</span></div><aside class="stage-teacher" id="interactiveTeacherVisual" aria-label="המורה המלווה"></aside><div class="stage-activity" id="interactiveActivity"></div></section></main><footer class="interactive-bottom"><div class="interactive-speech" id="interactiveInstruction" aria-live="polite"></div><div class="interactive-vocabulary" id="interactiveVocabulary" aria-label="מילות השיעור"></div><div class="interactive-answer-controls" id="interactiveAnswerControls"></div><p class="interactive-feedback" id="interactiveFeedback" role="status"></p><div class="interactive-tools"><button class="btn" id="interactiveReplay">🔊 שוב</button><button class="btn" id="interactiveHint">💡 רמז</button><button class="danger" id="interactiveEnd">סיום</button></div></footer></article>`;
         document.body.append(modal);
         modal.querySelector('.close').onclick=()=>this.end();
         modal.querySelector('#interactiveReplay').onclick=()=>this.speakCurrent();
@@ -141,6 +142,11 @@
         modal.querySelector('#interactivePause').onclick=()=>this.togglePause();
       }
       this.modal=modal;
+      const visualHost=this.modal.querySelector('#interactiveTeacherVisual');
+      if(visualHost&&!this.visual&&root.EATeacherVisual){
+        this.visual=root.EATeacherVisual.createController(visualHost,{character:'noa',reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,subtitles:'replay'});
+        this.visual.setReplay(last=>this.speakSegments(last.text,.82));
+      }
       this.modal.querySelector('#interactiveChildName').textContent=this.child?.name||'חבר/ה';
       this.modal.classList.add('open');
       document.body.style.overflow='hidden';
@@ -165,6 +171,8 @@
       controls.replaceChildren();
       this.renderVocabulary(item);
       this.renderActivity(item,host,controls);
+      this.modal.querySelector('.adventure-stage').dataset.activity=item.type;
+      this.setVisualState('speaking');
       this.save();
       this.speakCurrent();
       this.timer=setTimeout(()=>this.speakCurrent('לא נורא, אני אחזור על ההוראה.'),14000);
@@ -174,8 +182,9 @@
       if(!item)return;
       clearTimeout(this.timer);
       this.modal.querySelector('.interactive-panel').dataset.focus='speaking';
+      this.setVisualState('speaking');
       const text=[prefix,item.teacherInstructionEn,item.teacherInstructionHe].filter(Boolean).join(' ');
-      this.speakSegments(text,.82,()=>{if(this.current()===item){this.modal.querySelector('#interactiveState').textContent='המורה מחכה לתשובה';this.modal.querySelector('.interactive-panel').dataset.focus='answer'}});
+      this.speakSegments(text,.82,()=>{if(this.current()===item){this.modal.querySelector('#interactiveState').textContent='המורה מחכה לתשובה';this.modal.querySelector('.interactive-panel').dataset.focus='answer';this.setVisualState('waiting')}});
     }
     speakSegments(text,rate=.85,onend=()=>{}){
       const Natural=root.EANaturalVoice;
@@ -188,13 +197,29 @@
         const speechText=Natural?.normalizeTextForSpeech?.(segment.text,segment.lang)||segment.text;
         if(!speechText)return next();
         const utterance=new SpeechSynthesisUtterance(speechText);
+        this.visual?.showSpeech(speechText,segment.lang);
+        this.visual?.startMouth();
+        this.animateCue();
         utterance.lang=segment.lang;
         utterance.rate=rate;
-        utterance.onend=next;
-        utterance.onerror=next;
+        utterance.onend=()=>{this.visual?.stopMouth();next()};
+        utterance.onerror=()=>{this.visual?.stopMouth();next()};
         speechSynthesis?.speak(utterance);
       };
       next();
+    }
+    setVisualState(state){
+      const panel=this.modal?.querySelector('.interactive-panel');
+      if(panel)panel.dataset.teacherState=state;
+      const mapped={speaking:'speaking',waiting:'waiting',listening:'listening',success:'celebrating',retry:'correcting',paused:'paused'}[state]||state;
+      this.visual?.setState(mapped);
+    }
+    animateCue(){
+      const stage=this.modal?.querySelector('.adventure-stage');
+      if(!stage)return;
+      stage.classList.remove('cue');
+      void stage.offsetWidth;
+      stage.classList.add('cue');
     }
     setInstruction(english,hebrew=''){
       const box=this.modal.querySelector('#interactiveInstruction');
@@ -212,7 +237,7 @@
       const button=this.modal.querySelector('#interactivePause');
       button.textContent=this.paused?'▶️':'⏸️';
       button.setAttribute('aria-label',this.paused?'המשך השיעור':'השהיית השיעור');
-      if(this.paused){speechSynthesis?.cancel();this.recognition?.abort();this.modal.querySelector('#interactiveState').textContent='השיעור מושהה';this.modal.querySelector('.interactive-panel').dataset.focus='answer'}else this.speakCurrent();
+      if(this.paused){speechSynthesis?.cancel();this.visual?.stopMouth();this.recognition?.abort();this.modal.querySelector('#interactiveState').textContent='השיעור מושהה';this.modal.querySelector('.interactive-panel').dataset.focus='answer';this.setVisualState('paused')}else this.speakCurrent();
     }
     button(label,value,action){
       const button=document.createElement('button');
@@ -276,6 +301,7 @@
       recognition.lang='en-US';
       recognition.interimResults=false;
       this.modal.querySelector('#interactiveState').textContent='המורה מקשיבה';
+      this.setVisualState('listening');
       recognition.onresult=event=>this.answer(event.results[0][0].transcript);
       recognition.onerror=()=>this.feedback('לא שמעתי בבירור. אפשר לנסות שוב או ללחוץ “אמרתי”.',false);
       try{recognition.start()}catch{this.feedback('המיקרופון אינו זמין. לחצו “אמרתי”.',false)}
@@ -304,6 +330,8 @@
       this.setInstruction(text);
       this.modal.querySelector('.interactive-panel').dataset.focus='feedback';
       this.modal.querySelector('#interactiveState').textContent=positive?'המורה מעודדת':'המורה עוזרת';
+      this.setVisualState(positive?'success':'retry');
+      this.animateCue();
       this.speakSegments(text,.85);
     }
     showHint(){
@@ -321,6 +349,7 @@
       host.innerHTML=`<div class="interactive-complete"><div>🏆✨</div><h2>כל הכבוד! סיימתם את השיעור היומי עם המורה</h2><p>למדנו: dog, cat and bird</p><p><strong>+${earned} XP</strong></p><button class="primary" id="interactiveHome">חזרה למסך הבית</button></div>`;
       this.modal.querySelector('#interactiveInstruction').textContent='Great work! Today you learned dog, cat and bird.';
       this.modal.querySelector('#interactiveState').textContent='המורה חוגגת';
+      this.setVisualState('success');
       this.speakSegments(`כל הכבוד ${this.child.name}! Today you learned dog, cat and bird.`,.82);
       host.querySelector('#interactiveHome').onclick=()=>this.close();
       this.onComplete?.();
@@ -332,6 +361,7 @@
       clearTimeout(this.timer);
       speechSynthesis?.cancel();
       this.recognition?.abort();
+      this.visual?.stopMouth();
       this.modal.classList.remove('open');
       document.body.style.overflow='';
     }
