@@ -1,6 +1,6 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const Core=require('../../teacher-modes-core.js');
-const configured={ADVANCED_AI_ENABLED:true,buildMode:'production',backendEndpoint:'https://example.test/teacher',backendDeployed:true,serverSecretConfigured:true,billingApproved:true,productionActivationToken:'approved'};
+const configured={ADVANCED_AI_ENABLED:true,REALTIME_VOICE_ENABLED:true,OPENAI_BACKEND_ENABLED:true,buildMode:'production',backendEndpoint:'https://example.test/teacher',backendDeployed:true,serverSecretConfigured:true,billingApproved:true,productionActivationToken:'approved'};
 test('free teacher is enabled and selected without API configuration',()=>{assert.equal(Core.DEFAULTS.allowedFree,true);assert.equal(Core.DEFAULTS.defaultMode,'free');assert.equal(Core.resolveMode(null,Core.DEFAULTS,{endpoint:'',demoMode:true}).mode,'free')});
 test('advanced teacher is disabled by default',()=>assert.equal(Core.DEFAULTS.allowedAdvanced,false));
 test('parent block cannot be bypassed by a child selection',()=>{const result=Core.resolveMode('advanced',{...Core.DEFAULTS,allowedAdvanced:false,advancedConsent:true},configured);assert.deepEqual(result,{mode:'free',fallback:true,reason:'parent-blocked'})});

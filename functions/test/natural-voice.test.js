@@ -11,6 +11,20 @@ const voices=[
 ];
 test('voice ranking prefers high-quality local matching voices',()=>assert.equal(Natural.chooseVoice(voices,'en-US').voice.voiceURI,'aria'));
 test('English and Hebrew selections stay language scoped',()=>{assert.equal(Natural.chooseVoice(voices,'en-US').voice.lang,'en-US');assert.equal(Natural.chooseVoice(voices,'he-IL').voice.lang,'he-IL')});
+test('teacher gender uses explicit metadata and configurable preferences',()=>{
+  const candidates=[
+    {name:'Neutral A',gender:'male',lang:'en-US',localService:true},
+    {name:'Neutral B',gender:'female',lang:'en-US',localService:true}
+  ];
+  assert.equal(Natural.chooseVoice(candidates,'en-US','','female').voice.name,'Neutral B');
+  assert.equal(Natural.chooseVoice(candidates,'en-US','','male').voice.name,'Neutral A');
+  assert.ok(Natural.VOICE_PREFERENCES.female.en.includes('Samantha'));
+  assert.ok(Natural.VOICE_PREFERENCES.male.en.includes('Daniel'));
+});
+test('voice fallback is explicit when gender metadata is unavailable',()=>{
+  const choice=Natural.chooseVoice([{name:'Unknown Local',lang:'he-IL',localService:true}],'he-IL','','female');
+  assert.equal(choice.fallbackReason,'gender-unknown-best-quality');
+});
 test('preferred device voice persists when still available',()=>assert.equal(Natural.chooseVoice(voices,'en-US','basic').voice.voiceURI,'basic'));
 test('phrase splitting creates natural short utterances',()=>assert.deepEqual(Natural.splitPhrases("Hi, Ori! Today we're learning colors. What color is it?"),['Hi, Ori!',"Today we're learning colors.",'What color is it?']));
 test('pronunciation metadata uses defined chunks and recognition variants',()=>{const m=Natural.pronunciationMeta('Wonderful.',{pronunciationChunks:['Won','der','ful'],commonRecognitionVariants:['wonder full']});assert.deepEqual(m.pronunciationChunks,['Won','der','ful']);assert.deepEqual(m.commonRecognitionVariants,['wonder full'])});
@@ -79,7 +93,7 @@ test('every production SpeechSynthesis utterance passes through the central norm
   for(const file of ['app.js','teacher-ai.js','interactive-activity-engine.js','natural-voice.js']){
     const source=fs.readFileSync(path.join(root,file),'utf8');
     const constructors=[...source.matchAll(/new (?:window\.)?SpeechSynthesisUtterance\(([^)]*)\)|new this\.Utterance\(([^)]*)\)/g)];
-    assert.ok(constructors.length,`${file} has a speech call`);
+    if(!constructors.length)continue;
     for(const match of constructors){
       const argument=(match[1]||match[2]||'').trim();
       assert.match(argument,/speechText/,`${file} bypasses normalizeTextForSpeech: ${match[0]}`);

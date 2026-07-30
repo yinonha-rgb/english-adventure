@@ -4,16 +4,16 @@ const fs=require('node:fs');
 const Natural=require('../../natural-voice.js');
 const {AnswerPlayback}=require('../../answer-playback.js');
 
-test('boy and girl voice preferences preserve quality and manual override',()=>{
+test('female and male teacher preferences preserve quality and reject an opposite-gender override',()=>{
   const voices=[
     {name:'Microsoft Daniel Natural',voiceURI:'male',lang:'en-US',localService:true},
     {name:'Microsoft Jenny Natural',voiceURI:'female',lang:'en-US',localService:true},
     {name:'Robot male basic',voiceURI:'bad',lang:'en-US',localService:false}
   ];
-  assert.equal(Natural.chooseVoice(voices,'en-US','', 'boy').voice.voiceURI,'male');
-  assert.equal(Natural.chooseVoice(voices,'en-US','', 'girl').voice.voiceURI,'female');
-  assert.equal(Natural.chooseVoice(voices,'en-US','male','girl').voice.voiceURI,'male');
-  assert.notEqual(Natural.chooseVoice(voices,'en-US','', 'boy').voice.voiceURI,'bad');
+  assert.equal(Natural.chooseVoice(voices,'en-US','', 'male').voice.voiceURI,'male');
+  assert.equal(Natural.chooseVoice(voices,'en-US','', 'female').voice.voiceURI,'female');
+  assert.equal(Natural.chooseVoice(voices,'en-US','male','female').voice.voiceURI,'female');
+  assert.notEqual(Natural.chooseVoice(voices,'en-US','', 'male').voice.voiceURI,'bad');
 });
 
 test('legacy profile migration and synced gender are explicit',()=>{

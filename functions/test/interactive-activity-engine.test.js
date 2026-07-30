@@ -32,6 +32,12 @@ test('activity state never advances before a correct child response',()=>{
   assert.equal(engine.transition(initial,'dog',true).index,2);
 });
 
+test('activity engine locks each turn against overlapping taps or speech events',()=>{
+  assert.match(source,/this\.answerLocked=true/);
+  assert.match(source,/if\(this\.paused\|\|this\.answerLocked\)return/);
+  assert.match(source,/this\.answerLocked=false/);
+});
+
 test('wrong attempts retry and then reveal a hint',()=>{
   const once=engine.transition({index:1,attempts:0},'cat',false);
   assert.equal(once.lastResult,'incorrect');
@@ -68,8 +74,8 @@ test('progress resumes per child and completion awards remain idempotent',()=>{
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.18\.2/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.18\.2/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.20\.2/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.20\.2/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
 
@@ -87,7 +93,7 @@ test('activity canvas is isolated from speech, vocabulary and controls',()=>{
   assert.match(source,/class="interactive-bottom"/);
   assert.match(source,/id="interactiveVocabulary"/);
   assert.match(source,/id="interactiveAnswerControls"/);
-  assert.match(html,/grid-template-rows:minmax\(64px,10%\) minmax\(0,1fr\) minmax\(150px,24%\)/);
+  assert.match(html,/grid-template-rows:minmax\(64px,10%\) minmax\(0,1fr\) minmax\(200px,30%\)/);
   assert.match(html,/interactive-panel\[data-focus="speaking"\]/);
   assert.doesNotMatch(source,/interactive-board/);
 });
