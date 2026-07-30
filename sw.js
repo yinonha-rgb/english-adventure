@@ -1,5 +1,5 @@
-const VERSION='english-adventure-4.8.1';
-const CORE=['./','./index.html','./translations.js?v=4.8.1','./ui-controls.js?v=4.8.1','./answer-playback.js?v=4.8.1','./natural-voice.js?v=4.8.1','./teacher-visual.js?v=4.8.1','./adaptive-learning.js?v=4.8.1','./app.js?v=4.8.1','./teacher-modes-core.js?v=4.8.1','./firebase-sync.js?v=4.8.1','./teacher-ai.js?v=4.8.1','./firebase-config.js','./content.json','./manifest.json','./update-manifest.json','./icon.svg','./icon-maskable.svg'];
+const VERSION='english-adventure-4.9.0';
+const CORE=['./','./index.html','./translations.js?v=4.9.0','./ui-controls.js?v=4.9.0','./answer-playback.js?v=4.9.0','./natural-voice.js?v=4.9.0','./teacher-visual.js?v=4.9.0','./adaptive-learning.js?v=4.9.0','./advanced-ai-config.js?v=4.9.0','./pricing-config.js?v=4.9.0','./advanced-ai-policy.js?v=4.9.0','./teacher-providers.js?v=4.9.0','./app.js?v=4.9.0','./teacher-modes-core.js?v=4.9.0','./firebase-sync.js?v=4.9.0','./teacher-ai.js?v=4.9.0','./firebase-config.js','./content.json','./manifest.json','./update-manifest.json','./icon.svg','./icon-maskable.svg'];
 
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(CORE))));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==VERSION).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));

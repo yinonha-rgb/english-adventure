@@ -43,6 +43,8 @@ Firebase web configuration can be committed because it identifies the public web
 
 ## AI voice teacher
 
+Version 4.9 adds a selectable, fully local Mock AI provider and a shared provider interface for the free, mock, and future real teachers. The shipped build has an immutable `ADVANCED_AI_ENABLED: false` lock, an empty backend endpoint, zero real pricing assumptions, and an intentionally blocked backend deployment command. Mock usage and cost estimates are clearly marked as simulated and always report zero paid requests. See [`ADVANCED_AI_ACTIVATION_HE.md`](ADVANCED_AI_ACTIVATION_HE.md) for the approval-gated future activation checklist.
+
 Version 4.1 provides two clearly separated teacher modes. The **Free Guided Teacher** is the default, runs entirely with browser speech features and scripted lesson logic, and never calls a paid API. The optional **Advanced AI Teacher** uses the prepared authenticated backend and remains disabled until billing, secrets, deployment, and explicit parent consent are configured.
 
 Hebrew guides: [teacher-mode comparison](TEACHER_MODES_HE.md), [free teacher](FREE_VOICE_TEACHER_HE.md), and [advanced setup](ADVANCED_AI_TEACHER_SETUP_HE.md).
