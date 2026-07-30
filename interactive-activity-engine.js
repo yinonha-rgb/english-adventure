@@ -132,14 +132,16 @@
         modal.setAttribute('role','dialog');
         modal.setAttribute('aria-modal','true');
         modal.setAttribute('aria-labelledby','interactiveTeacherTitle');
-        modal.innerHTML=`<article class="panel interactive-panel"><div class="panelhead"><div><span class="eyebrow">המורה מובילה את הפעילות</span><h2 id="interactiveTeacherTitle">שיעור חיות עם המורה</h2></div><button class="close" type="button" data-close aria-label="סגירת החלון">×</button></div><div class="interactive-progress" aria-label="התקדמות בשיעור"><span></span></div><section class="interactive-stage"><aside class="interactive-avatar" aria-live="polite"><div class="interactive-face">👩‍🏫</div><div class="interactive-state" id="interactiveState">המורה מדברת</div></aside><main class="interactive-board"><p class="interactive-instruction" id="interactiveInstruction"></p><div id="interactiveActivity"></div><p class="interactive-feedback" id="interactiveFeedback" role="status"></p></main></section><div class="interactive-tools"><button class="btn" id="interactiveReplay">🔊 שוב</button><button class="btn" id="interactiveHint">💡 רמז</button><button class="danger" id="interactiveEnd">סיום</button></div></article>`;
+        modal.innerHTML=`<article class="panel interactive-panel" data-focus="speaking"><header class="interactive-top"><div class="interactive-teacher-mini" aria-hidden="true">👩‍🏫</div><div class="interactive-child"><strong id="interactiveChildName"></strong><small id="interactiveState" aria-live="polite">המורה מדברת</small></div><div class="interactive-progress" aria-label="התקדמות בשיעור"><span></span></div><button class="btn interactive-pause" id="interactivePause" type="button" aria-label="השהיית השיעור">⏸️</button><button class="close" type="button" data-close aria-label="סגירת החלון">×</button></header><main class="interactive-center" aria-label="אזור הפעילות"><div id="interactiveActivity"></div></main><footer class="interactive-bottom"><div class="interactive-speech" id="interactiveInstruction" aria-live="polite"></div><div class="interactive-vocabulary" id="interactiveVocabulary" aria-label="מילות השיעור"></div><div class="interactive-answer-controls" id="interactiveAnswerControls"></div><p class="interactive-feedback" id="interactiveFeedback" role="status"></p><div class="interactive-tools"><button class="btn" id="interactiveReplay">🔊 שוב</button><button class="btn" id="interactiveHint">💡 רמז</button><button class="danger" id="interactiveEnd">סיום</button></div></footer></article>`;
         document.body.append(modal);
         modal.querySelector('.close').onclick=()=>this.end();
         modal.querySelector('#interactiveReplay').onclick=()=>this.speakCurrent();
         modal.querySelector('#interactiveHint').onclick=()=>this.showHint();
         modal.querySelector('#interactiveEnd').onclick=()=>this.end();
+        modal.querySelector('#interactivePause').onclick=()=>this.togglePause();
       }
       this.modal=modal;
+      this.modal.querySelector('#interactiveChildName').textContent=this.child?.name||'חבר/ה';
       this.modal.classList.add('open');
       document.body.style.overflow='hidden';
     }
@@ -154,12 +156,15 @@
       this.matched.clear();
       this.selectedWord=null;
       this.modal.querySelector('.interactive-progress span').style.width=`${Math.round(this.state.index/this.lesson.activities.length*100)}%`;
-      this.modal.querySelector('#interactiveInstruction').textContent=`${item.teacherInstructionEn} — ${item.teacherInstructionHe}`;
+      this.setInstruction(item.teacherInstructionEn,item.teacherInstructionHe);
       this.modal.querySelector('#interactiveFeedback').textContent='';
       this.modal.querySelector('#interactiveState').textContent='המורה מדברת';
       const host=this.modal.querySelector('#interactiveActivity');
+      const controls=this.modal.querySelector('#interactiveAnswerControls');
       host.replaceChildren();
-      this.renderActivity(item,host);
+      controls.replaceChildren();
+      this.renderVocabulary(item);
+      this.renderActivity(item,host,controls);
       this.save();
       this.speakCurrent();
       this.timer=setTimeout(()=>this.speakCurrent('לא נורא, אני אחזור על ההוראה.'),14000);
@@ -169,12 +174,31 @@
       if(!item)return;
       clearTimeout(this.timer);
       speechSynthesis?.cancel();
+      this.modal.querySelector('.interactive-panel').dataset.focus='speaking';
       const text=[prefix,item.teacherInstructionEn,item.teacherInstructionHe].filter(Boolean).join(' ');
       const utterance=new SpeechSynthesisUtterance(text);
       utterance.lang='he-IL';
       utterance.rate=.82;
-      utterance.onend=()=>{if(this.current()===item)this.modal.querySelector('#interactiveState').textContent='המורה מחכה לתשובה'};
+      utterance.onend=()=>{if(this.current()===item){this.modal.querySelector('#interactiveState').textContent='המורה מחכה לתשובה';this.modal.querySelector('.interactive-panel').dataset.focus='answer'}};
       speechSynthesis?.speak(utterance);
+    }
+    setInstruction(english,hebrew=''){
+      const box=this.modal.querySelector('#interactiveInstruction');
+      box.replaceChildren();
+      const en=document.createElement('strong');en.textContent=english||'';box.append(en);
+      if(hebrew){const he=document.createElement('small');he.textContent=hebrew;box.append(he)}
+    }
+    renderVocabulary(item){
+      const strip=this.modal.querySelector('#interactiveVocabulary');
+      strip.replaceChildren();
+      for(const word of this.lesson.words||[]){const card=document.createElement('span');card.className='interactive-word';card.textContent=word;if(String(item.prompt||'').toLowerCase().includes(word))card.classList.add('active');strip.append(card)}
+    }
+    togglePause(){
+      this.paused=!this.paused;
+      const button=this.modal.querySelector('#interactivePause');
+      button.textContent=this.paused?'▶️':'⏸️';
+      button.setAttribute('aria-label',this.paused?'המשך השיעור':'השהיית השיעור');
+      if(this.paused){speechSynthesis?.cancel();this.recognition?.abort();this.modal.querySelector('#interactiveState').textContent='השיעור מושהה';this.modal.querySelector('.interactive-panel').dataset.focus='answer'}else this.speakCurrent();
     }
     button(label,value,action){
       const button=document.createElement('button');
@@ -184,19 +208,19 @@
       button.onclick=()=>action(value,button);
       return button;
     }
-    renderActivity(item,host){
+    renderActivity(item,host,controls){
       const pictureTypes=[TYPES.PICTURE_CHOICE,TYPES.LISTENING,TYPES.STORY];
       if(item.type===TYPES.WELCOME){
-        host.append(this.button('כן, מתחילים ▶️',item.correctAnswer,value=>this.answer(value)));
+        host.innerHTML='<div class="movement-demo">🌟</div>';
+        controls.append(this.button('כן, מתחילים ▶️',item.correctAnswer,value=>this.answer(value)));
       }else if(pictureTypes.includes(item.type)){
         const grid=document.createElement('div');grid.className='interactive-options';
         item.options.forEach(option=>grid.append(this.button(`<span>${option.label}</span><strong>${option.word||''}</strong>`,option.value,(value,button)=>this.answer(value,button))));
         host.append(grid);
       }else if(item.type===TYPES.REPEAT){
         const word=document.createElement('div');word.className='repeat-word';word.innerHTML=`<span>🐶</span><strong>${item.prompt}</strong>`;
-        const controls=document.createElement('div');controls.className='interactive-options';
         controls.append(this.button('🎤 דברו למיקרופון','microphone',()=>this.listen()),this.button('✅ אמרתי','אמרתי',()=>this.answer(item.correctAnswer)));
-        host.append(word,controls);
+        host.append(word);
       }else if(item.type===TYPES.DRAG_MATCH){
         const targets=document.createElement('div');targets.className='match-targets';
         item.pairs.forEach(pair=>{const target=this.button(`${pair.label}<small>${pair.value}</small>`,pair.value,value=>this.matchTarget(value));target.dataset.target=value;target.ondragover=event=>event.preventDefault();target.ondrop=event=>{event.preventDefault();this.selectedWord=event.dataTransfer.getData('text/plain');this.matchTarget(value)};targets.append(target)});
@@ -210,10 +234,10 @@
         setTimeout(()=>grid.querySelectorAll('button').forEach(card=>{card.textContent='❓';card.classList.add('hidden-card')}),1800);
       }else if(item.type===TYPES.MOVEMENT){
         const move=document.createElement('div');move.className='movement-demo';move.textContent='🐦  3… 2… 1…';
-        host.append(move,this.button('סיימתי! ⭐',item.correctAnswer,value=>this.answer(value)));
+        host.append(move);controls.append(this.button('סיימתי! ⭐',item.correctAnswer,value=>this.answer(value)));
       }else if(item.type===TYPES.SENTENCE){
-        const sentence=document.createElement('div');sentence.className='sentence-builder';sentence.innerHTML='<strong>I like </strong>';
-        item.options.forEach(option=>sentence.append(this.button(option,option,value=>this.answer(value))));
+        const sentence=document.createElement('div');sentence.className='sentence-builder';sentence.innerHTML='<strong>I like …</strong>';
+        item.options.forEach(option=>controls.append(this.button(option,option,value=>this.answer(value))));
         host.append(sentence);
       }
     }
@@ -263,6 +287,8 @@
       const box=this.modal.querySelector('#interactiveFeedback');
       box.textContent=text;
       box.dataset.kind=positive?'success':'retry';
+      this.setInstruction(text);
+      this.modal.querySelector('.interactive-panel').dataset.focus='feedback';
       this.modal.querySelector('#interactiveState').textContent=positive?'המורה מעודדת':'המורה עוזרת';
       const utterance=new SpeechSynthesisUtterance(text);utterance.lang=/[\u0590-\u05ff]/.test(text)?'he-IL':'en-US';utterance.rate=.85;speechSynthesis?.speak(utterance);
     }
