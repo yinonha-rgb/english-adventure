@@ -15,8 +15,8 @@ The voice teacher now uses six human-style answer categories, three difficulty l
 - Parent dashboard behind a local four-digit convenience PIN, including progress, recent activity, reset, JSON export, and JSON import
 - Optional Google parent sign-in and near-real-time UID-isolated Firestore synchronization
 - Conflict-safe Hebrew migration, offline change queue, manual sync, cloud deletion backup, and account controls
-- Interactive lesson-scoped AI voice teacher with a nine-phase teaching flow and a no-cost local demo mode
-- Optional secure Firebase Functions bridge for short-lived OpenAI Realtime WebRTC credentials; the permanent API key never reaches GitHub Pages
+- Interactive lesson-scoped free voice teacher with a nine-phase teaching flow and a no-cost local mock mode
+- Local Hebrew/English classroom-intent handling, live recognition transcript, bounded recognition recovery, and deterministic answer validation
 - Offline caching, install support, versioned updates, keyboard navigation, focus trapping, and reduced-motion support
 
 ## Install and run
@@ -41,21 +41,19 @@ Cloud sync is disabled until `firebase-config.js` is filled in. Follow the compl
 
 Firebase web configuration can be committed because it identifies the public web app; it is not a private credential. Security relies on Google Authentication and Firestore rules. Never commit service-account JSON, Admin SDK private keys, access tokens, or other server credentials.
 
-## AI voice teacher
+## Voice teacher
 
-Version 4.9 adds a selectable, fully local Mock AI provider and a shared provider interface for the free, mock, and future real teachers. The shipped build has an immutable `ADVANCED_AI_ENABLED: false` lock, an empty backend endpoint, zero real pricing assumptions, and an intentionally blocked backend deployment command. Mock usage and cost estimates are clearly marked as simulated and always report zero paid requests. See [`ADVANCED_AI_ACTIVATION_HE.md`](ADVANCED_AI_ACTIVATION_HE.md) for the approval-gated future activation checklist.
+Version 4.20 improves the free teacher with local conversational intent handling. The child can ask to repeat, slow down, explain a word, give a hint, try again, pause, or finish in Hebrew or English. Chrome recognition may recover from an early empty stop up to two times, but recognition errors never count as wrong answers and never create an endless retry loop. A subtle live transcript shows what the browser heard.
 
-Version 4.1 provides two clearly separated teacher modes. The **Free Guided Teacher** is the default, runs entirely with browser speech features and scripted lesson logic, and never calls a paid API. The optional **Advanced AI Teacher** uses the prepared authenticated backend and remains disabled until billing, secrets, deployment, and explicit parent consent are configured.
+The **Free Guided Teacher** is the production teacher. It runs entirely with browser speech features and deterministic lesson logic and never calls a paid API. The repository retains a local mock provider for testing architecture, but the advanced provider is locked in the shipped build: `ADVANCED_AI_ENABLED` is `false`, its endpoint is empty, real pricing is unset, the backend transport is explicitly `implemented:false`, no OpenAI secret is bound, and backend deployment is intentionally blocked.
 
-Hebrew guides: [teacher-mode comparison](TEACHER_MODES_HE.md), [free teacher](FREE_VOICE_TEACHER_HE.md), and [advanced setup](ADVANCED_AI_TEACHER_SETUP_HE.md).
+Hebrew guides: [teacher-mode comparison](TEACHER_MODES_HE.md) and [free teacher](FREE_VOICE_TEACHER_HE.md).
 
 The teacher actively runs a structured lesson through greeting, warm-up, vocabulary teaching, listen-and-repeat, comprehension, speaking, review, summary, and goodbye. It includes microphone controls, conservative pronunciation feedback, reconnection behavior, parent consent and limits, optional transcript retention, usage reporting, Hebrew parent summaries, and a child achievement screen.
 
-The repository ships with `teacherAIConfig.demoMode: true`, so the interface can be tested locally without a paid API request. Real voice conversation requires the included authenticated Cloud Function, Firebase billing, a Secret Manager entry named `OPENAI_API_KEY`, and a deployed endpoint. Follow [TEACHER_AI_SETUP_HE.md](TEACHER_AI_SETUP_HE.md). OpenAI API usage creates external charges; neither this project nor Firebase makes that usage free.
-
 Version 4.6 adds a completely local natural-speech layer for the free teacher: ranked operating-system voices, separate English/Hebrew selection, phrase queues, varied speaking rates, protected turn-taking, interruption recovery, calibration previews, and a temporary “יותר לאט” replay. Browser synthesis quality still depends on voices installed on the device and is not presented as identical to a human voice.
 
-The browser never receives the permanent OpenAI key. It requests a Firebase-authenticated, short-lived Realtime credential from `teacherApi` and uses WebRTC directly for low-latency audio. Raw microphone audio is not stored by default. The server rechecks parent consent, scopes records to the parent UID and child ID, enforces daily/monthly limits transactionally, bounds lesson context, and applies a child-safety system prompt.
+No production code sends lesson audio or text to OpenAI. Temporary answer recordings remain only in browser memory when the parent has enabled that feature and are deleted at the end of the answer flow.
 
 The cloud document model is `users/{uid}/state/main`, with immutable deletion backups under `users/{uid}/backups/{backupId}`. Online writes use Firestore transactions with schema and revision fields. Offline edits remain queued locally and merge automatically when connectivity returns. Completed lessons and award ledgers are unioned, activity is deduplicated by stable IDs, tombstones protect profile deletion, and stale snapshots cannot blindly replace newer progress.
 
@@ -76,12 +74,15 @@ Without sign-in, all names, progress, mistakes, and activity stay on the learner
 - `index.html` — accessible responsive interface and styles
 - `app.js` — profiles, learning flow, speech, review, gamification, parent tools, and updates
 - `firebase-sync.js` — authentication, merging, transactions, live snapshots, offline queue, and account UI
-- `teacher-ai.js` — voice-teacher UI, state machine, WebRTC client, demo mode, recovery, reports, and parent controls
+- `teacher-ai.js` — free voice-teacher UI, state machine, local conversation intents, recognition recovery, reports, and parent controls
+- `teacher-providers.js` — shared `ConversationProvider` contract with production `FreeConversationProvider`, deterministic `MockAdvancedConversationProvider`, and disabled `AdvancedConversationProvider`
+- `functions/ai-backend-core.js` — disabled backend interfaces, authentication/ownership validation helpers, restrictive abuse and cost limits, and privacy-safe usage records
+- `SECURE_AI_ARCHITECTURE.md` — trust boundaries, feature flags, future secret handling, privacy, limits, and fallback design
+- `AI_ACTIVATION_CHECKLIST.md` — mandatory manual approvals before any real provider work or deployment
 - `firebase-config.js` — public Firebase Web configuration; disabled placeholder until setup
 - `firestore.rules` — UID-isolated Firestore authorization rules
 - `FIREBASE_SETUP_HE.md` — beginner-friendly Firebase setup and testing guide in Hebrew
-- `TEACHER_AI_SETUP_HE.md` — billing, secrets, Functions, usage limits, App Check, microphone and Realtime setup in Hebrew
-- `functions/` — authenticated server endpoint, short-lived Realtime credential creation, usage enforcement, and policy tests
+- `functions/` — locked future-backend scaffold and policy tests; production deployment is intentionally disabled
 - `content.json` — bilingual lesson and quiz content
 - `manifest.json` — PWA metadata, icons, and shortcuts
 - `sw.js` — offline cache and update lifecycle

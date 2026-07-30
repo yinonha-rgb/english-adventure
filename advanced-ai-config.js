@@ -2,6 +2,8 @@
   'use strict';
   const config=Object.freeze({
     ADVANCED_AI_ENABLED:false,
+    REALTIME_VOICE_ENABLED:false,
+    OPENAI_BACKEND_ENABLED:false,
     productionActivationToken:'',
     backendEndpoint:'',
     backendDeployed:false,

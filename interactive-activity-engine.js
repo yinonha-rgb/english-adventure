@@ -113,9 +113,13 @@
       this.child=child;
       this.progress=progress;
       this.onComplete=onComplete;
-      this.teacherId=teacherId||child?.teacherId||'noa';
+      this.teacherId=teacherId||child?.teacherId||'female-young';
+      this.teacherProfile=root.EATeacherSystem?.byId?.(this.teacherId);
+      this.teacherGender=this.teacherProfile?.gender||'female';
       this.state={index:0,attempts:0,results:[],...(progress?.load?.(lesson.id)||{})};
       this.timer=null;
+      this.paused=false;
+      this.answerLocked=true;
       this.recognition=null;
       this.recognitionGeneration=0;
       this.speechDebug={microphone:'STOPPED',recognition:'STOPPED',lastTranscript:'—',lessonState:'idle',events:[]};
@@ -123,6 +127,7 @@
       this.matched=new Set();
       this.visual=null;
     }
+    teacherText(female,male){return this.teacherGender==='male'?male:female}
     start(){
       this.ensureUI();
       this.render();
@@ -170,6 +175,7 @@
     }
     render(){
       clearTimeout(this.timer);
+      this.answerLocked=true;
       const item=this.current();
       if(!item)return this.complete();
       this.matched.clear();
@@ -177,7 +183,7 @@
       this.modal.querySelector('.interactive-progress span').style.width=`${Math.round(this.state.index/this.lesson.activities.length*100)}%`;
       this.setInstruction(item.teacherInstructionEn,item.teacherInstructionHe);
       this.modal.querySelector('#interactiveFeedback').textContent='';
-      this.modal.querySelector('#interactiveState').textContent='המורה מדברת';
+      this.modal.querySelector('#interactiveState').textContent=this.teacherText('נועה מדברת','אדם מדבר');
       const host=this.modal.querySelector('#interactiveActivity');
       const controls=this.modal.querySelector('#interactiveAnswerControls');
       host.replaceChildren();
@@ -197,7 +203,7 @@
       this.modal.querySelector('.interactive-panel').dataset.focus='speaking';
       this.setVisualState('speaking');
       const text=[prefix,item.teacherInstructionEn,item.teacherInstructionHe].filter(Boolean).join(' ');
-      this.speakSegments(text,.82,()=>{if(this.current()===item){this.modal.querySelector('#interactiveState').textContent='המורה מחכה לתשובה';this.modal.querySelector('.interactive-panel').dataset.focus='answer';this.setVisualState('waiting')}});
+      this.speakSegments(text,.82,()=>{if(this.current()===item&&!this.paused){this.answerLocked=false;this.modal.querySelector('#interactiveState').textContent='המורה מחכה לתשובה';this.modal.querySelector('.interactive-panel').dataset.focus='answer';this.setVisualState('waiting')}});
     }
     speakSegments(text,rate=.85,onend=()=>{}){
       const Natural=root.EANaturalVoice;
@@ -247,6 +253,7 @@
     }
     togglePause(){
       this.paused=!this.paused;
+      this.answerLocked=true;
       const button=this.modal.querySelector('#interactivePause');
       button.textContent=this.paused?'▶️':'⏸️';
       button.setAttribute('aria-label',this.paused?'המשך השיעור':'השהיית השיעור');
@@ -307,6 +314,7 @@
       }
     }
     listen(){
+      if(this.paused||this.answerLocked)return this.speechLog('start blocked',this.paused?'lesson paused':'teacher still speaking');
       const item=this.current(),SR=root.SpeechRecognition||root.webkitSpeechRecognition;
       if(!SR){this.speechLog('recognition unavailable');return this.feedback('זיהוי דיבור אינו זמין. לחצו “אמרתי” כדי להמשיך.',false)}
       this.recognition?.abort();
@@ -318,7 +326,7 @@
       recognition.interimResults=true;
       recognition.continuous=false;
       recognition.maxAlternatives=3;
-      this.modal.querySelector('#interactiveState').textContent='המורה מקשיבה';
+      this.modal.querySelector('#interactiveState').textContent=this.teacherText('נועה מקשיבה','אדם מקשיב');
       this.setVisualState('listening');
       recognition.onstart=()=>{this.speechDebug.microphone='READY';this.speechDebug.recognition='RUNNING';this.speechLog('onstart')};
       recognition.onaudiostart=()=>{this.speechDebug.microphone='LISTENING';this.speechLog('onaudiostart')};
@@ -332,6 +340,8 @@
       try{recognition.start();this.speechLog('recognition started')}catch(error){settled=true;this.speechLog('start exception',error?.message||'unknown');this.speechDebug.microphone='STOPPED';this.speechDebug.recognition='STOPPED';this.feedback('המיקרופון אינו זמין. לחצו “אמרתי”.',false)}
     }
     answer(value,button){
+      if(this.paused||this.answerLocked)return;
+      this.answerLocked=true;
       clearTimeout(this.timer);
       const item=this.current(),correct=validate(item,value);
       this.state.results.push({activityId:item.id,correct,response:String(value),at:new Date().toISOString()});
@@ -354,7 +364,7 @@
       box.dataset.kind=positive?'success':'retry';
       this.setInstruction(text);
       this.modal.querySelector('.interactive-panel').dataset.focus='feedback';
-      this.modal.querySelector('#interactiveState').textContent=positive?'המורה מעודדת':'המורה עוזרת';
+      this.modal.querySelector('#interactiveState').textContent=positive?this.teacherText('נועה מעודדת','אדם מעודד'):this.teacherText('נועה עוזרת','אדם עוזר');
       this.setVisualState(positive?'success':'retry');
       this.animateCue();
       this.speakSegments(text,.85);

@@ -28,7 +28,7 @@ function normalize(raw){
     return {
       id:cleanString(x.id,80),name:cleanString(x.name,20)||'ילד/ה',
       gender:['boy','girl'].includes(x.gender)?x.gender:'not-specified',
-      teacherId:['noa','daniel'].includes(x.teacherId)?x.teacherId:null,
+      teacherId:({noa:'female-young',daniel:'male-young','female-young':'female-young','male-young':'male-young'})[x.teacherId]||null,
       updatedAt:Number(x.updatedAt)||0,
       p:{
         xp:Math.max(0,Number(p.xp)||0),
