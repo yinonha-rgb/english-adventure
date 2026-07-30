@@ -23,7 +23,26 @@ test('teacher gender uses explicit metadata and configurable preferences',()=>{
 });
 test('voice fallback is explicit when gender metadata is unavailable',()=>{
   const choice=Natural.chooseVoice([{name:'Unknown Local',lang:'he-IL',localService:true}],'he-IL','','female');
-  assert.equal(choice.fallbackReason,'gender-unknown-best-quality');
+  assert.equal(choice.fallbackReason,'gender-unknown-pitch-adjusted');
+  assert.ok(Natural.genderPitch('female',choice.actualGender)>1);
+  assert.ok(Natural.genderPitch('male',choice.actualGender)<1);
+});
+test('an opposite-gender saved voice never overrides the selected teacher',()=>{
+  const candidates=[
+    {name:'Adam Voice',gender:'male',lang:'en-US',voiceURI:'adam',localService:true},
+    {name:'Noa Voice',gender:'female',lang:'en-US',voiceURI:'noa',localService:true}
+  ];
+  assert.equal(Natural.chooseVoice(candidates,'en-US','adam','female').voice.voiceURI,'noa');
+  assert.equal(Natural.chooseVoice(candidates,'en-US','noa','male').voice.voiceURI,'adam');
+});
+test('speech queue keeps female and male voices audibly distinct when browser gender is unknown',async()=>{
+  const utterances=[],synth={cancel(){},speak(u){utterances.push(u);queueMicrotask(()=>u.onend())}},U=function(text){this.text=text};
+  const speakFor=async teacherVoiceGender=>{const q=new Natural.SpeechQueue({synth,Utterance:U,pause:()=>Promise.resolve(),getSettings:()=>({teacherVoiceGender})});q.setVoices([{name:'Hebrew Local',lang:'he-IL',voiceURI:'he',localService:true}]);await q.speak([{text:'שלום',lang:'he-IL'}]);return utterances.at(-1)};
+  const female=await speakFor('female'),male=await speakFor('male');
+  assert.ok(female.pitch>1.1);
+  assert.ok(male.pitch<.9);
+  assert.equal(female.voice.voiceURI,'he');
+  assert.equal(male.voice.voiceURI,'he');
 });
 test('preferred device voice persists when still available',()=>assert.equal(Natural.chooseVoice(voices,'en-US','basic').voice.voiceURI,'basic'));
 test('phrase splitting creates natural short utterances',()=>assert.deepEqual(Natural.splitPhrases("Hi, Ori! Today we're learning colors. What color is it?"),['Hi, Ori!',"Today we're learning colors.",'What color is it?']));
@@ -36,7 +55,7 @@ test('praise matches streak and success after difficulty',()=>{assert.match(Natu
 test('silence and uncertain recognition remain gentle',()=>{assert.match(Natural.responseStyle({category:'didnt-answer'}).text,/Take your time/);assert.match(Natural.responseStyle({category:'speech-recognition-uncertain'}).text,/heard/)});
 test('speech queue never overlaps and slower replay is temporary',async()=>{const utterances=[],synth={cancel(){},speak(u){utterances.push(u);queueMicrotask(()=>u.onend())}},U=function(text){this.text=text},q=new Natural.SpeechQueue({synth,Utterance:U,pause:()=>Promise.resolve(),getSettings:()=>({speechSpeed:'normal'})});await q.speak([{text:'Hello. Ready?',lang:'en-US',tone:'greeting'}]);const original=utterances.map(x=>x.rate);await q.repeatSlower();assert.ok(utterances.slice(original.length).every((x,i)=>x.rate<original[i]));assert.equal(q.active,false)});
 test('pause, background, resume, device changes and duplicate events use idempotent cancellation',()=>{const q=new Natural.SpeechQueue({synth:{cancel(){}},Utterance:function(){}});q.cancel();q.cancel();assert.equal(q.active,false)});
-test('voice settings migrate and persist without enabling paid mode',()=>{const s=Core.migrateSettings({englishVoice:'aria',hebrewVoice:'hebrew',speechSpeed:'slow',speechVolume:.7,voiceCalibrated:true});assert.equal(s.englishVoice,'aria');assert.equal(s.speechSpeed,'slow');assert.equal(s.speechVolume,.7);assert.equal(s.allowedAdvanced,false)});
+test('voice settings migrate and persist without enabling paid mode',()=>{const s=Core.migrateSettings({englishVoice:'aria',hebrewVoice:'hebrew',voiceTeacherId:'female-young',speechSpeed:'slow',speechVolume:.7,voiceCalibrated:true});assert.equal(s.englishVoice,'aria');assert.equal(s.voiceTeacherId,'female-young');assert.equal(s.speechSpeed,'slow');assert.equal(s.speechVolume,.7);assert.equal(s.allowedAdvanced,false)});
 test('every lesson phrase has complete pronunciation modeling metadata',()=>{let count=0;for(const lesson of content.lessons){const shared=Core.sharedContext({lesson});for(const phrase of shared.lesson.phrases){count++;for(const key of ['naturalPronunciation','slowPronunciation','pronunciationChunks','stressHint','commonRecognitionVariants'])assert.ok(key in phrase,`${lesson.id} ${key}`);assert.ok(phrase.pronunciationChunks.length)}}assert.equal(count,66)});
 test('speech preprocessing removes markup and technical symbols naturally',()=>{
   const clean=Natural.normalizeTextForSpeech;

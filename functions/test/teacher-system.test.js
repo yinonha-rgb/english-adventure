@@ -69,11 +69,29 @@ test('teacher selection is per child, available on first lesson and profile sett
 test('selected teacher owns renderer and voice identity',()=>{
   assert.match(app,/teacher\.nameHe.*מחכה לך/);
   assert.match(html,/teacher-choice-grid/);
-  assert.match(html,/teacher-system\.js\?v=4\.20\.2/);
-  assert.match(sw,/teacher-system\.js\?v=4\.20\.2/);
+  assert.match(html,/teacher-system\.js\?v=4\.20\.3/);
+  assert.match(sw,/teacher-system\.js\?v=4\.20\.3/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/teacher\?\.voiceGender/);
+  assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/teacherVoiceGender/);
+  assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/voiceTeacherId/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/TeacherSystem=window\.EATeacherSystem/);
   assert.match(fs.readFileSync(path.join(root,'interactive-activity-engine.js'),'utf8'),/EATeacherSystem\?\.createLessonTeacher/);
+});
+
+test('female and male previews apply matching voices and distinct fallback pitch',async()=>{
+  const oldNatural=globalThis.EANaturalVoice,oldSynth=globalThis.speechSynthesis,oldUtterance=globalThis.SpeechSynthesisUtterance;
+  const Natural=require(path.join(root,'natural-voice.js')),spoken=[];
+  globalThis.EANaturalVoice=Natural;
+  globalThis.speechSynthesis={getVoices:()=>[{name:'Unknown Hebrew',lang:'he-IL',voiceURI:'he',localService:true}],cancel(){},speak(value){spoken.push(value)}};
+  globalThis.SpeechSynthesisUtterance=function(text){this.text=text};
+  try{
+    await System.previewTeacher(System.byId('female-young'),'he');
+    await System.previewTeacher(System.byId('male-young'),'he');
+    assert.ok(spoken[0].pitch>1.1);
+    assert.ok(spoken[1].pitch<.9);
+    assert.match(spoken[0].text,/נועה/);
+    assert.match(spoken[1].text,/אדם/);
+  }finally{globalThis.EANaturalVoice=oldNatural;globalThis.speechSynthesis=oldSynth;globalThis.SpeechSynthesisUtterance=oldUtterance}
 });
 
 test('Adam uses the supplied portrait consistently and offline',()=>{

@@ -22,7 +22,7 @@ test('service-worker updates bypass cache, show an accessible action and reload 
   assert.match(app,/updateBtn\.disabled=true/);
   assert.match(html,/id="updateNotice" role="status" aria-live="polite"/);
 });
-test('4.20.2 precache contains every local script referenced by index',()=>{
+test('4.20.3 precache contains every local script referenced by index',()=>{
   for(const match of html.matchAll(/<script(?: type="module")? src="([^"]+)"/g))assert.ok(sw.includes(`'./${match[1]}'`),match[1]);
 });
 test('service worker never handles cross-origin Firebase or API traffic',()=>{
