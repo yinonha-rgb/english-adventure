@@ -29,6 +29,10 @@
     const day=isoDay(date),stored=dailyStore(progress)[day];
     const byId=id=>lessons.find(lesson=>lesson.id===id);
 
+    if(stored?.status!=='completed'&&stored?.mode==='voice'&&byId(stored.lessonId)){
+      return{lesson:byId(stored.lessonId),reason:'unfinished-voice',day,mode:'voice'};
+    }
+
     const unresolved=(progress.mistakes||[])
       .filter(item=>!item.resolvedAt)
       .sort((a,b)=>(b.count||1)-(a.count||1)||(a.next||0)-(b.next||0));
@@ -97,6 +101,7 @@
       lessonId:selection.lesson.id,
       status:'selected',
       selectionReason:selection.reason,
+      mode:selection.mode||existing?.mode||'voice',
       selectedAt:existing?.selectedAt||new Date(now).toISOString(),
       updatedAt:new Date(now).toISOString()
     };
