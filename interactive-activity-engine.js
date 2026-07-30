@@ -211,7 +211,7 @@
     setVisualState(state){
       const panel=this.modal?.querySelector('.interactive-panel');
       if(panel)panel.dataset.teacherState=state;
-      const mapped={speaking:'speaking',waiting:'waiting',listening:'listening',success:'celebrating',retry:'correcting',paused:'paused'}[state]||state;
+      const mapped={speaking:this.current()?.type===TYPES.WELCOME?'waving':'speaking',waiting:'listening',listening:'listening',success:'celebrating',retry:'encouraging',paused:'paused'}[state]||state;
       this.visual?.setState(mapped);
     }
     animateCue(){
