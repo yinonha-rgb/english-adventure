@@ -117,6 +117,8 @@
       this.state={index:0,attempts:0,results:[],...(progress?.load?.(lesson.id)||{})};
       this.timer=null;
       this.recognition=null;
+      this.recognitionGeneration=0;
+      this.speechDebug={microphone:'STOPPED',recognition:'STOPPED',lastTranscript:'—',lessonState:'idle',events:[]};
       this.selectedWord=null;
       this.matched=new Set();
       this.visual=null;
@@ -134,7 +136,7 @@
         modal.setAttribute('role','dialog');
         modal.setAttribute('aria-modal','true');
         modal.setAttribute('aria-labelledby','interactiveTeacherTitle');
-        modal.innerHTML=`<article class="panel interactive-panel" data-focus="speaking" data-teacher-state="speaking"><header class="interactive-top"><div class="interactive-teacher-mini" aria-hidden="true">👩‍🏫</div><div class="interactive-child"><strong id="interactiveChildName"></strong><small id="interactiveState" aria-live="polite">המורה מדברת</small></div><div class="interactive-progress" aria-label="התקדמות בשיעור"><span></span></div><button class="btn interactive-pause" id="interactivePause" type="button" aria-label="השהיית השיעור">⏸️</button><button class="close" type="button" data-close aria-label="סגירת החלון">×</button></header><main class="interactive-center" aria-label="אזור הפעילות"><section class="adventure-stage" aria-label="במת משחק מונפשת"><div class="stage-sky" aria-hidden="true"><i></i><i></i><i></i></div><div class="stage-scenery" aria-hidden="true"><span class="stage-sun">☀️</span><span class="stage-hill hill-a"></span><span class="stage-hill hill-b"></span><span class="stage-sparkles">✦ · ✧</span></div><aside class="stage-teacher" id="interactiveTeacherVisual" aria-label="המורה המלווה"></aside><div class="stage-activity" id="interactiveActivity"></div></section></main><footer class="interactive-bottom"><div class="interactive-speech" id="interactiveInstruction" aria-live="polite"></div><div class="interactive-vocabulary" id="interactiveVocabulary" aria-label="מילות השיעור"></div><div class="interactive-answer-controls" id="interactiveAnswerControls"></div><p class="interactive-feedback" id="interactiveFeedback" role="status"></p><div class="interactive-tools"><button class="btn" id="interactiveReplay">🔊 שוב</button><button class="btn" id="interactiveHint">💡 רמז</button><button class="danger" id="interactiveEnd">סיום</button></div></footer></article>`;
+        modal.innerHTML=`<article class="panel interactive-panel" data-focus="speaking" data-teacher-state="speaking"><header class="interactive-top"><div class="interactive-teacher-mini" aria-hidden="true">👩‍🏫</div><div class="interactive-child"><strong id="interactiveChildName"></strong><small id="interactiveState" aria-live="polite">המורה מדברת</small></div><div class="interactive-progress" aria-label="התקדמות בשיעור"><span></span></div><button class="btn interactive-pause" id="interactivePause" type="button" aria-label="השהיית השיעור">⏸️</button><button class="close" type="button" data-close aria-label="סגירת החלון">×</button></header><main class="interactive-center" aria-label="אזור הפעילות"><section class="adventure-stage" aria-label="במת משחק מונפשת"><div class="stage-sky" aria-hidden="true"><i></i><i></i><i></i></div><div class="stage-scenery" aria-hidden="true"><span class="stage-sun">☀️</span><span class="stage-hill hill-a"></span><span class="stage-hill hill-b"></span><span class="stage-sparkles">✦ · ✧</span></div><aside class="stage-teacher" id="interactiveTeacherVisual" aria-label="המורה המלווה"></aside><div class="stage-activity" id="interactiveActivity"></div></section></main><footer class="interactive-bottom"><div class="interactive-speech" id="interactiveInstruction" aria-live="polite"></div><div class="interactive-vocabulary" id="interactiveVocabulary" aria-label="מילות השיעור"></div><div class="interactive-answer-controls" id="interactiveAnswerControls"></div><p class="interactive-feedback" id="interactiveFeedback" role="status"></p><div class="interactive-tools"><button class="btn" id="interactiveReplay">🔊 שוב</button><button class="btn" id="interactiveHint">💡 רמז</button><button class="danger" id="interactiveEnd">סיום</button></div></footer><pre class="teacher-debug" id="interactiveSpeechDebug" hidden aria-label="מצב צינור זיהוי הדיבור"></pre></article>`;
         document.body.append(modal);
         modal.querySelector('.close').onclick=()=>this.end();
         modal.querySelector('#interactiveReplay').onclick=()=>this.speakCurrent();
@@ -155,6 +157,14 @@
       document.body.style.overflow='hidden';
     }
     current(){return this.lesson.activities[this.state.index]}
+    speechLog(event,detail=''){
+      this.speechDebug.lessonState=`activity ${this.state.index+1} / ${this.modal?.querySelector('.interactive-panel')?.dataset.teacherState||'idle'}`;
+      this.speechDebug.events.push({at:new Date().toISOString(),event,detail:String(detail||'')});
+      this.speechDebug.events=this.speechDebug.events.slice(-24);
+      const enabled=new URLSearchParams(location.search).get('speechDebug')==='1',box=this.modal?.querySelector('#interactiveSpeechDebug');
+      if(enabled)console.debug('[EA Speech]',event,detail);
+      if(box){box.hidden=!enabled;box.textContent=`Microphone: ${this.speechDebug.microphone}\nRecognition: ${this.speechDebug.recognition}\nLast transcript: ${this.speechDebug.lastTranscript}\nCurrent lesson state: ${this.speechDebug.lessonState}\n\n${this.speechDebug.events.map(x=>`${x.at.slice(11,23)} ${x.event}${x.detail?`: ${x.detail}`:''}`).join('\n')}`}
+    }
     save(){
       this.progress?.save?.(this.lesson.id,{...this.state,updatedAt:new Date().toISOString()});
     }
@@ -298,16 +308,28 @@
     }
     listen(){
       const item=this.current(),SR=root.SpeechRecognition||root.webkitSpeechRecognition;
-      if(!SR)return this.feedback('זיהוי דיבור אינו זמין. לחצו “אמרתי” כדי להמשיך.',false);
+      if(!SR){this.speechLog('recognition unavailable');return this.feedback('זיהוי דיבור אינו זמין. לחצו “אמרתי” כדי להמשיך.',false)}
       this.recognition?.abort();
-      const recognition=this.recognition=new SR();
+      const generation=++this.recognitionGeneration,recognition=this.recognition=new SR();
+      let settled=false,heardSpeech=false,finalTranscript='';
+      this.speechLog('recognition created',`generation ${generation}`);
+      if(generation>1)this.speechLog('recognition restarted',`generation ${generation}`);
       recognition.lang='en-US';
-      recognition.interimResults=false;
+      recognition.interimResults=true;
+      recognition.continuous=false;
+      recognition.maxAlternatives=3;
       this.modal.querySelector('#interactiveState').textContent='המורה מקשיבה';
       this.setVisualState('listening');
-      recognition.onresult=event=>this.answer(event.results[0][0].transcript);
-      recognition.onerror=()=>this.feedback('לא שמעתי בבירור. אפשר לנסות שוב או ללחוץ “אמרתי”.',false);
-      try{recognition.start()}catch{this.feedback('המיקרופון אינו זמין. לחצו “אמרתי”.',false)}
+      recognition.onstart=()=>{this.speechDebug.microphone='READY';this.speechDebug.recognition='RUNNING';this.speechLog('onstart')};
+      recognition.onaudiostart=()=>{this.speechDebug.microphone='LISTENING';this.speechLog('onaudiostart')};
+      recognition.onspeechstart=()=>{heardSpeech=true;this.speechLog('onspeechstart')};
+      recognition.onspeechend=()=>this.speechLog('onspeechend');
+      recognition.onaudioend=()=>{this.speechDebug.microphone='STOPPED';this.speechLog('onaudioend')};
+      recognition.onresult=event=>{let interim='';this.speechLog('onresult',`index ${event.resultIndex}`);for(let n=event.resultIndex;n<event.results.length;n++){const result=event.results[n],text=result[0]?.transcript||'';if(result.isFinal)finalTranscript=`${finalTranscript} ${text}`.trim();else interim=`${interim} ${text}`.trim()}this.speechDebug.lastTranscript=finalTranscript||interim||'—';this.speechLog(finalTranscript?'transcript final':'transcript interim',this.speechDebug.lastTranscript);if(finalTranscript&&!settled){settled=true;this.answer(finalTranscript)}};
+      recognition.onerror=event=>{this.speechLog('onerror',event.error||'unknown');if(settled)return;settled=true;if(event.error==='not-allowed'||event.error==='service-not-allowed')this.feedback('המיקרופון לא אושר. אשרו הרשאה או לחצו “אמרתי”.',false);else this.feedback('לא שמעתי בבירור. אפשר לנסות שוב או ללחוץ “אמרתי”.',false)};
+      recognition.onend=()=>{this.speechDebug.microphone='STOPPED';this.speechDebug.recognition='STOPPED';this.speechLog('recognition ended',heardSpeech&&!finalTranscript?'speech without final transcript':'');if(this.recognition===recognition)this.recognition=null;if(!settled){settled=true;this.feedback(heardSpeech?'שמעתי קול אבל לא התקבל תמלול. נסו שוב.':'לא נשמעה תשובה. נסו שוב או לחצו “אמרתי”.',false)}};
+      root.navigator?.permissions?.query?.({name:'microphone'}).then(permission=>this.speechLog('microphone permission',permission.state)).catch(()=>this.speechLog('microphone permission','query unavailable'));
+      try{recognition.start();this.speechLog('recognition started')}catch(error){settled=true;this.speechLog('start exception',error?.message||'unknown');this.speechDebug.microphone='STOPPED';this.speechDebug.recognition='STOPPED';this.feedback('המיקרופון אינו זמין. לחצו “אמרתי”.',false)}
     }
     answer(value,button){
       clearTimeout(this.timer);
