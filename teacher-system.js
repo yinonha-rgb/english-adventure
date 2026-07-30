@@ -2,15 +2,15 @@
   'use strict';
 
   class TeacherProfile{
-    constructor({id,name,nameHe,character,voiceGender,accent='#6552a5',role='tutor',description='',descriptionHe='',enabled=true}){
-      Object.assign(this,{id,name,nameHe,character,voiceGender,accent,role,description,descriptionHe,enabled});
+    constructor({id,name,nameHe,choiceLabel=name,choiceLabelHe=nameHe,character,voiceGender,age,personality=[],accent='#6552a5',role='tutor',description='',descriptionHe='',enabled=true}){
+      Object.assign(this,{id,name,nameHe,choiceLabel,choiceLabelHe,character,voiceGender,age,personality:Object.freeze([...personality]),accent,role,description,descriptionHe,enabled});
       Object.freeze(this);
     }
   }
 
   const CATALOG=[
-    new TeacherProfile({id:'noa',name:'Noa',nameHe:'המורה נועה',character:'noa',voiceGender:'girl',accent:'#6552a5',description:'Warm, creative and encouraging',descriptionHe:'חמה, יצירתית ומעודדת'}),
-    new TeacherProfile({id:'daniel',name:'Daniel',nameHe:'המורה דניאל',character:'daniel',voiceGender:'boy',accent:'#276b68',description:'Energetic, patient and friendly',descriptionHe:'אנרגטי, סבלני וידידותי'})
+    new TeacherProfile({id:'noa',name:'Noa',nameHe:'המורה נועה',choiceLabel:'Young Female Teacher — Noa',choiceLabelHe:'מורה צעירה — נועה',character:'noa',voiceGender:'girl',age:29,personality:['encouraging','patient','positive','playful','calm'],accent:'#8b57a5',description:'Warm, creative and encouraging',descriptionHe:'חמה, יצירתית ומעודדת'}),
+    new TeacherProfile({id:'daniel',name:'Daniel',nameHe:'המורה דניאל',choiceLabel:'Young Male Teacher — Daniel',choiceLabelHe:'מורה צעיר — דניאל',character:'daniel',voiceGender:'boy',age:31,personality:['encouraging','patient','positive','playful','calm','energetic'],accent:'#27766f',description:'Energetic, patient and friendly',descriptionHe:'אנרגטי, סבלני וידידותי'})
   ];
   const byId=id=>CATALOG.find(profile=>profile.id===id&&profile.enabled)||null;
   const defaultProfile=()=>CATALOG[0];
@@ -49,7 +49,7 @@
 
   function createLessonTeacher(host,options={}){return new TeacherRenderer(host,options)}
   function selectionMarkup(selected='',lang='he'){
-    return CATALOG.map(profile=>`<button class="teacher-choice${selected===profile.id?' selected':''}" type="button" data-teacher-choice="${profile.id}" aria-pressed="${selected===profile.id}" style="--teacher-accent:${profile.accent}"><span class="teacher-choice-art" aria-hidden="true">${root.EATeacherVisual?.characterSvg?.(profile.character)||''}</span><strong>${lang==='he'?profile.nameHe:profile.name}</strong><small>${lang==='he'?profile.descriptionHe:profile.description}</small><span class="teacher-choice-check">${selected===profile.id?'✓':''}</span></button>`).join('');
+    return CATALOG.map(profile=>`<button class="teacher-choice${selected===profile.id?' selected':''}" type="button" data-teacher-choice="${profile.id}" aria-pressed="${selected===profile.id}" style="--teacher-accent:${profile.accent}"><span class="teacher-choice-art" aria-hidden="true">${root.EATeacherVisual?.characterSvg?.(profile.character)||''}</span><strong>${lang==='he'?profile.choiceLabelHe:profile.choiceLabel}</strong><small>${lang==='he'?profile.descriptionHe:profile.description}</small><span class="teacher-choice-check">${selected===profile.id?'✓':''}</span></button>`).join('');
   }
   function bindSelection(host,{selected='',lang='he',onSelect=()=>{}}={}){
     host.innerHTML=selectionMarkup(selected,lang);
