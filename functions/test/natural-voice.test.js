@@ -24,3 +24,35 @@ test('speech queue never overlaps and slower replay is temporary',async()=>{cons
 test('pause, background, resume, device changes and duplicate events use idempotent cancellation',()=>{const q=new Natural.SpeechQueue({synth:{cancel(){}},Utterance:function(){}});q.cancel();q.cancel();assert.equal(q.active,false)});
 test('voice settings migrate and persist without enabling paid mode',()=>{const s=Core.migrateSettings({englishVoice:'aria',hebrewVoice:'hebrew',speechSpeed:'slow',speechVolume:.7,voiceCalibrated:true});assert.equal(s.englishVoice,'aria');assert.equal(s.speechSpeed,'slow');assert.equal(s.speechVolume,.7);assert.equal(s.allowedAdvanced,false)});
 test('every lesson phrase has complete pronunciation modeling metadata',()=>{let count=0;for(const lesson of content.lessons){const shared=Core.sharedContext({lesson});for(const phrase of shared.lesson.phrases){count++;for(const key of ['naturalPronunciation','slowPronunciation','pronunciationChunks','stressHint','commonRecognitionVariants'])assert.ok(key in phrase,`${lesson.id} ${key}`);assert.ok(phrase.pronunciationChunks.length)}}assert.equal(count,66)});
+test('speech preprocessing removes markup and technical symbols naturally',()=>{
+  const clean=Natural.toSpokenText;
+  assert.equal(clean('Say: cat/dog'),'Say: cat or dog');
+  assert.equal(clean('red/blue'),'red or blue');
+  assert.equal(clean('My_name'),'My name');
+  assert.equal(clean('hello-world'),'hello world');
+  assert.equal(clean('**Hello** [friend](https://example.com)!!!'),'Hello friend!');
+  assert.equal(clean('<b>Open</b> (the door)'),'Open the door');
+  assert.equal(clean('one\\two | three'),'one or two or three');
+});
+test('speech never leaks symbol names unless a lesson explicitly teaches symbols',()=>{
+  const forbidden=/\b(?:slash|backslash|underscore|pipe|asterisk|hash|open parenthesis|close parenthesis)\b/i;
+  for(const input of ['slash','backslash','under_score','a|b','*word*','#title','(hello)','[hello]','{hello}','<hello>'])assert.doesNotMatch(Natural.toSpokenText(input),forbidden);
+  assert.equal(Natural.toSpokenText({spokenText:'slash',teachesSymbols:true}),'slash');
+});
+test('displayText remains separate while spokenText always wins',()=>{
+  const meta=Natural.pronunciationMeta('cat/dog',{displayText:'cat/dog',spokenText:'cat or dog'});
+  assert.equal(meta.displayText,'cat/dog');
+  assert.equal(meta.spokenText,'cat or dog');
+  assert.equal(meta.naturalPronunciation,'cat or dog');
+});
+test('every existing lesson has safe automatically generated speech',()=>{
+  const unsafe=/[/\\|_*#~^`[\]{}<>]/;
+  for(const lesson of content.lessons)for(const phrase of lesson.phrases){const meta=Natural.pronunciationMeta(phrase.english,phrase);assert.doesNotMatch(meta.spokenText,unsafe,`${lesson.id}: ${meta.spokenText}`)}
+});
+test('SpeechQueue preprocesses the final utterance immediately before synthesis',async()=>{
+  const spoken=[],synth={cancel(){},speak(utterance){spoken.push(utterance.text);queueMicrotask(()=>utterance.onend())}};
+  class Utterance{constructor(text){this.text=text}}
+  const queue=new Natural.SpeechQueue({synth,Utterance,pause:()=>Promise.resolve(),getSettings:()=>({})});
+  await queue.speak([{text:'Say **cat/dog**!!!'}]);
+  assert.deepEqual(spoken,['Say cat or dog!']);
+});
