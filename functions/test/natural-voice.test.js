@@ -35,6 +35,23 @@ test('an opposite-gender saved voice never overrides the selected teacher',()=>{
   assert.equal(Natural.chooseVoice(candidates,'en-US','adam','female').voice.voiceURI,'noa');
   assert.equal(Natural.chooseVoice(candidates,'en-US','noa','male').voice.voiceURI,'adam');
 });
+test('central utterance identity applies the selected teacher voice to direct speech paths',()=>{
+  const candidates=[
+    {name:'Microsoft Asaf',gender:'male',lang:'he-IL',voiceURI:'asaf',localService:true},
+    {name:'Microsoft Hila',gender:'female',lang:'he-IL',voiceURI:'hila',localService:true}
+  ],female={},male={};
+  Natural.applyVoiceIdentity(female,{voices:candidates,lang:'he-IL',gender:'female',rate:.82});
+  Natural.applyVoiceIdentity(male,{voices:candidates,lang:'he-IL',gender:'male',rate:.82});
+  assert.equal(female.voice.voiceURI,'hila');
+  assert.equal(male.voice.voiceURI,'asaf');
+  assert.ok(female.pitch>1);
+  assert.ok(male.pitch<1);
+});
+test('an explicitly male-only fallback is strongly corrected for the female teacher',()=>{
+  const utterance={},choice=Natural.applyVoiceIdentity(utterance,{voices:[{name:'Microsoft Asaf',gender:'male',lang:'he-IL',voiceURI:'asaf'}],lang:'he-IL',gender:'female'});
+  assert.equal(choice.actualGender,'male');
+  assert.ok(utterance.pitch>=1.2);
+});
 test('speech queue keeps female and male voices audibly distinct when browser gender is unknown',async()=>{
   const utterances=[],synth={cancel(){},speak(u){utterances.push(u);queueMicrotask(()=>u.onend())}},U=function(text){this.text=text};
   const speakFor=async teacherVoiceGender=>{const q=new Natural.SpeechQueue({synth,Utterance:U,pause:()=>Promise.resolve(),getSettings:()=>({teacherVoiceGender})});q.setVoices([{name:'Hebrew Local',lang:'he-IL',voiceURI:'he',localService:true}]);await q.speak([{text:'שלום',lang:'he-IL'}]);return utterances.at(-1)};

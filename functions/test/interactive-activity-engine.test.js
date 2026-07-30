@@ -74,8 +74,8 @@ test('progress resumes per child and completion awards remain idempotent',()=>{
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.20\.4/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.20\.4/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.20\.5/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.20\.5/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
 
@@ -85,6 +85,16 @@ test('daily interactive teacher handles the complete Chrome recognition lifecycl
   assert.match(source,/result\.isFinal/);
   assert.match(source,/speech without final transcript/);
   assert.match(source,/interactiveSpeechDebug/);
+});
+
+test('daily interactive speech always applies the selected teacher voice identity',()=>{
+  assert.match(source,/Natural\?\.applyVoiceIdentity/);
+  assert.match(source,/this\.teacherProfile\?\.voiceGender\|\|this\.teacherGender/);
+  assert.match(source,/speechSynthesis\?\.getVoices/);
+  assert.match(source,/settings\.hebrewVoice/);
+  assert.match(source,/settings\.englishVoice/);
+  assert.match(app,/configureTeacherUtterance/);
+  assert.equal((app.match(/new SpeechSynthesisUtterance/g)||[]).length,(app.match(/configureTeacherUtterance/g)||[]).length-1);
 });
 
 test('activity canvas is isolated from speech, vocabulary and controls',()=>{

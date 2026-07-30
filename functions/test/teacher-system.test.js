@@ -77,8 +77,8 @@ test('teacher selection is per child, available on first lesson and profile sett
 test('selected teacher owns renderer and voice identity',()=>{
   assert.match(app,/teacher\.nameHe.*מחכה לך/);
   assert.match(html,/teacher-choice-grid/);
-  assert.match(html,/teacher-system\.js\?v=4\.20\.4/);
-  assert.match(sw,/teacher-system\.js\?v=4\.20\.4/);
+  assert.match(html,/teacher-system\.js\?v=4\.20\.5/);
+  assert.match(sw,/teacher-system\.js\?v=4\.20\.5/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/teacher\?\.voiceGender/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/teacherVoiceGender/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/voiceTeacherId/);
