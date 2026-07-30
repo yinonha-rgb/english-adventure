@@ -68,8 +68,8 @@ test('progress resumes per child and completion awards remain idempotent',()=>{
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.15\.0/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.15\.0/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.16\.0/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.16\.0/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
 
@@ -94,6 +94,13 @@ test('premium stage keeps teacher, scenery and gameplay alive together',()=>{
   assert.match(html,/@keyframes cloudDrift/);
   assert.match(html,/@keyframes choiceAlive/);
   assert.match(html,/data-teacher-state="success"/);
+  assert.match(html,/grid-template-columns:minmax\(210px,31%\)/);
+  assert.match(html,/grid-template-columns:minmax\(118px,33%\)/);
+  assert.match(html,/@keyframes teacherWave/);
+  assert.match(html,/@keyframes teacherClapLeft/);
+  assert.match(html,/@keyframes teacherPoint/);
+  assert.match(source,/waiting:'listening'/);
+  assert.match(source,/retry:'encouraging'/);
   assert.match(html,/@media\(prefers-reduced-motion:reduce\)/);
 });
 
