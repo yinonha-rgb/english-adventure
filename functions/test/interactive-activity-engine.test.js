@@ -68,19 +68,33 @@ test('progress resumes per child and completion awards remain idempotent',()=>{
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.14\.0/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.14\.0/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.15\.0/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.15\.0/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
 
 test('activity canvas is isolated from speech, vocabulary and controls',()=>{
-  assert.match(source,/class="interactive-center"[^>]*><div id="interactiveActivity"/);
+  assert.match(source,/class="interactive-center"[^>]*><section class="adventure-stage"/);
+  assert.match(source,/class="stage-activity" id="interactiveActivity"/);
   assert.match(source,/class="interactive-bottom"/);
   assert.match(source,/id="interactiveVocabulary"/);
   assert.match(source,/id="interactiveAnswerControls"/);
   assert.match(html,/grid-template-rows:minmax\(64px,10%\) minmax\(0,1fr\) minmax\(150px,24%\)/);
   assert.match(html,/interactive-panel\[data-focus="speaking"\]/);
   assert.doesNotMatch(source,/interactive-board/);
+});
+
+test('premium stage keeps teacher, scenery and gameplay alive together',()=>{
+  assert.match(source,/id="interactiveTeacherVisual"/);
+  assert.match(source,/EATeacherVisual\.createController/);
+  assert.match(source,/setVisualState\('speaking'\)/);
+  assert.match(source,/setVisualState\('listening'\)/);
+  assert.match(source,/positive\?'success':'retry'/);
+  assert.match(html,/\.adventure-stage\{/);
+  assert.match(html,/@keyframes cloudDrift/);
+  assert.match(html,/@keyframes choiceAlive/);
+  assert.match(html,/data-teacher-state="success"/);
+  assert.match(html,/@media\(prefers-reduced-motion:reduce\)/);
 });
 
 test('interactive speech replaces content and stays at two visible lines',()=>{
