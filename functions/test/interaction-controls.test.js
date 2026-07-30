@@ -71,6 +71,6 @@ test('all dialog close paths and unsaved confirmation are implemented',()=>{
 
 test('recording success never bypasses deterministic answer validation',()=>{
   const teacher=fs.readFileSync(require.resolve('../../teacher-ai.js'),'utf8');
-  assert.match(teacher,/evaluate\(result\.transcript,i/);
+  assert.match(teacher,/evaluate\(finalTranscript,i/);
   assert.doesNotMatch(teacher,/answerPlayback\?\.hasRecording\(\).*valid:true/);
 });

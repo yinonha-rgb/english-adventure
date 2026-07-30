@@ -23,11 +23,20 @@ test('daily home action opens the free guided teacher directly',()=>{
 test('browser speech, microphone denial and button fallback remain complete',()=>{
   assert.match(teacher,/SpeechRecognition\|\|window\.webkitSpeechRecognition/);
   assert.match(teacher,/speechSynthesis/);
-  assert.match(teacher,/not-allowed'\)showAnswers/);
+  assert.match(teacher,/event\.error==='not-allowed'/);
   assert.match(teacher,/function showAnswers/);
   assert.match(teacher,/source:'button'/);
   assert.match(teacher,/id="teacherSkip"/);
   assert.match(teacher,/confirm\('לסיים את השיעור/);
+});
+
+test('speech recognition pipeline exposes every lifecycle event and releases stale listening state',()=>{
+  for(const event of ['recognition created','recognition started','recognition ended','recognition restarted','onstart','onspeechstart','onspeechend','onaudiostart','onaudioend','onresult','onerror','transcript final'])assert.match(teacher,new RegExp(event));
+  assert.match(teacher,/interimResults=true/);
+  assert.match(teacher,/result\.isFinal/);
+  assert.match(teacher,/r\.onend=.*turnGuard\.handleAnswer\(\)/);
+  assert.match(teacher,/listen\(instruction\(\),\{manual:true\}\)/);
+  for(const label of ['Microphone:','Recognition:','Last transcript:','Current lesson state:'])assert.match(teacher,new RegExp(label));
 });
 
 test('daily voice completion is per child and idempotent',()=>{
