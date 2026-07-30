@@ -64,3 +64,11 @@ test('backend request is guarded before the future external transport and deploy
   const pkg=require('../package.json');
   assert.match(pkg.scripts.deploy,/intentionally locked/i);
 });
+test('optional teacher initialization cannot create a self-triggering DOM observer or contact a backend',()=>{
+  const source=fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8');
+  const observer=source.match(/new MutationObserver\(\(\)=>\{([^}]*)\}\)/)?.[1]||'';
+  assert.doesNotMatch(observer,/renderProviderStatus/);
+  assert.match(source,/try\{await ready/);
+  assert.match(source,/Optional voice teacher disabled; the free application remains available/);
+  assert.ok(source.indexOf("ADVANCED_AI_ENABLED!==true")<source.indexOf('fetch(teacherAIConfig.backendEndpoint'));
+});
