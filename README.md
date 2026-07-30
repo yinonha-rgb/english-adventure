@@ -2,6 +2,8 @@
 
 A warm, bilingual, child-friendly English learning PWA for ages 6–12. Core learning works entirely offline. Optional Firebase Authentication and Cloud Firestore synchronization lets a parent securely carry family progress between devices without adding an application server.
 
+The voice teacher now uses six human-style answer categories, three difficulty levels, misconception explanations, spaced review, and parent learning insights. See [HUMAN_TEACHER_HE.md](HUMAN_TEACHER_HE.md).
+
 ## Highlights
 
 - Hebrew-first parent-facing interface with an English switch and complete RTL support
