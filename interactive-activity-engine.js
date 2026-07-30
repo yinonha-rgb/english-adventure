@@ -173,14 +173,28 @@
       const item=this.current();
       if(!item)return;
       clearTimeout(this.timer);
-      speechSynthesis?.cancel();
       this.modal.querySelector('.interactive-panel').dataset.focus='speaking';
       const text=[prefix,item.teacherInstructionEn,item.teacherInstructionHe].filter(Boolean).join(' ');
-      const utterance=new SpeechSynthesisUtterance(text);
-      utterance.lang='he-IL';
-      utterance.rate=.82;
-      utterance.onend=()=>{if(this.current()===item){this.modal.querySelector('#interactiveState').textContent='המורה מחכה לתשובה';this.modal.querySelector('.interactive-panel').dataset.focus='answer'}};
-      speechSynthesis?.speak(utterance);
+      this.speakSegments(text,.82,()=>{if(this.current()===item){this.modal.querySelector('#interactiveState').textContent='המורה מחכה לתשובה';this.modal.querySelector('.interactive-panel').dataset.focus='answer'}});
+    }
+    speakSegments(text,rate=.85,onend=()=>{}){
+      const Natural=root.EANaturalVoice;
+      const segments=Natural?.splitSpeechSegments?.(text,'en-US')||[{text:Natural?.normalizeTextForSpeech?.(text,'en-US')||String(text||''),lang:'en-US'}];
+      speechSynthesis?.cancel();
+      let index=0;
+      const next=()=>{
+        const segment=segments[index++];
+        if(!segment)return onend();
+        const speechText=Natural?.normalizeTextForSpeech?.(segment.text,segment.lang)||segment.text;
+        if(!speechText)return next();
+        const utterance=new SpeechSynthesisUtterance(speechText);
+        utterance.lang=segment.lang;
+        utterance.rate=rate;
+        utterance.onend=next;
+        utterance.onerror=next;
+        speechSynthesis?.speak(utterance);
+      };
+      next();
     }
     setInstruction(english,hebrew=''){
       const box=this.modal.querySelector('#interactiveInstruction');
@@ -290,7 +304,7 @@
       this.setInstruction(text);
       this.modal.querySelector('.interactive-panel').dataset.focus='feedback';
       this.modal.querySelector('#interactiveState').textContent=positive?'המורה מעודדת':'המורה עוזרת';
-      const utterance=new SpeechSynthesisUtterance(text);utterance.lang=/[\u0590-\u05ff]/.test(text)?'he-IL':'en-US';utterance.rate=.85;speechSynthesis?.speak(utterance);
+      this.speakSegments(text,.85);
     }
     showHint(){
       const hint=this.current()?.hint||'הסתכלו שוב ונסו צעד קטן.';
@@ -307,9 +321,7 @@
       host.innerHTML=`<div class="interactive-complete"><div>🏆✨</div><h2>כל הכבוד! סיימתם את השיעור היומי עם המורה</h2><p>למדנו: dog, cat and bird</p><p><strong>+${earned} XP</strong></p><button class="primary" id="interactiveHome">חזרה למסך הבית</button></div>`;
       this.modal.querySelector('#interactiveInstruction').textContent='Great work! Today you learned dog, cat and bird.';
       this.modal.querySelector('#interactiveState').textContent='המורה חוגגת';
-      speechSynthesis?.cancel();
-      const summary=new SpeechSynthesisUtterance(`כל הכבוד ${this.child.name}! Today you learned dog, cat and bird.`);
-      summary.lang='he-IL';summary.rate=.82;speechSynthesis?.speak(summary);
+      this.speakSegments(`כל הכבוד ${this.child.name}! Today you learned dog, cat and bird.`,.82);
       host.querySelector('#interactiveHome').onclick=()=>this.close();
       this.onComplete?.();
     }
