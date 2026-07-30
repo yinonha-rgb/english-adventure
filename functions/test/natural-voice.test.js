@@ -25,14 +25,32 @@ test('pause, background, resume, device changes and duplicate events use idempot
 test('voice settings migrate and persist without enabling paid mode',()=>{const s=Core.migrateSettings({englishVoice:'aria',hebrewVoice:'hebrew',speechSpeed:'slow',speechVolume:.7,voiceCalibrated:true});assert.equal(s.englishVoice,'aria');assert.equal(s.speechSpeed,'slow');assert.equal(s.speechVolume,.7);assert.equal(s.allowedAdvanced,false)});
 test('every lesson phrase has complete pronunciation modeling metadata',()=>{let count=0;for(const lesson of content.lessons){const shared=Core.sharedContext({lesson});for(const phrase of shared.lesson.phrases){count++;for(const key of ['naturalPronunciation','slowPronunciation','pronunciationChunks','stressHint','commonRecognitionVariants'])assert.ok(key in phrase,`${lesson.id} ${key}`);assert.ok(phrase.pronunciationChunks.length)}}assert.equal(count,66)});
 test('speech preprocessing removes markup and technical symbols naturally',()=>{
-  const clean=Natural.toSpokenText;
-  assert.equal(clean('Say: cat/dog'),'Say: cat or dog');
-  assert.equal(clean('red/blue'),'red or blue');
+  const clean=Natural.normalizeTextForSpeech;
+  assert.equal(clean('Say: cat/dog','en-US'),'Say: cat, dog');
+  assert.equal(clean('red/blue','en-US'),'red, blue');
   assert.equal(clean('My_name'),'My name');
   assert.equal(clean('hello-world'),'hello world');
   assert.equal(clean('**Hello** [friend](https://example.com)!!!'),'Hello friend!');
   assert.equal(clean('<b>Open</b> (the door)'),'Open the door');
-  assert.equal(clean('one\\two | three'),'one or two or three');
+  assert.equal(clean('one\\two | three'),'one, two, three');
+});
+test('central speech normalization handles slash, markup, URLs and backslash',()=>{
+  const clean=Natural.normalizeTextForSpeech;
+  const bilingual=clean('Dog / כלב');
+  assert.doesNotMatch(bilingual,/slash|\//i);
+  assert.match(bilingual,/Dog/);
+  assert.match(bilingual,/כלב/);
+  assert.equal(clean('cat/dog/bird','en-US'),'cat, dog, bird');
+  assert.equal(clean('<strong>Dog</strong>','en-US'),'Dog');
+  assert.equal(clean('https://example.com','en-US'),'');
+  assert.doesNotMatch(clean('Listen \\ הקשב'),/backslash|\\/i);
+});
+test('bilingual speech is split into language-specific voice segments',()=>{
+  assert.deepEqual(Natural.splitSpeechSegments('Dog / כלב','en-US'),[
+    {text:'Dog,',lang:'en-US'},
+    {text:'כלב.',lang:'he-IL'}
+  ]);
+  assert.deepEqual(Natural.splitSpeechSegments('Listen \\ הקשב','en-US').map(x=>x.lang),['en-US','he-IL']);
 });
 test('speech never leaks symbol names unless a lesson explicitly teaches symbols',()=>{
   const forbidden=/\b(?:slash|backslash|underscore|pipe|asterisk|hash|open parenthesis|close parenthesis)\b/i;
@@ -54,5 +72,17 @@ test('SpeechQueue preprocesses the final utterance immediately before synthesis'
   class Utterance{constructor(text){this.text=text}}
   const queue=new Natural.SpeechQueue({synth,Utterance,pause:()=>Promise.resolve(),getSettings:()=>({})});
   await queue.speak([{text:'Say **cat/dog**!!!'}]);
-  assert.deepEqual(spoken,['Say cat or dog!']);
+  assert.deepEqual(spoken,['Say cat, dog!']);
+});
+test('every production SpeechSynthesis utterance passes through the central normalizer',()=>{
+  const fs=require('node:fs'),path=require('node:path'),root=path.resolve(__dirname,'../..');
+  for(const file of ['app.js','teacher-ai.js','interactive-activity-engine.js','natural-voice.js']){
+    const source=fs.readFileSync(path.join(root,file),'utf8');
+    const constructors=[...source.matchAll(/new (?:window\.)?SpeechSynthesisUtterance\(([^)]*)\)|new this\.Utterance\(([^)]*)\)/g)];
+    assert.ok(constructors.length,`${file} has a speech call`);
+    for(const match of constructors){
+      const argument=(match[1]||match[2]||'').trim();
+      assert.match(argument,/speechText/,`${file} bypasses normalizeTextForSpeech: ${match[0]}`);
+    }
+  }
 });
