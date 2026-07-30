@@ -108,11 +108,12 @@
   }
 
   class InteractiveTeacher{
-    constructor({lesson,child,progress,onComplete}){
+    constructor({lesson,child,progress,onComplete,teacherId}){
       this.lesson=lesson;
       this.child=child;
       this.progress=progress;
       this.onComplete=onComplete;
+      this.teacherId=teacherId||child?.teacherId||'noa';
       this.state={index:0,attempts:0,results:[],...(progress?.load?.(lesson.id)||{})};
       this.timer=null;
       this.recognition=null;
@@ -143,9 +144,11 @@
       }
       this.modal=modal;
       const visualHost=this.modal.querySelector('#interactiveTeacherVisual');
-      if(visualHost&&!this.visual&&root.EATeacherVisual){
-        this.visual=root.EATeacherVisual.createController(visualHost,{character:'noa',reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,subtitles:'replay'});
-        this.visual.setReplay(last=>this.speakSegments(last.text,.82));
+      if(visualHost&&!this.visual){
+        const renderer=root.EATeacherSystem?.createLessonTeacher?.(visualHost,{teacherId:this.teacherId,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,subtitles:'replay'});
+        this.teacherRenderer=renderer;
+        this.visual=renderer?.animation?.controller||root.EATeacherVisual?.createController?.(visualHost,{character:this.teacherId,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,subtitles:'replay'});
+        this.visual?.setReplay(last=>this.speakSegments(last.text,.82));
       }
       this.modal.querySelector('#interactiveChildName').textContent=this.child?.name||'חבר/ה';
       this.modal.classList.add('open');
