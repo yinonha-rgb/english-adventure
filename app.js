@@ -1,5 +1,5 @@
 /* English Adventure 2.0 — local-first learning app. No data leaves this device. */
-const VERSION='4.9.0', STORE='ea-v2', PIN='ea-parent-pin';
+const VERSION='4.9.1', STORE='ea-v2', PIN='ea-parent-pin';
 const I18N=window.EATranslations;
 const CATS={all:['הכול','All'],greetings:['ברכות','Greetings'],family:['משפחה','Family'],colors:['צבעים','Colors'],numbers:['מספרים','Numbers'],food:['אוכל','Food'],home:['בית','Home'],school:['בית ספר','School'],animals:['חיות','Animals'],body:['גוף','Body'],clothing:['בגדים','Clothing'],weather:['מזג אוויר','Weather'],emotions:['רגשות','Emotions'],shopping:['קניות','Shopping'],cafe:['בית קפה','Café'],directions:['כיוונים','Directions'],travel:['נסיעות','Travel']};
 const safeParse=(v,f)=>{try{return JSON.parse(v)||f}catch{return f}}, today=()=>new Date().toISOString().slice(0,10);
