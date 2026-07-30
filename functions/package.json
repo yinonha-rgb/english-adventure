@@ -5,7 +5,7 @@
   "engines": { "node": "20" },
   "scripts": {
     "test": "node --test test/*.test.js",
-    "deploy": "firebase deploy --only functions,firestore:rules"
+    "deploy": "node -e \"throw new Error('Deployment intentionally locked. Follow ADVANCED_AI_ACTIVATION_HE.md after explicit owner approval.')\""
   },
   "dependencies": {
     "firebase-admin": "^13.0.0",
