@@ -74,8 +74,8 @@ test('progress resumes per child and completion awards remain idempotent',()=>{
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.20\.3/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.20\.3/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.20\.4/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.20\.4/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
 
