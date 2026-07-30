@@ -1,6 +1,6 @@
-const VERSION='english-adventure-4.20.2';
+const VERSION='english-adventure-4.20.3';
 const CACHE_PREFIX='english-adventure-';
-const CORE=['./','./index.html','./translations.js?v=4.20.2','./ui-controls.js?v=4.20.2','./answer-playback.js?v=4.20.2','./natural-voice.js?v=4.20.2','./teacher-visual.js?v=4.20.2','./teacher-system.js?v=4.20.2','./adaptive-learning.js?v=4.20.2','./daily-lesson-core.js?v=4.20.2','./interactive-activity-engine.js?v=4.20.2','./advanced-ai-config.js?v=4.20.2','./pricing-config.js?v=4.20.2','./advanced-ai-policy.js?v=4.20.2','./teacher-providers.js?v=4.20.2','./app.js?v=4.20.2','./teacher-modes-core.js?v=4.20.2','./firebase-sync.js?v=4.20.2','./teacher-ai.js?v=4.20.2','./firebase-config.js','./content.json','./manifest.json','./update-manifest.json','./icon.svg','./icon-maskable.svg','./assets/teacher-adam.png','./assets/teacher-noa.png'];
+const CORE=['./','./index.html','./translations.js?v=4.20.3','./ui-controls.js?v=4.20.3','./answer-playback.js?v=4.20.3','./natural-voice.js?v=4.20.3','./teacher-visual.js?v=4.20.3','./teacher-system.js?v=4.20.3','./adaptive-learning.js?v=4.20.3','./daily-lesson-core.js?v=4.20.3','./interactive-activity-engine.js?v=4.20.3','./advanced-ai-config.js?v=4.20.3','./pricing-config.js?v=4.20.3','./advanced-ai-policy.js?v=4.20.3','./teacher-providers.js?v=4.20.3','./app.js?v=4.20.3','./teacher-modes-core.js?v=4.20.3','./firebase-sync.js?v=4.20.3','./teacher-ai.js?v=4.20.3','./firebase-config.js','./content.json','./manifest.json','./update-manifest.json','./icon.svg','./icon-maskable.svg','./assets/teacher-adam.png','./assets/teacher-noa.png'];
 
 const cacheGoodResponse=async(cache,request,response)=>{
   if(response?.ok&&response.type==='basic')await cache.put(request,response.clone());
