@@ -219,8 +219,11 @@
         this.visual?.showSpeech(speechText,segment.lang);
         this.visual?.startMouth();
         this.animateCue();
-        utterance.lang=segment.lang;
-        utterance.rate=rate;
+        const settings=root.EAApp?.getData?.()?.settings?.teacherAI||{};
+        const preferred=segment.lang.startsWith('he')?settings.hebrewVoice:settings.englishVoice;
+        const choice=Natural?.applyVoiceIdentity?.(utterance,{voices:speechSynthesis?.getVoices?.()||[],lang:segment.lang,preferred,gender:this.teacherProfile?.voiceGender||this.teacherGender,rate,volume:settings.speechVolume??1});
+        if(!choice){utterance.lang=segment.lang;utterance.rate=rate}
+        if(settings.developerDebug||new URLSearchParams(location.search).get('speechDebug')==='1')console.debug(`[EA Interactive Voice] teacher=${this.teacherProfile?.id||'unknown'} requested=${this.teacherProfile?.voiceGender||this.teacherGender} lang=${segment.lang} voice=${choice?.voice?.name||'browser-default'} actual=${choice?.actualGender||'unknown'} pitch=${utterance.pitch} fallback=${choice?.fallbackReason||'none'}`);
         utterance.onend=()=>{this.visual?.stopMouth();next()};
         utterance.onerror=()=>{this.visual?.stopMouth();next()};
         speechSynthesis?.speak(utterance);
