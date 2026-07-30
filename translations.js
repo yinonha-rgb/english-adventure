@@ -1,0 +1,7 @@
+(function(root){
+  'use strict';
+  root.EATranslations={
+    he:{install:'התקנה',parents:'להורים',learningNow:'לומדים עכשיו',helloTag:'לומדים • משחקים • מצליחים',welcomeText:'שיעורים קצרים ומשחקיים, תרגול הגייה והישגים שנשמרים רק במכשיר הזה.',level:'רמה',streak:'רצף',badges:'תגים',dailyGoal:'היעד היומי',practiceMistakes:'תרגול טעויות',dailyReview:'החזרה היומית',startReview:'מתחילים חזרה',adventureMap:'מפת ההרפתקה',chooseLesson:'בוחרים נושא ומתחילים לשחק',privacyTitle:'הפרטיות שלכם חשובה',privacyText:'אין כאן פרסומות, מעקב או שליחת מידע. שמות הילדים וההתקדמות נשמרים רק בדפדפן במכשיר הזה.',manageProfiles:'ניהול פרופילים',newName:'שם חדש',addProfile:'הוספת פרופיל',parentArea:'אזור הורים',newVersion:'גרסה חדשה זמינה',update:'עדכון'},
+    en:{install:'Install',parents:'Parents',learningNow:'Learning now',helloTag:'Learn • Play • Succeed',welcomeText:'Short playful lessons, pronunciation practice, and achievements saved only on this device.',level:'Level',streak:'Streak',badges:'Badges',dailyGoal:'Daily goal',practiceMistakes:'Practice mistakes',dailyReview:'Daily review',startReview:'Start review',adventureMap:'Adventure map',chooseLesson:'Choose a topic and start playing',privacyTitle:'Your privacy matters',privacyText:'No ads, tracking, or data sharing. Names and progress stay in this browser on this device.',manageProfiles:'Manage profiles',newName:'New name',addProfile:'Add profile',parentArea:'Parent area',newVersion:'New version available',update:'Update'}
+  };
+})(typeof window!=='undefined'?window:globalThis);
