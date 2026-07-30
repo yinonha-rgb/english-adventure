@@ -1,5 +1,5 @@
-const VERSION='english-adventure-4.6.2';
-const CORE=['./','./index.html','./natural-voice.js?v=4.6.2','./adaptive-learning.js?v=4.6.2','./app.js?v=4.6.2','./teacher-modes-core.js?v=4.6.2','./firebase-sync.js?v=4.6.2','./teacher-ai.js?v=4.6.2','./firebase-config.js','./content.json','./manifest.json','./update-manifest.json','./icon.svg','./icon-maskable.svg'];
+const VERSION='english-adventure-4.7.0';
+const CORE=['./','./index.html','./natural-voice.js?v=4.7.0','./teacher-visual.js?v=4.7.0','./adaptive-learning.js?v=4.7.0','./app.js?v=4.7.0','./teacher-modes-core.js?v=4.7.0','./firebase-sync.js?v=4.7.0','./teacher-ai.js?v=4.7.0','./firebase-config.js','./content.json','./manifest.json','./update-manifest.json','./icon.svg','./icon-maskable.svg'];
 
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(CORE))));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==VERSION).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
