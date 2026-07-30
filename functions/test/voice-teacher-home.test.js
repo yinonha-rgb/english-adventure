@@ -41,3 +41,18 @@ test('daily voice startup makes zero OpenAI calls',()=>{
   const dailyStart=app.match(/function startDailyLesson[\s\S]*?function renderFilters/)?.[0]||'';
   assert.doesNotMatch(dailyStart,/fetch\(|openai|backend/i);
 });
+
+test('teacher lesson uses separate top, animation and bottom regions',()=>{
+  assert.match(teacher,/class="teacher-lesson-top"/);
+  assert.match(teacher,/class="teacher-focus-area"/);
+  assert.match(teacher,/class="teacher-lesson-bottom"/);
+  assert.match(teacher,/id="teacherVocabulary"/);
+  assert.match(teacher,/grid-template-rows:minmax\(64px,10%\) minmax\(0,1fr\) minmax\(180px,25%\)/);
+  assert.match(teacher,/teacher-bubbles\{display:none!important\}/);
+});
+
+test('teacher transcript never stacks over the activity and focus mode expands it',()=>{
+  assert.match(teacher,/teacherTranscript'\)\.replaceChildren\(p\)/);
+  assert.match(teacher,/stage\.dataset\.focus=state==='teacherSpeaking'\?'speaking':'answer'/);
+  assert.match(teacher,/-webkit-line-clamp:2/);
+});

@@ -68,7 +68,23 @@ test('progress resumes per child and completion awards remain idempotent',()=>{
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.12\.1/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.12\.1/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.13\.0/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.13\.0/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
+});
+
+test('activity canvas is isolated from speech, vocabulary and controls',()=>{
+  assert.match(source,/class="interactive-center"[^>]*><div id="interactiveActivity"/);
+  assert.match(source,/class="interactive-bottom"/);
+  assert.match(source,/id="interactiveVocabulary"/);
+  assert.match(source,/id="interactiveAnswerControls"/);
+  assert.match(html,/grid-template-rows:minmax\(64px,10%\) minmax\(0,1fr\) minmax\(150px,24%\)/);
+  assert.match(html,/interactive-panel\[data-focus="speaking"\]/);
+  assert.doesNotMatch(source,/interactive-board/);
+});
+
+test('interactive speech replaces content and stays at two visible lines',()=>{
+  assert.match(source,/setInstruction\(english,hebrew/);
+  assert.match(source,/box\.replaceChildren\(\)/);
+  assert.match(html,/-webkit-line-clamp:1/);
 });
