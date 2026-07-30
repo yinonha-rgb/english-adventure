@@ -55,6 +55,10 @@ The browser never receives the permanent OpenAI key. It requests a Firebase-auth
 
 The cloud document model is `users/{uid}/state/main`, with immutable deletion backups under `users/{uid}/backups/{backupId}`. Online writes use Firestore transactions with schema and revision fields. Offline edits remain queued locally and merge automatically when connectivity returns. Completed lessons and award ledgers are unioned, activity is deduplicated by stable IDs, tombstones protect profile deletion, and stale snapshots cannot blindly replace newer progress.
 
+## Adaptive difficulty
+
+Version 4.5 adds seven independent 1–10 skill levels, conservative evidence-based promotion, delayed review, temporary in-lesson support, a friendly placement check, and Hebrew parent controls. Both teacher modes use the same limits and per-child state. See [`ADAPTIVE_DIFFICULTY_HE.md`](ADAPTIVE_DIFFICULTY_HE.md) for the exact rules.
+
 ## Privacy and parent PIN
 
 Without sign-in, all names, progress, mistakes, and activity stay on the learner’s device. After the parent explicitly signs in and approves migration, learning data is stored in that parent UID’s Firestore area for synchronization. The four-digit parent PIN remains a convenience lock, not encryption or real security; only its SHA-256 hash is synchronized. Clearing site data removes unsynchronized progress unless it was exported first.
