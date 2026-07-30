@@ -1,4 +1,5 @@
 import {teacherAIConfig} from './firebase-config.js';
+if(!window.EANaturalVoice)await import('./natural-voice.js?v=4.6.2');
 
 const Core=window.EATeacherCore,Adaptive=window.EAAdaptive,Natural=window.EANaturalVoice,PHASES=['greeting','warm-up','teach-vocabulary','listen-repeat','comprehension','speaking','review','summary','goodbye'];
 const PHASE_HE={greeting:'ברכה','warm-up':'חימום','teach-vocabulary':'לימוד מילים','listen-repeat':'הקשבה וחזרה',comprehension:'בדיקת הבנה',speaking:'תרגול דיבור',review:'חזרה',summary:'סיכום',goodbye:'פרידה'};
