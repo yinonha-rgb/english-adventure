@@ -1,30 +1,87 @@
-.teacher-presence-rig{width:100%;height:100%;display:grid;align-items:end}
-.teacher-presence-rig .teacher-character{height:100%;min-height:0;display:grid;align-items:end}
-.teacher-rig{position:relative;display:block;width:100%;height:100%;overflow:visible;transform-origin:50% 92%;isolation:isolate;animation:rigBreath 5.2s cubic-bezier(.45,.05,.55,.95) infinite}
-.teacher-rig-canvas{position:relative;display:block;width:auto;height:100%;aspect-ratio:35/100;margin-inline:auto;overflow:hidden}
-.rig-body{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 12px 10px #244c6a2f);transform-origin:50% 82%;will-change:transform}
-.rig-expression,.rig-mouth-shape{position:absolute;z-index:3;object-fit:contain;pointer-events:none;transform-origin:center}
+.teacher-presence-rig{width:100%;height:100%;display:grid;align-items:end;contain:layout style}
+.teacher-presence-rig .teacher-character{height:100%;min-height:0;display:grid;align-items:end;overflow:visible}
+.teacher-rig{position:relative;display:block;width:100%;height:100%;overflow:visible;transform-origin:50% 92%;isolation:isolate;transition:transform .68s cubic-bezier(.2,.7,.25,1),filter .45s ease;will-change:transform}
+.teacher-rig-canvas{position:relative;display:block;width:auto;height:100%;aspect-ratio:35/100;margin-inline:auto;overflow:hidden;transform-origin:50% 88%;transition:transform .72s cubic-bezier(.2,.7,.2,1)}
+.rig-body{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 12px 10px #244c6a2f);transform-origin:50% 82%;transition:transform .62s cubic-bezier(.2,.72,.22,1),filter .4s ease;will-change:transform}
+.rig-expression,.rig-mouth-shape{position:absolute;z-index:3;object-fit:contain;pointer-events:none;transform-origin:center;transition:transform .36s ease,filter .36s ease}
 .rig-expression{left:var(--expr-x);top:var(--expr-y);width:var(--expr-w);height:var(--expr-h);mask-image:linear-gradient(#000 0 78%,transparent 100%)}
 .rig-mouth-shape{z-index:4;left:var(--lip-x);top:var(--lip-y);width:var(--lip-w);height:var(--lip-h)}
 .rig-expression[hidden],.rig-mouth-shape[hidden]{display:none!important}
 .teacher-presence-rig:not(.mouth-active) .rig-mouth-shape{display:none!important}
 .teacher-presence-rig.mouth-active .rig-expression{display:none!important}
-.teacher-rig-blink{position:absolute;z-index:6;left:41%;top:15%;width:7.5%;height:1%;border-radius:50%;background:#9c604d;box-shadow:5.25em 0 #9c604d;opacity:0;pointer-events:none;animation:rigBlink 6.1s linear infinite}
+.teacher-rig-blink{position:absolute;z-index:6;left:41%;top:15%;width:7.5%;height:1%;border-radius:50%;background:#9c604d;box-shadow:5.25em 0 #9c604d;opacity:0;pointer-events:none;transform:scaleY(.08)}
 .teacher-rig-stars{position:absolute;z-index:7;inset:8% 3% auto;color:#ffd84d;font-size:clamp(1.3rem,4vw,2.4rem);word-spacing:2.2rem;opacity:0;pointer-events:none}
-.teacher-presence-rig.mouth-active .rig-mouth-shape{animation:rigMouth .22s ease-in-out infinite alternate;transform-origin:50% 58%}
-.teacher-presence-rig[data-state="speaking"] .rig-body,.teacher-presence-rig[data-state="explaining"] .rig-body,.teacher-presence-rig[data-state="greeting"] .rig-body{animation:rigTalkBody 1.65s cubic-bezier(.42,0,.58,1) infinite alternate}
-.teacher-presence-rig[data-state="listening"] .rig-expression,.teacher-presence-rig[data-state="waiting"] .rig-expression{animation:rigListen 3.4s ease-in-out infinite}
-.teacher-presence-rig[data-state="thinking"] .rig-expression{animation:rigThink 3.7s ease-in-out infinite}
-.teacher-presence-rig[data-state="encouraging"] .rig-expression,.teacher-presence-rig[data-state="correcting"] .rig-expression{animation:rigEncourage 2.8s ease-in-out infinite}
-.teacher-presence-rig[data-state="praising"] .teacher-rig,.teacher-presence-rig[data-state="celebrating"] .teacher-rig{animation:rigCelebrate 1.2s ease-in-out 2}
-.teacher-presence-rig[data-state="praising"] .teacher-rig-stars,.teacher-presence-rig[data-state="celebrating"] .teacher-rig-stars{opacity:1;animation:rigStars 1s ease-out infinite alternate}
-@keyframes rigBreath{0%,100%{transform:translateY(0) scale(1)}48%{transform:translateY(-1.5px) scale(1.003)}62%{transform:translateY(-2px) scale(1.004)}}
-@keyframes rigTalkBody{0%{transform:translateY(0) rotate(-.08deg)}100%{transform:translateY(-1.8px) rotate(.12deg)}}
-@keyframes rigListen{0%,100%{transform:rotate(0)}50%{transform:rotate(-.75deg) translate(-.35px,1.1px)}}
-@keyframes rigThink{0%,100%{transform:rotate(0)}55%{transform:rotate(.65deg) translate(.6px,.8px)}}
-@keyframes rigEncourage{0%,100%{transform:translateY(0)}48%{transform:translateY(.8px) rotate(-.3deg)}}
-@keyframes rigCelebrate{0%,100%{transform:translateY(0) scale(1)}45%{transform:translateY(-4px) scale(1.008)}70%{transform:translateY(-1px) scale(1.003)}}
-@keyframes rigMouth{from{transform:scale(.94,.9)}to{transform:scale(1,1.04)}}
-@keyframes rigBlink{0%,91%,95%,100%{opacity:0;transform:scaleY(.08)}92%,94%{opacity:.62;transform:scaleY(1)}}
-@keyframes rigStars{to{transform:translateY(-7px) scale(1.12);filter:drop-shadow(0 3px 3px #704d19aa)}}
-@media(prefers-reduced-motion:reduce){.teacher-rig,.rig-body,.rig-expression,.rig-mouth-shape,.teacher-rig-blink,.teacher-rig-stars{animation:none!important;transition:none!important}.rig-mouth-shape,.teacher-rig-blink,.teacher-rig-stars{display:none!important}}
+.teacher-gesture-trail{position:absolute;z-index:1;inset:20% -7% auto;height:42%;border-radius:50%;border:3px solid transparent;pointer-events:none}
+.teacher-presence-rig.mouth-active .rig-mouth-shape{animation:rigMouth .18s ease-in-out 1;transform-origin:50% 58%}
+
+/* Micro-motion is scheduled by TeacherController, avoiding an obvious repeating loop. */
+.teacher-rig[data-motion="breathe"]{transform:translateY(-1.5px) scale(1.003)}
+.teacher-rig[data-motion="blink"] .teacher-rig-blink{opacity:.58;transform:scaleY(1);transition:opacity .04s,transform .06s}
+.teacher-rig[data-motion="gaze-left"] .rig-expression,.teacher-rig[data-motion="talk-left"] .rig-expression{transform:translateX(-1.2px) rotate(-.18deg)}
+.teacher-rig[data-motion="gaze-right"] .rig-expression,.teacher-rig[data-motion="talk-right"] .rig-expression{transform:translateX(1.2px) rotate(.18deg)}
+.teacher-rig[data-motion="gaze-up"] .rig-expression{transform:translateY(-1px) rotate(.2deg)}
+.teacher-rig[data-motion="head-left"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-left"] .teacher-rig-canvas{transform:rotate(-.45deg) translateX(-.6px)}
+.teacher-rig[data-motion="head-right"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-right"] .teacher-rig-canvas{transform:rotate(.45deg) translateX(.6px)}
+.teacher-rig[data-motion="shoulder"] .rig-body{transform:translateY(-1.2px) scaleX(1.003)}
+.teacher-rig[data-motion="weight-left"] .rig-body{transform:translateX(-1.4px) rotate(-.12deg)}
+.teacher-rig[data-motion="weight-right"] .rig-body{transform:translateX(1.4px) rotate(.12deg)}
+.teacher-rig[data-motion="listen-nod"] .teacher-rig-canvas{transform:translateY(1.4px) rotate(-.28deg)}
+.teacher-rig[data-motion="brow"] .rig-expression{transform:translateY(-.8px) scaleY(1.008)}
+.teacher-rig[data-motion="happy-bounce"]{transform:translateY(-4px) scale(1.008)}
+
+/* Deliberate gestures remain small enough to feel human, never puppet-like. */
+.teacher-rig[data-gesture="wave"] .rig-body{animation:rigWave 1.35s cubic-bezier(.34,.05,.22,1) 1}
+.teacher-rig[data-gesture="point-left"] .rig-body{transform:translateX(-3px) rotate(-.65deg)}
+.teacher-rig[data-gesture="point-right"] .rig-body{transform:translateX(3px) rotate(.65deg)}
+.teacher-rig[data-gesture="thumbs-up"]{filter:drop-shadow(0 0 10px #ffe27188);transform:translateY(-2px) scale(1.008)}
+.teacher-rig[data-gesture="open-hands"] .rig-body{transform:scaleX(1.014) translateY(-1px)}
+.teacher-rig[data-gesture="heart-hands"]{filter:drop-shadow(0 0 12px #ff8fb287);transform:scale(1.008)}
+.teacher-rig[data-gesture="clap"] .rig-body{animation:rigClap .48s cubic-bezier(.3,.1,.2,1) 3}
+.teacher-rig[data-gesture="thinking-pose"] .rig-body{transform:translateX(1.5px) rotate(.28deg)}
+.teacher-rig[data-gesture="wave"] .teacher-gesture-trail,.teacher-rig[data-gesture="clap"] .teacher-gesture-trail{border-top-color:#ffe17299;animation:rigTrail .75s ease-out 2}
+.teacher-presence-rig[data-controller-state="listen"] .rig-body{filter:drop-shadow(0 12px 10px #244c6a2f) saturate(1.02)}
+.teacher-presence-rig[data-state="speaking"] .rig-body{filter:drop-shadow(0 12px 10px #244c6a2f) saturate(1.025)}
+.teacher-presence-rig[data-state="listening"] .rig-expression{filter:saturate(1.02)}
+.teacher-presence-rig[data-state="thinking"] .rig-expression{filter:saturate(.97)}
+.teacher-presence-rig[data-state="encouraging"] .rig-expression{filter:saturate(1.04)}
+.teacher-presence-rig[data-state="celebrating"] .rig-expression{filter:saturate(1.08)}
+.teacher-presence-rig[data-controller-state="encouraging"] .teacher-rig{filter:drop-shadow(0 0 9px #7ed1b255)}
+.teacher-presence-rig[data-controller-state="celebrate"] .teacher-rig-stars{opacity:1;animation:rigStars .72s ease-out 2 alternate}
+.teacher-presence-rig[data-controller-state="celebrate"] .rig-body{animation:rigCelebrate 1.15s cubic-bezier(.2,.8,.2,1) 1}
+
+@keyframes rigWave{0%,100%{transform:rotate(0) translateY(0)}28%{transform:rotate(-.55deg) translateY(-1.5px)}58%{transform:rotate(.45deg) translateY(-.7px)}82%{transform:rotate(-.22deg)}}
+@keyframes rigClap{0%,100%{transform:scaleX(1) translateY(0)}50%{transform:scaleX(.988) translateY(-2px)}}
+@keyframes rigCelebrate{0%,100%{transform:translateY(0) scale(1)}38%{transform:translateY(-5px) scale(1.01)}68%{transform:translateY(-1px) scale(1.004)}}
+@keyframes rigMouth{from{transform:scale(.95,.92)}to{transform:scale(1,1.035)}}
+@keyframes rigTrail{from{opacity:.7;transform:scale(.8) rotate(-6deg)}to{opacity:0;transform:scale(1.08) rotate(7deg)}}
+@keyframes rigStars{to{transform:translateY(-8px) scale(1.14);filter:drop-shadow(0 3px 3px #704d19aa)}}
+
+@media(max-width:900px){.teacher-rig-canvas{aspect-ratio:38/100}}
+@media(max-width:600px){.teacher-rig-canvas{width:100%;height:100%;aspect-ratio:auto;transform:none;transform-origin:50% 45%}.teacher-rig[data-motion="head-left"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-left"] .teacher-rig-canvas{transform:rotate(-.35deg)}.teacher-rig[data-motion="head-right"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-right"] .teacher-rig-canvas{transform:rotate(.35deg)}}
+@media(prefers-reduced-motion:reduce){.teacher-rig,.teacher-rig-canvas,.rig-body,.rig-expression,.rig-mouth-shape,.teacher-rig-blink,.teacher-rig-stars,.teacher-gesture-trail{animation:none!important;transition:none!important}.rig-mouth-shape,.teacher-rig-blink,.teacher-rig-stars,.teacher-gesture-trail{display:none!important}}
+
+/* Lesson-stage orchestration: tutor, activity and companion share one living scene. */
+.adventure-stage{grid-template-columns:minmax(190px,26%) minmax(0,1fr)!important}
+.lesson-dragon{position:absolute;z-index:6;inset-inline-end:1.5%;bottom:2%;width:clamp(54px,8vw,92px);height:clamp(54px,8vw,92px);margin:0;transform-origin:50% 100%;transition:transform .55s cubic-bezier(.2,.8,.2,1),filter .4s ease;pointer-events:none}
+.lesson-dragon img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 5px #234b6840)}
+.lesson-dragon span{position:absolute;top:-8%;inset-inline-start:4%;color:#ffe46b;opacity:0;font-size:1.4rem}
+.lesson-dragon[data-state="watching"]{animation:dragonBreathe 3.7s ease-in-out infinite alternate}
+.lesson-dragon[data-state="listening"]{transform:rotate(-2deg) translateY(-2px) scale(1.025)}
+.lesson-dragon[data-state="encouraging"]{animation:dragonEncourage 1.15s ease-in-out 2}
+.lesson-dragon[data-state="celebrating"]{animation:dragonCelebrate .62s cubic-bezier(.2,.9,.2,1) 3;filter:drop-shadow(0 0 12px #ffe46b)}
+.lesson-dragon[data-state="celebrating"] span{opacity:1;animation:dragonStar .7s ease-out 2}
+.lesson-dragon[data-state="sleeping"]{transform:scale(.98) translateY(2px);filter:saturate(.65)}
+.lesson-celebration{position:absolute;z-index:10;inset:0;pointer-events:none;overflow:hidden;opacity:0}
+.lesson-celebration i{position:absolute;top:48%;left:50%;font-style:normal;color:#ffcc32;font-size:clamp(1rem,3vw,2.2rem)}
+.lesson-celebration i:nth-child(2){color:#ff7397}.lesson-celebration i:nth-child(3){color:#5ed0af}.lesson-celebration i:nth-child(4){color:#8b72e8}.lesson-celebration i:nth-child(5){color:#fff}.lesson-celebration i:nth-child(6){color:#ff9c42}
+.lesson-celebration.active{opacity:1}.lesson-celebration.active i{animation:confettiBurst 1.55s cubic-bezier(.15,.7,.2,1) forwards}
+.lesson-celebration.active i:nth-child(1){--x:-34vw;--y:-30vh;--r:180deg}.lesson-celebration.active i:nth-child(2){--x:-18vw;--y:-39vh;--r:-130deg}.lesson-celebration.active i:nth-child(3){--x:2vw;--y:-36vh;--r:220deg}.lesson-celebration.active i:nth-child(4){--x:19vw;--y:-33vh;--r:-190deg}.lesson-celebration.active i:nth-child(5){--x:34vw;--y:-25vh;--r:160deg}.lesson-celebration.active i:nth-child(6){--x:26vw;--y:8vh;--r:260deg}
+.animation-fps{position:absolute;z-index:20;top:8px;left:8px;padding:5px 8px;border-radius:10px;background:#102b3dcc;color:#9ff3d5;font:700 11px/1.2 ui-monospace,monospace;direction:ltr}
+@keyframes dragonBreathe{to{transform:translateY(-3px) rotate(.7deg)}}
+@keyframes dragonEncourage{50%{transform:translateY(-4px) rotate(-3deg) scale(1.03)}}
+@keyframes dragonCelebrate{45%{transform:translateY(-15px) rotate(4deg) scale(1.07)}75%{transform:translateY(-3px) rotate(-3deg)}}
+@keyframes dragonStar{to{transform:translate(-15px,-18px) rotate(90deg);opacity:0}}
+@keyframes confettiBurst{0%{transform:translate(0,0) scale(.3);opacity:0}18%{opacity:1}100%{transform:translate(var(--x),var(--y)) rotate(var(--r)) scale(1.05);opacity:0}}
+@media(max-width:900px) and (min-width:701px){.adventure-stage{grid-template-columns:minmax(150px,22%) minmax(0,1fr)!important}}
+@media(max-width:700px){.adventure-stage{grid-template-columns:minmax(132px,40%) minmax(0,1fr)!important}.lesson-dragon{width:54px;height:54px;inset-inline-end:0}.stage-teacher{overflow:hidden}}
+@media(prefers-reduced-motion:reduce){.lesson-dragon,.lesson-celebration i{animation:none!important;transition:none!important}.lesson-celebration{display:none}}
