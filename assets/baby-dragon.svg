@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+  <title id="title">Baby dragon companion</title>
+  <desc id="desc">A friendly mint-green baby dragon holding a glowing purple crystal.</desc>
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#9cf5c9"/><stop offset="1" stop-color="#38b987"/></linearGradient>
+    <linearGradient id="belly" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff4b8"/><stop offset="1" stop-color="#ffd56b"/></linearGradient>
+    <radialGradient id="crystal"><stop stop-color="#fff"/><stop offset=".25" stop-color="#e9ddff"/><stop offset="1" stop-color="#7d5cf2"/></radialGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <ellipse cx="160" cy="283" rx="91" ry="18" fill="#164f5840"/>
+  <path d="M91 182C43 174 25 125 51 95c4 34 26 45 58 39" fill="url(#body)" stroke="#218c70" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M229 181c49-9 65-58 39-87-3 34-25 46-57 40" fill="url(#body)" stroke="#218c70" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M106 99 80 55l48 18M213 98l28-43-49 19" fill="#ffc85e" stroke="#a96b35" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M103 146c-17 30-23 80-4 111 23 36 98 36 122 1 21-31 14-83-5-113" fill="url(#body)" stroke="#218c70" stroke-width="8"/>
+  <path d="M130 185c-12 27-12 65 4 84 14 16 39 16 54 0 16-18 17-57 3-84" fill="url(#belly)" opacity=".95"/>
+  <path d="M119 226c-26 1-42 13-40 29 2 15 22 20 48 8M201 226c25 1 41 13 39 29-2 15-21 20-47 8" fill="none" stroke="#218c70" stroke-width="13" stroke-linecap="round"/>
+  <path d="M211 260c37 10 59-5 67-29-1 35-17 58-57 58" fill="url(#body)" stroke="#218c70" stroke-width="7" stroke-linejoin="round"/>
+  <ellipse cx="160" cy="123" rx="82" ry="68" fill="url(#body)" stroke="#218c70" stroke-width="8"/>
+  <path d="M115 104c12-14 25-16 39-5M206 104c-12-14-25-16-39-5" fill="none" stroke="#17624f" stroke-width="7" stroke-linecap="round"/>
+  <ellipse cx="128" cy="119" rx="17" ry="22" fill="#fff"/><ellipse cx="192" cy="119" rx="17" ry="22" fill="#fff"/>
+  <ellipse cx="131" cy="122" rx="9" ry="13" fill="#17203b"/><ellipse cx="189" cy="122" rx="9" ry="13" fill="#17203b"/>
+  <circle cx="135" cy="116" r="3.5" fill="#fff"/><circle cx="193" cy="116" r="3.5" fill="#fff"/>
+  <path d="M145 142c10 8 20 8 30 0" fill="none" stroke="#17624f" stroke-width="6" stroke-linecap="round"/>
+  <path d="M133 158c17 17 39 17 55 0" fill="#fff" stroke="#17624f" stroke-width="6" stroke-linejoin="round"/>
+  <path d="m160 209 24 29-24 31-24-31z" fill="url(#crystal)" stroke="#5b4bd8" stroke-width="5" filter="url(#glow)"/>
+  <path d="m160 43 8 15 17 3-12 12 3 17-16-8-16 8 3-17-12-12 17-3z" fill="#ffe66d"/>
+</svg>
