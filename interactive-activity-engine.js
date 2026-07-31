@@ -320,9 +320,10 @@
       if(this.paused||this.answerLocked)return this.speechLog('start blocked',this.paused?'lesson paused':'teacher still speaking');
       const item=this.current(),SR=root.SpeechRecognition||root.webkitSpeechRecognition;
       if(!SR){this.speechLog('recognition unavailable');return this.feedback('זיהוי דיבור אינו זמין. לחצו “אמרתי” כדי להמשיך.',false)}
-      this.recognition?.abort();
+      if(this.recognition){const stale=this.recognition;this.recognition=null;this.recognitionGeneration++;for(const event of ['onstart','onaudiostart','onspeechstart','onspeechend','onaudioend','onresult','onerror','onend'])stale[event]=null;try{stale.abort()}catch{}this.speechLog('recognition retired','before new listening turn')}
       const generation=++this.recognitionGeneration,recognition=this.recognition=new SR();
-      let settled=false,heardSpeech=false,finalTranscript='';
+      let settled=false,heardSpeech=false,finalTranscript='',interimTranscript='',interimConfidence=0;
+      const isCurrent=()=>this.recognition===recognition&&this.recognitionGeneration===generation;
       this.speechLog('recognition created',`generation ${generation}`);
       if(generation>1)this.speechLog('recognition restarted',`generation ${generation}`);
       recognition.lang='en-US';
@@ -331,14 +332,14 @@
       recognition.maxAlternatives=3;
       this.modal.querySelector('#interactiveState').textContent=this.teacherText('נועה מקשיבה','אדם מקשיב');
       this.setVisualState('listening');
-      recognition.onstart=()=>{this.speechDebug.microphone='READY';this.speechDebug.recognition='RUNNING';this.speechLog('onstart')};
-      recognition.onaudiostart=()=>{this.speechDebug.microphone='LISTENING';this.speechLog('onaudiostart')};
-      recognition.onspeechstart=()=>{heardSpeech=true;this.speechLog('onspeechstart')};
-      recognition.onspeechend=()=>this.speechLog('onspeechend');
-      recognition.onaudioend=()=>{this.speechDebug.microphone='STOPPED';this.speechLog('onaudioend')};
-      recognition.onresult=event=>{let interim='';this.speechLog('onresult',`index ${event.resultIndex}`);for(let n=event.resultIndex;n<event.results.length;n++){const result=event.results[n],text=result[0]?.transcript||'';if(result.isFinal)finalTranscript=`${finalTranscript} ${text}`.trim();else interim=`${interim} ${text}`.trim()}this.speechDebug.lastTranscript=finalTranscript||interim||'—';this.speechLog(finalTranscript?'transcript final':'transcript interim',this.speechDebug.lastTranscript);if(finalTranscript&&!settled){settled=true;this.answer(finalTranscript)}};
-      recognition.onerror=event=>{this.speechLog('onerror',event.error||'unknown');if(settled)return;settled=true;if(event.error==='not-allowed'||event.error==='service-not-allowed')this.feedback('המיקרופון לא אושר. אשרו הרשאה או לחצו “אמרתי”.',false);else this.feedback('לא שמעתי בבירור. אפשר לנסות שוב או ללחוץ “אמרתי”.',false)};
-      recognition.onend=()=>{this.speechDebug.microphone='STOPPED';this.speechDebug.recognition='STOPPED';this.speechLog('recognition ended',heardSpeech&&!finalTranscript?'speech without final transcript':'');if(this.recognition===recognition)this.recognition=null;if(!settled){settled=true;this.feedback(heardSpeech?'שמעתי קול אבל לא התקבל תמלול. נסו שוב.':'לא נשמעה תשובה. נסו שוב או לחצו “אמרתי”.',false)}};
+      recognition.onstart=()=>{if(!isCurrent())return;this.speechDebug.microphone='READY';this.speechDebug.recognition='RUNNING';this.speechLog('onstart')};
+      recognition.onaudiostart=()=>{if(!isCurrent())return;this.speechDebug.microphone='LISTENING';this.speechLog('onaudiostart')};
+      recognition.onspeechstart=()=>{if(!isCurrent())return;heardSpeech=true;this.speechLog('onspeechstart')};
+      recognition.onspeechend=()=>{if(isCurrent())this.speechLog('onspeechend')};
+      recognition.onaudioend=()=>{if(!isCurrent())return;this.speechDebug.microphone='STOPPED';this.speechLog('onaudioend')};
+      recognition.onresult=event=>{if(!isCurrent())return;let interim='';this.speechLog('onresult',`index ${event.resultIndex}`);for(let n=event.resultIndex;n<event.results.length;n++){const result=event.results[n],alternative=result[0],text=alternative?.transcript||'';if(result.isFinal)finalTranscript=`${finalTranscript} ${text}`.trim();else{interim=`${interim} ${text}`.trim();interimConfidence=Math.max(interimConfidence,Number(alternative?.confidence)||0)}}if(interim)interimTranscript=interim;this.speechDebug.lastTranscript=finalTranscript||interim||'—';this.speechLog(finalTranscript?'transcript final':'transcript interim',this.speechDebug.lastTranscript);if(finalTranscript&&!settled){settled=true;this.answer(finalTranscript)}};
+      recognition.onerror=event=>{if(!isCurrent())return;this.speechLog('onerror',event.error||'unknown');if(settled)return;settled=true;if(event.error==='not-allowed'||event.error==='service-not-allowed')this.feedback('המיקרופון לא אושר. אשרו הרשאה או לחצו “אמרתי”.',false);else this.feedback('לא שמעתי בבירור. אפשר לנסות שוב או ללחוץ “אמרתי”.',false)};
+      recognition.onend=()=>{if(!isCurrent())return;this.speechDebug.microphone='STOPPED';this.speechDebug.recognition='STOPPED';this.speechLog('recognition ended',heardSpeech&&!finalTranscript?'speech without final transcript':'');if(this.recognition===recognition)this.recognition=null;const fallback=root.EANaturalVoice?.finalizeRecognitionResult?.({finalTranscript,interimTranscript,heardSpeech,interimConfidence});if(!settled&&fallback?.text&&fallback.fallback){settled=true;this.speechLog('interim promoted to final',fallback.text);this.answer(fallback.text);return}if(!settled){settled=true;this.feedback(heardSpeech?'שמעתי קול אבל לא התקבל תמלול. נסו שוב.':'לא נשמעה תשובה. נסו שוב או לחצו “אמרתי”.',false)}};
       root.navigator?.permissions?.query?.({name:'microphone'}).then(permission=>this.speechLog('microphone permission',permission.state)).catch(()=>this.speechLog('microphone permission','query unavailable'));
       try{recognition.start();this.speechLog('recognition started')}catch(error){settled=true;this.speechLog('start exception',error?.message||'unknown');this.speechDebug.microphone='STOPPED';this.speechDebug.recognition='STOPPED';this.feedback('המיקרופון אינו זמין. לחצו “אמרתי”.',false)}
     }

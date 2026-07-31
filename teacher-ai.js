@@ -82,21 +82,24 @@ async function listen(i,{manual=false,restartAttempt=0}={}){
   if(muted||!settings.microphoneEnabled||(!settings.automaticListening&&!manual))return showAnswers(i,'אפשר לענות בלחיצה או להפעיל את המיקרופון.');
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){speechLog('recognition unavailable');return showAnswers(i,'זיהוי דיבור אינו זמין. אפשר לבחור תשובה ולהמשיך.')}
+  if(recognition){const stale=recognition;recognition=null;recognitionGeneration++;clearTimeout(listenTimer);turnGuard.interrupt();for(const event of ['onstart','onaudiostart','onspeechstart','onspeechend','onaudioend','onresult','onerror','onend'])stale[event]=null;try{stale.abort()}catch{}speechLog('recognition retired','before new listening turn')}
   if(!turnGuard.beginListening()){speechLog('start blocked','turn guard not ready');return}
-  recognition?.abort();
   const generation=++recognitionGeneration,r=recognition=new SR(),startedListeningAt=Date.now();
-  let settled=false,heardSpeech=false,finalTranscript='',finalConfidence=0,lastError='';
+  let settled=false,heardSpeech=false,finalTranscript='',finalConfidence=0,interimTranscript='',interimConfidence=0,lastError='';
+  const isCurrent=()=>recognition===r&&recognitionGeneration===generation;
   speechLog('recognition created',`generation ${generation}`);
   if(restartAttempt>0)speechLog('recognition restarted',`attempt ${restartAttempt}`);
   r.lang='en-US';r.interimResults=true;r.continuous=false;r.maxAlternatives=3;
-  r.onstart=()=>{speechDebug.microphone='READY';speechDebug.recognition='RUNNING';speechLog('onstart');conversationState('childSpeaking');$('#teacherMute').textContent='⏹️ עצירת הקשבה'};
-  r.onaudiostart=()=>{speechDebug.microphone='LISTENING';speechLog('onaudiostart')};
-  r.onspeechstart=()=>{heardSpeech=true;speechLog('onspeechstart')};
-  r.onspeechend=()=>speechLog('onspeechend');
-  r.onaudioend=()=>{speechDebug.microphone='STOPPED';speechLog('onaudioend')};
+  r.onstart=()=>{if(!isCurrent())return;speechDebug.microphone='READY';speechDebug.recognition='RUNNING';speechLog('onstart');conversationState('childSpeaking');$('#teacherMute').textContent='⏹️ עצירת הקשבה'};
+  r.onaudiostart=()=>{if(!isCurrent())return;speechDebug.microphone='LISTENING';speechLog('onaudiostart')};
+  r.onspeechstart=()=>{if(!isCurrent())return;heardSpeech=true;speechLog('onspeechstart')};
+  r.onspeechend=()=>{if(isCurrent())speechLog('onspeechend')};
+  r.onaudioend=()=>{if(!isCurrent())return;speechDebug.microphone='STOPPED';speechLog('onaudioend')};
   r.onresult=event=>{
+    if(!isCurrent())return;
     let interim='';speechLog('onresult',`index ${event.resultIndex}`);
-    for(let n=event.resultIndex;n<event.results.length;n++){const result=event.results[n],alternative=result[0];if(result.isFinal){finalTranscript=`${finalTranscript} ${alternative.transcript}`.trim();finalConfidence=Math.max(finalConfidence,Number(alternative.confidence)||0)}else interim=`${interim} ${alternative.transcript}`.trim()}
+    for(let n=event.resultIndex;n<event.results.length;n++){const result=event.results[n],alternative=result[0];if(result.isFinal){finalTranscript=`${finalTranscript} ${alternative.transcript}`.trim();finalConfidence=Math.max(finalConfidence,Number(alternative.confidence)||0)}else{interim=`${interim} ${alternative.transcript}`.trim();interimConfidence=Math.max(interimConfidence,Number(alternative.confidence)||0)}}
+    if(interim)interimTranscript=interim;
     const visible=finalTranscript||interim;speechDebug.lastTranscript=visible||'—';updateLiveTranscript(visible);speechLog(finalTranscript?'transcript final':'transcript interim',speechDebug.lastTranscript);
     if(!finalTranscript||!turnGuard.handleAnswer())return;
     settled=true;clearTimeout(listenTimer);endAnswerRecording();
@@ -105,6 +108,7 @@ async function listen(i,{manual=false,restartAttempt=0}={}){
     conversationState('validating');evaluate(finalTranscript,i,{confidence:finalConfidence,source:'speech'})
   };
   r.onerror=event=>{
+    if(!isCurrent())return;
     lastError=event.error||'unknown';speechLog('onerror',lastError);clearTimeout(listenTimer);endAnswerRecording();
     if(settled||!turnGuard.handleAnswer())return;
     settled=true;
@@ -112,7 +116,10 @@ async function listen(i,{manual=false,restartAttempt=0}={}){
     else{visualTeacher?.setState('uncertain');showAnswers(i,lastError==='no-speech'?'לא שמעתי תשובה. אפשר לנסות שוב או לבחור תשובה.':'לא שמעתי בבירור. אפשר לנסות שוב או לבחור תשובה.')}
   };
   r.onend=()=>{
+    if(!isCurrent())return;
     speechDebug.recognition='STOPPED';speechDebug.microphone='STOPPED';speechLog('recognition ended',heardSpeech&&!finalTranscript?'speech without final transcript':'');if(recognition===r)recognition=null;$('#teacherMute').textContent='🎤 התחלת הקשבה';
+    const fallback=Natural.finalizeRecognitionResult({finalTranscript,interimTranscript,heardSpeech,finalConfidence,interimConfidence});
+    if(!settled&&fallback.text&&fallback.fallback&&turnGuard.handleAnswer()){settled=true;clearTimeout(listenTimer);endAnswerRecording();speechLog('interim promoted to final',fallback.text);if(handleConversationIntent(fallback.text,i))return;conversationState('validating');evaluate(fallback.text,i,{confidence:fallback.confidence,source:'speech-finalized-interim'});return}
     const canRestart=!settled&&turnGuard.snapshot().listening&&Providers.shouldRestartRecognition({elapsedMs:Date.now()-startedListeningAt,heardSpeech,finalTranscript,error:lastError,restartCount:restartAttempt});
     if(canRestart){settled=true;clearTimeout(listenTimer);endAnswerRecording();turnGuard.interrupt();speechLog('recognition restart scheduled',`attempt ${restartAttempt+1}`);setTimeout(()=>listen(i,{manual:true,restartAttempt:restartAttempt+1}),280);return}
     if(!settled&&turnGuard.handleAnswer()){settled=true;clearTimeout(listenTimer);endAnswerRecording();showAnswers(i,heardSpeech?'שמעתי קול אבל לא התקבל תמלול. נסו שוב או בחרו תשובה.':'לא נשמעה תשובה. נסו שוב או בחרו תשובה.')}
