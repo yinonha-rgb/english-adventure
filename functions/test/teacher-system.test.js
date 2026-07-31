@@ -5,6 +5,7 @@ const path=require('node:path');
 const root=path.join(__dirname,'..','..');
 const System=require(path.join(root,'teacher-system.js'));
 const Visual=require(path.join(root,'teacher-visual.js'));
+const Rig=require(path.join(root,'teacher-rig.js'));
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
 const sync=fs.readFileSync(path.join(root,'firebase-sync.js'),'utf8');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
@@ -25,8 +26,36 @@ test('initial catalog includes warm female and male private tutors',()=>{
   assert.equal(System.byId('male-young').choiceLabelHe,'אדם – מורה');
   assert.equal(System.byId('female-young').imageAsset,'assets/teacher-noa.png');
   assert.equal(System.byId('male-young').imageAsset,'assets/teacher-adam.png');
+  assert.equal(System.byId('female-young').spriteAsset,'assets/teacher-noa-sprite.png');
+  assert.equal(System.byId('male-young').spriteAsset,'assets/teacher-adam-sprite.png');
   assert.equal(System.byId('noa').id,'female-young');
   assert.equal(System.byId('daniel').id,'male-young');
+});
+
+test('layered sprite rigs use distinct atlases and separately animated body parts',()=>{
+  const female=Rig.rigMarkup('female-young','assets/teacher-noa-sprite.png');
+  const male=Rig.rigMarkup('male-young','assets/teacher-adam-sprite.png');
+  assert.match(female,/teacher-noa-sprite\.png/);
+  assert.match(male,/teacher-adam-sprite\.png/);
+  for(const markup of [female,male]){
+    for(const part of ['rig-body','rig-head','rig-arm-left','rig-arm-right'])assert.match(markup,new RegExp(part));
+  }
+  const femaleClip=female.match(/id="(ea-rig-\d+)-full"/)?.[1];
+  const maleClip=male.match(/id="(ea-rig-\d+)-full"/)?.[1];
+  assert.ok(femaleClip&&maleClip);
+  assert.notEqual(femaleClip,maleClip);
+  const rigCss=fs.readFileSync(path.join(root,'teacher-rig.css'),'utf8');
+  for(const state of ['speaking','listening','thinking','pointing','encouraging','celebrating'])assert.match(rigCss,new RegExp(`data-state=\"${state}\"`));
+  assert.match(rigCss,/prefers-reduced-motion:reduce/);
+});
+
+test('rig assets are shipped, cached offline and loaded before the teacher system',()=>{
+  for(const file of ['teacher-noa-sprite.png','teacher-adam-sprite.png']){
+    assert.ok(fs.statSync(path.join(root,'assets',file)).size>100000,file);
+    assert.match(sw,new RegExp(`assets/${file.replace('.','\\.')}`));
+  }
+  assert.match(html,/teacher-rig\.css\?v=4\.20\.8/);
+  assert.match(html,/teacher-visual\.js\?v=4\.20\.8[\s\S]*teacher-rig\.js\?v=4\.20\.8[\s\S]*teacher-system\.js\?v=4\.20\.8/);
 });
 
 test('female and male teachers use distinct dedicated artwork',()=>{
@@ -90,8 +119,8 @@ test('teacher selection is per child, available on first lesson and profile sett
 test('selected teacher owns renderer and voice identity',()=>{
   assert.match(app,/teacher\.nameHe.*מחכה לך/);
   assert.match(html,/teacher-choice-grid/);
-  assert.match(html,/teacher-system\.js\?v=4\.20\.7/);
-  assert.match(sw,/teacher-system\.js\?v=4\.20\.7/);
+  assert.match(html,/teacher-system\.js\?v=4\.20\.8/);
+  assert.match(sw,/teacher-system\.js\?v=4\.20\.8/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/teacher\?\.voiceGender/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/teacherVoiceGender/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/voiceTeacherId/);
