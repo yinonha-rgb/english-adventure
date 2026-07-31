@@ -1,8 +1,8 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.EARiggedTeacher=api})(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const GEOMETRY={
-    'female-young':{key:'noa',body:'assets/teacher-noa-body-v2.png',expressionBox:[14,0,72,34],mouthBox:[40,14,20,6]},
-    'male-young':{key:'adam',body:'assets/teacher-adam-body-v2.png',expressionBox:[14,0,72,31],mouthBox:[40,12,20,6]}
+    'female-young':{key:'noa',body:'assets/teacher-noa-body-v2.png',expressionBox:[14,0,72,34],mouthBox:[44,15.8,12,4]},
+    'male-young':{key:'adam',body:'assets/teacher-adam-body-v2.png',expressionBox:[14,0,72,31],mouthBox:[44,13,12,4]}
   };
   const labels={female:'נועה',male:'אדם'};
   const expressions=['neutral','happy','listening','thinking','encouraging','celebrating'];

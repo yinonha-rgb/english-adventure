@@ -8,9 +8,10 @@
 .rig-mouth-shape{z-index:4;left:var(--lip-x);top:var(--lip-y);width:var(--lip-w);height:var(--lip-h)}
 .rig-expression[hidden],.rig-mouth-shape[hidden]{display:none!important}
 .teacher-presence-rig:not(.mouth-active) .rig-mouth-shape{display:none!important}
+.teacher-presence-rig.mouth-active .rig-expression{display:none!important}
 .teacher-rig-blink{position:absolute;z-index:6;left:41%;top:15%;width:7.5%;height:1%;border-radius:50%;background:#9c604d;box-shadow:5.25em 0 #9c604d;opacity:0;pointer-events:none;animation:rigBlink 6.1s linear infinite}
 .teacher-rig-stars{position:absolute;z-index:7;inset:8% 3% auto;color:#ffd84d;font-size:clamp(1.3rem,4vw,2.4rem);word-spacing:2.2rem;opacity:0;pointer-events:none}
-.teacher-presence-rig.mouth-active .rig-mouth-shape{animation:rigMouth .22s ease-in-out infinite alternate}
+.teacher-presence-rig.mouth-active .rig-mouth-shape{animation:rigMouth .22s ease-in-out infinite alternate;transform-origin:50% 58%}
 .teacher-presence-rig[data-state="speaking"] .rig-body,.teacher-presence-rig[data-state="explaining"] .rig-body,.teacher-presence-rig[data-state="greeting"] .rig-body{animation:rigTalkBody 1.65s cubic-bezier(.42,0,.58,1) infinite alternate}
 .teacher-presence-rig[data-state="listening"] .rig-expression,.teacher-presence-rig[data-state="waiting"] .rig-expression{animation:rigListen 3.4s ease-in-out infinite}
 .teacher-presence-rig[data-state="thinking"] .rig-expression{animation:rigThink 3.7s ease-in-out infinite}
