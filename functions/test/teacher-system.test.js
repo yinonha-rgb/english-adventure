@@ -61,8 +61,8 @@ test('rig assets are shipped, cached offline and loaded before the teacher syste
     assert.ok(fs.existsSync(path.join(root,'assets',file)),file);
     assert.match(sw,new RegExp(`assets/${file.replace('.','\\.')}`));
   }
-  assert.match(html,/teacher-rig\.css\?v=4\.20\.15/);
-  assert.match(html,/teacher-visual\.js\?v=4\.20\.15[\s\S]*teacher-rig\.js\?v=4\.20\.15[\s\S]*teacher-system\.js\?v=4\.20\.15/);
+  assert.match(html,/teacher-rig\.css\?v=4\.21\.0/);
+  assert.match(html,/teacher-visual\.js\?v=4\.21\.0[\s\S]*teacher-rig\.js\?v=4\.21\.0[\s\S]*teacher-system\.js\?v=4\.21\.0/);
 });
 
 test('female and male teachers use distinct dedicated artwork',()=>{
@@ -126,8 +126,8 @@ test('teacher selection is per child, available on first lesson and profile sett
 test('selected teacher owns renderer and voice identity',()=>{
   assert.match(app,/teacher\.nameHe.*מחכה לך/);
   assert.match(html,/teacher-choice-grid/);
-  assert.match(html,/teacher-system\.js\?v=4\.20\.15/);
-  assert.match(sw,/teacher-system\.js\?v=4\.20\.15/);
+  assert.match(html,/teacher-system\.js\?v=4\.21\.0/);
+  assert.match(sw,/teacher-system\.js\?v=4\.21\.0/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/teacher\?\.voiceGender/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/teacherVoiceGender/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/voiceTeacherId/);
