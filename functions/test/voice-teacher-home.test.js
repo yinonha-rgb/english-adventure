@@ -43,6 +43,15 @@ test('speech recognition pipeline exposes every lifecycle event and releases sta
   for(const label of ['Microphone:','Recognition:','Last transcript:','Current lesson state:'])assert.match(teacher,new RegExp(label));
 });
 
+test('a new listening turn cannot be cancelled by stale Chrome recognition callbacks',()=>{
+  assert.match(teacher,/recognition retired/);
+  assert.match(teacher,/const isCurrent=\(\)=>recognition===r&&recognitionGeneration===generation/);
+  assert.match(teacher,/stale\[event\]=null/);
+  assert.match(teacher,/clearTimeout\(listenTimer\);turnGuard\.interrupt\(\)/);
+  assert.match(teacher,/interim promoted to final/);
+  assert.match(teacher,/finalizeRecognitionResult/);
+});
+
 test('daily voice completion is per child and idempotent',()=>{
   assert.match(app,/EACompleteDailyVoice/);
   assert.match(app,/daily-lesson-complete/);

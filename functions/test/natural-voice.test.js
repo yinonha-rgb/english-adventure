@@ -67,6 +67,18 @@ test('pronunciation metadata uses defined chunks and recognition variants',()=>{
 test('turn guard prevents overlap and duplicate answers',()=>{const g=Natural.createTurnGuard(),id=g.beginSpeech();assert.equal(g.beginListening(),false);assert.equal(g.endSpeech(id),true);assert.equal(g.beginListening(),true);assert.equal(g.handleAnswer(),true);assert.equal(g.handleAnswer(),false)});
 test('stale synthesis completion cannot start a turn',()=>{const g=Natural.createTurnGuard(),old=g.beginSpeech();g.beginSpeech();assert.equal(g.endSpeech(old),false);assert.equal(g.snapshot().speaking,true)});
 test('interruption clears both speech and recognition state',()=>{const g=Natural.createTurnGuard(),id=g.beginSpeech();g.interrupt();assert.equal(g.endSpeech(id),false);assert.deepEqual(g.snapshot().speaking,false)});
+test('final recognition transcript always wins over interim text',()=>{
+  assert.deepEqual(Natural.finalizeRecognitionResult({finalTranscript:'red',interimTranscript:'read',heardSpeech:true,finalConfidence:.91,interimConfidence:.45}),{text:'red',confidence:.91,fallback:false});
+});
+test('Chrome interim transcript is safely promoted when speech was actually heard',()=>{
+  const result=Natural.finalizeRecognitionResult({interimTranscript:'the color is red',heardSpeech:true,interimConfidence:.61});
+  assert.equal(result.text,'the color is red');
+  assert.equal(result.fallback,true);
+  assert.ok(result.confidence>=.72);
+});
+test('noise or an interim result without detected speech is never treated as an answer',()=>{
+  assert.deepEqual(Natural.finalizeRecognitionResult({interimTranscript:'background noise',heardSpeech:false,interimConfidence:.8}),{text:'',confidence:0,fallback:false});
+});
 test('response variation is deterministic and never praises wrong answers',()=>{const a=Natural.responseStyle({category:'correct',index:0}),b=Natural.responseStyle({category:'correct',index:1}),wrong=Natural.responseStyle({category:'completely-unrelated',index:0});assert.notEqual(a.text,b.text);assert.equal(wrong.state,'correcting');assert.doesNotMatch(wrong.text,/right|exactly|great job/i)});
 test('praise matches streak and success after difficulty',()=>{assert.match(Natural.responseStyle({category:'correct',correctStreak:3}).text,/getting really good/);assert.match(Natural.responseStyle({category:'correct',hadDifficulty:true}).text,/worked it out/)});
 test('silence and uncertain recognition remain gentle',()=>{assert.match(Natural.responseStyle({category:'didnt-answer'}).text,/Take your time/);assert.match(Natural.responseStyle({category:'speech-recognition-uncertain'}).text,/heard/)});
