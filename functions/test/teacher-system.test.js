@@ -56,6 +56,16 @@ test('photo teachers animate as layered characters in every lesson state',()=>{
   assert.match(html,/prefers-reduced-motion:reduce/);
 });
 
+test('photo teachers use natural, state-aware motion without excluding reduced-motion users',()=>{
+  for(const animation of ['teacherNaturalBlink','teacherNaturalIdle','teacherListeningLean','teacherThoughtfulBody','teacherGestureArc','teacherGentleCorrection']){
+    assert.match(html,new RegExp(animation));
+  }
+  assert.match(html,/teacher-photo-wrap::before/);
+  assert.match(html,/data-state="listening"[^}]+teacher-photo-wrap/);
+  assert.match(html,/data-state="pointing"[^}]+teacher-photo-wrap::after/);
+  assert.match(html,/@media\(prefers-reduced-motion:reduce\)[^{]*\{[^}]*teacher-photo-wrap/);
+});
+
 test('teacher architecture is reusable without lesson-engine changes',()=>{
   for(const component of ['TeacherProfile','TeacherRenderer','TeacherAnimationController','TeacherVoiceManager','TeacherEmotionController'])assert.equal(typeof System[component],'function');
   assert.equal(System.TeacherEmotionController.stateFor('correct'),'celebrating');
@@ -77,8 +87,8 @@ test('teacher selection is per child, available on first lesson and profile sett
 test('selected teacher owns renderer and voice identity',()=>{
   assert.match(app,/teacher\.nameHe.*מחכה לך/);
   assert.match(html,/teacher-choice-grid/);
-  assert.match(html,/teacher-system\.js\?v=4\.20\.5/);
-  assert.match(sw,/teacher-system\.js\?v=4\.20\.5/);
+  assert.match(html,/teacher-system\.js\?v=4\.20\.6/);
+  assert.match(sw,/teacher-system\.js\?v=4\.20\.6/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/teacher\?\.voiceGender/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/teacherVoiceGender/);
   assert.match(fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8'),/voiceTeacherId/);
