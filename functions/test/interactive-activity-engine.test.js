@@ -136,5 +136,9 @@ test('premium stage keeps teacher, scenery and gameplay alive together',()=>{
 test('interactive speech replaces content and stays at two visible lines',()=>{
   assert.match(source,/setInstruction\(english,hebrew/);
   assert.match(source,/box\.replaceChildren\(\)/);
+  assert.match(source,/en\.lang='en';en\.dir='ltr'/);
+  assert.match(source,/he\.lang='he';he\.dir='rtl'/);
+  assert.match(html,/interactive-speech strong\[lang="en"\]\{direction:ltr/);
+  assert.match(html,/interactive-speech small\[lang="he"\]\{direction:rtl/);
   assert.match(html,/-webkit-line-clamp:1/);
 });
