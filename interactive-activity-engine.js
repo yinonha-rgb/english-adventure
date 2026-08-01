@@ -259,8 +259,8 @@
     setInstruction(english,hebrew=''){
       const box=this.modal.querySelector('#interactiveInstruction');
       box.replaceChildren();
-      const en=document.createElement('strong');en.textContent=english||'';box.append(en);
-      if(hebrew){const he=document.createElement('small');he.textContent=hebrew;box.append(he)}
+      const en=document.createElement('strong');en.lang='en';en.dir='ltr';en.textContent=english||'';box.append(en);
+      if(hebrew){const he=document.createElement('small');he.lang='he';he.dir='rtl';he.textContent=hebrew;box.append(he)}
     }
     renderVocabulary(item){
       const strip=this.modal.querySelector('#interactiveVocabulary');
