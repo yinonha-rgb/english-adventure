@@ -20,7 +20,7 @@
     const mission=document.createElement('section');mission.className='daily-mission';mission.setAttribute('aria-live','polite');mission.innerHTML='<span class="mission-label" id="worldName"></span><small id="missionLabel"></small><h2 id="dailyMissionTitle"></h2><p id="dailyMissionStory"></p>';
     copyBox.insertBefore(mission,start);
     const trail=document.createElement('nav');trail.className='world-trail';trail.setAttribute('aria-label','Adventure worlds');trail.innerHTML='<span data-world="village">🏡<small></small></span><span class="active" data-world="forest">🌳<small></small></span><span data-world="castle">🏰<small></small></span><span data-world="ocean">🐠<small></small></span><span data-world="space">🚀<small></small></span>';
-    home.append(trail);
+    art.append(trail);
     art.querySelector('.dragon-companion').addEventListener('click',()=>{const dragon=art.querySelector('.dragon-companion');dragon.classList.remove('excited');void dragon.offsetWidth;dragon.classList.add('excited');const lang=document.documentElement.lang==='en'?'en':'he';art.querySelector('.dragon-message').textContent=copy[lang].dragonHappy;setTimeout(()=>dragon.classList.remove('excited'),1100)});
   }
   function update({lang='he',progress={},completed=false,teacherName='',childName=''}={}){
