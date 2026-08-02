@@ -74,6 +74,8 @@ function handleConversationIntent(heard,i){
   const result=activeProvider?.handleChildInput?.(heard,{phase:PHASES[phase],lessonId:shared.lessonId,expected:i.answer})||Providers.conversationIntent(heard);
   const intent=result.intent;
   if(intent===Providers.CONVERSATION_INTENTS.ANSWER||intent===Providers.CONVERSATION_INTENTS.YES||intent===Providers.CONVERSATION_INTENTS.NO)return false;
+  if(intent===Providers.CONVERSATION_INTENTS.GREETING){speak(`Hello ${context.child.name}! I am listening. ${i.en}`,'en-US',()=>listen(i),'greeting');return true}
+  if(intent===Providers.CONVERSATION_INTENTS.THANKS){speak(`You are welcome, ${context.child.name}. ${i.en}`,'en-US',()=>listen(i),'encouragement');return true}
   line(context.child.name,heard);
   if(intent===Providers.CONVERSATION_INTENTS.REPEAT){speakCurrent();return true}
   if(intent===Providers.CONVERSATION_INTENTS.SLOWER){conversationState('teacherSpeaking');voiceQueue.repeatSlower().then(()=>{if(!paused)setTimeout(()=>listen(i),350)});return true}

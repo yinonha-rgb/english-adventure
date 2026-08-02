@@ -35,6 +35,8 @@
     READY:'ready',
     YES:'yes',
     NO:'no',
+    GREETING:'greeting',
+    THANKS:'thanks',
     ENCOURAGEMENT:'encouragement'
   });
   function normalizeConversationText(text){
@@ -43,6 +45,8 @@
   function conversationIntent(text){
     const normalized=normalizeConversationText(text),has=patterns=>patterns.some(pattern=>pattern.test(normalized));
     if(!normalized)return{intent:CONVERSATION_INTENTS.ANSWER,normalized,confidence:0};
+    if(has([/^(hi|hello|hey|good morning|good afternoon|good evening)$/,/^שלום$/]))return{intent:CONVERSATION_INTENTS.GREETING,normalized,confidence:.98};
+    if(has([/^(thanks|thank you|thank you teacher)$/,/^תודה$/]))return{intent:CONVERSATION_INTENTS.THANKS,normalized,confidence:.98};
     if(has([/\b(stop|end|finish|quit)\b/,/(עצור|תעצור|לסיים|סיום|די להיום)/]))return{intent:CONVERSATION_INTENTS.STOP,normalized,confidence:.98};
     if(has([/\b(break|pause|rest)\b/,/(הפסקה|להפסיק רגע|לנוח)/]))return{intent:CONVERSATION_INTENTS.BREAK,normalized,confidence:.98};
     if(has([/\b(let me try again|try again|one more try)\b/,/(אני רוצה לנסות שוב|אפשר לנסות שוב|עוד ניסיון)/]))return{intent:CONVERSATION_INTENTS.TRY_AGAIN,normalized,confidence:.96};
