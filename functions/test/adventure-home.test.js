@@ -39,7 +39,7 @@ test('world labels stay above the bottom edge on desktop and mobile',()=>{
 
 test('companion artwork and the new experience are available offline',()=>{
   assert.ok(fs.existsSync(path.join(root,'assets','baby-dragon.svg')));
-  for(const asset of ['./adventure-home.css?v=4.29.0','./adventure-home.js?v=4.29.0','./assets/baby-dragon.svg'])assert.ok(sw.includes(`'${asset}'`),asset);
+  for(const asset of ['./adventure-home.css?v=4.30.0','./adventure-home.js?v=4.30.0','./assets/baby-dragon.svg'])assert.ok(sw.includes(`'${asset}'`),asset);
   assert.doesNotMatch(source,/fetch\(|XMLHttpRequest|openai/i);
 });
 

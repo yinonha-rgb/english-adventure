@@ -15,6 +15,10 @@ test('free teacher understands common Hebrew and English classroom intents local
     ['אני מוכן','ready'],
     ['yes','yes'],
     ['לא','no'],
+    ['hello','greeting'],
+    ['שלום','greeting'],
+    ['thank you','thanks'],
+    ['תודה','thanks'],
     ['כיף לי','encouragement']
   ];
   for(const [text,intent] of cases)assert.equal(Providers.conversationIntent(text).intent,intent,text);
@@ -24,6 +28,12 @@ test('ordinary and unrelated answers remain answers for deterministic validation
   for(const text of ['dog','the animal is a cat','pizza','banana sounds funny']){
     assert.equal(Providers.conversationIntent(text).intent,Providers.CONVERSATION_INTENTS.ANSWER);
   }
+});
+
+test('social chat is acknowledged but never treated as a lesson answer',()=>{
+  assert.equal(Providers.conversationIntent('hello').intent,Providers.CONVERSATION_INTENTS.GREETING);
+  assert.equal(Providers.conversationIntent('thank you').intent,Providers.CONVERSATION_INTENTS.THANKS);
+  assert.equal(Providers.conversationIntent('pizza').intent,Providers.CONVERSATION_INTENTS.ANSWER);
 });
 
 test('free provider emits intent events and never performs a network request',()=>{
