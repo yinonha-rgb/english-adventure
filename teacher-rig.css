@@ -3,6 +3,16 @@
 .teacher-rig{position:relative;display:block;width:100%;height:100%;overflow:visible;transform-origin:50% 92%;isolation:isolate;transition:transform .68s cubic-bezier(.2,.7,.25,1),filter .45s ease;will-change:transform}
 .teacher-rig-canvas{position:relative;display:block;width:auto;height:100%;aspect-ratio:35/100;margin-inline:auto;overflow:hidden;transform-origin:50% 88%;transition:transform .72s cubic-bezier(.2,.7,.2,1)}
 .rig-body{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 12px 10px #244c6a2f);transform-origin:50% 82%;transition:transform .62s cubic-bezier(.2,.72,.22,1),filter .4s ease;will-change:transform}
+.rig-body-loop{position:absolute;inset:0;opacity:1;transition:opacity .22s ease}
+.rig-body-static{opacity:0;transition:opacity .22s ease}
+/* The animated WebP is the silent offline idle/listening video loop. Interactive
+   states use the calibrated static rig so mouth and gesture layers stay aligned. */
+.teacher-presence-rig:not([data-controller-state="idle"]):not([data-controller-state="listen"]) .rig-body-loop,
+.teacher-presence-rig.mouth-active .rig-body-loop{opacity:0}
+.teacher-presence-rig:not([data-controller-state="idle"]):not([data-controller-state="listen"]) .rig-body-static,
+.teacher-presence-rig.mouth-active .rig-body-static{opacity:1}
+.teacher-presence-rig.loop-unavailable .rig-body-loop{display:none}
+.teacher-presence-rig.loop-unavailable .rig-body-static{opacity:1}
 .rig-expression,.rig-mouth-shape{position:absolute;z-index:3;object-fit:contain;pointer-events:none;transform-origin:center;transition:transform .36s ease,filter .36s ease}
 .rig-expression{left:var(--expr-x);top:var(--expr-y);width:var(--expr-w);height:var(--expr-h);mask-image:linear-gradient(#000 0 78%,transparent 100%)}
 .rig-mouth-shape{z-index:4;left:var(--lip-x);top:var(--lip-y);width:var(--lip-w);height:var(--lip-h)}
@@ -58,7 +68,7 @@
 
 @media(max-width:900px){.teacher-rig-canvas{aspect-ratio:38/100}}
 @media(max-width:600px){.teacher-rig-canvas{width:100%;height:100%;aspect-ratio:auto;transform:none;transform-origin:50% 45%}.teacher-rig[data-motion="head-left"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-left"] .teacher-rig-canvas{transform:rotate(-.35deg)}.teacher-rig[data-motion="head-right"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-right"] .teacher-rig-canvas{transform:rotate(.35deg)}}
-@media(prefers-reduced-motion:reduce){.teacher-rig,.teacher-rig-canvas,.rig-body,.rig-expression,.rig-mouth-shape,.teacher-rig-blink,.teacher-rig-stars,.teacher-gesture-trail{animation:none!important;transition:none!important}.rig-mouth-shape,.teacher-rig-blink,.teacher-rig-stars,.teacher-gesture-trail{display:none!important}}
+@media(prefers-reduced-motion:reduce){.teacher-rig,.teacher-rig-canvas,.rig-body,.rig-expression,.rig-mouth-shape,.teacher-rig-blink,.teacher-rig-stars,.teacher-gesture-trail{animation:none!important;transition:none!important}.rig-body-loop,.rig-mouth-shape,.teacher-rig-blink,.teacher-rig-stars,.teacher-gesture-trail{display:none!important}.rig-body-static{opacity:1!important}}
 
 /* Lesson-stage orchestration: tutor, activity and companion share one living scene. */
 .adventure-stage{grid-template-columns:minmax(190px,26%) minmax(0,1fr)!important}

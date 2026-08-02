@@ -57,6 +57,10 @@ No production code sends lesson audio or text to OpenAI. Temporary answer record
 
 The cloud document model is `users/{uid}/state/main`, with immutable deletion backups under `users/{uid}/backups/{backupId}`. Online writes use Firestore transactions with schema and revision fields. Offline edits remain queued locally and merge automatically when connectivity returns. Completed lessons and award ledgers are unioned, activity is deduplicated by stable IDs, tombstones protect profile deletion, and stale snapshots cannot blindly replace newer progress.
 
+Version 4.23 adds a lightweight, silent, seamless animated WebP loop for each teacher while idle or listening. Speaking and gesture states automatically use the calibrated layered rig so lip placement remains accurate. The still PNG fallback, reduced-motion behavior, and offline cache are preserved.
+
+Version 4.24 adds an optional self-view camera tile to the interactive lesson. Camera permission is requested only after the child or parent presses the camera button. The stream is displayed locally, never recorded or uploaded, and every media track is stopped when the tile or lesson closes, the page is left, or permission fails.
+
 ## Adaptive difficulty
 
 Version 4.5 adds seven independent 1–10 skill levels, conservative evidence-based promotion, delayed review, temporary in-lesson support, a friendly placement check, and Hebrew parent controls. Both teacher modes use the same limits and per-child state. See [`ADAPTIVE_DIFFICULTY_HE.md`](ADAPTIVE_DIFFICULTY_HE.md) for the exact rules.
