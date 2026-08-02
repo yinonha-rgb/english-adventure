@@ -31,13 +31,14 @@ test('the world stays visibly alive and respects reduced motion',()=>{
 });
 
 test('world labels stay above the bottom edge on desktop and mobile',()=>{
-  assert.match(css,/\.world-trail\{[^}]*bottom:54px/);
-  assert.ok(css.includes('.world-trail{left:4%;right:4%;bottom:48px}'));
+  assert.match(source,/art\.append\(trail\)/);
+  assert.match(css,/\.world-trail\{[^}]*left:7%;right:7%;bottom:42px/);
+  assert.ok(css.includes('.world-trail{left:6%;right:6%;bottom:42px}'));
 });
 
 test('companion artwork and the new experience are available offline',()=>{
   assert.ok(fs.existsSync(path.join(root,'assets','baby-dragon.svg')));
-  for(const asset of ['./adventure-home.css?v=4.26.0','./adventure-home.js?v=4.26.0','./assets/baby-dragon.svg'])assert.ok(sw.includes(`'${asset}'`),asset);
+  for(const asset of ['./adventure-home.css?v=4.27.0','./adventure-home.js?v=4.27.0','./assets/baby-dragon.svg'])assert.ok(sw.includes(`'${asset}'`),asset);
   assert.doesNotMatch(source,/fetch\(|XMLHttpRequest|openai/i);
 });
 
