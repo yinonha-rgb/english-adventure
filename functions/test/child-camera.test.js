@@ -18,12 +18,13 @@ function fixture(){
   return{host,panel,video,status,button};
 }
 
-test('child camera is opt-in, front-facing and never requests microphone audio',()=>{
+test('child camera opens with the lesson, is front-facing and never requests microphone audio',()=>{
   assert.equal(Camera.CAMERA_CONSTRAINTS.audio,false);
   assert.equal(Camera.CAMERA_CONSTRAINTS.video.facingMode,'user');
   assert.match(Camera.PRIVACY_TEXT,/אינה מוקלטת, נשמרת או נשלחת לענן/);
   assert.match(engine,/id="interactiveCameraToggle"[^>]+aria-pressed="false"/);
   assert.match(engine,/EAChildCamera\?\.create/);
+  assert.match(engine,/this\.camera\?\.start\?\.\(\)\.catch\?\./);
 });
 
 test('temporary camera stream is shown locally and every track is stopped on close',async()=>{
