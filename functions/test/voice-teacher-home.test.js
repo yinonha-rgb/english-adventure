@@ -86,3 +86,11 @@ test('teacher transcript never stacks over the activity and focus mode expands i
   assert.match(teacher,/stage\.dataset\.focus=state==='teacherSpeaking'\?'speaking':'answer'/);
   assert.match(teacher,/-webkit-line-clamp:2/);
 });
+
+test('voice lesson shows an accessible countdown that pauses with the lesson',()=>{
+  assert.match(teacher,/id='teacherTimer'/);
+  assert.match(teacher,/lessonCountdownRemaining=600/);
+  assert.match(teacher,/if\(!paused\)/);
+  assert.match(teacher,/זמן נותר בשיעור/);
+  assert.match(teacher,/teacher-timer/);
+});
