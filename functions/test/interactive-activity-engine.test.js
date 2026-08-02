@@ -64,6 +64,15 @@ test('microphone fallback and touch alternatives are always present',()=>{
   assert.match(source,/onclick/);
 });
 
+test('repeat-after-teacher turns start listening automatically after speech ends',()=>{
+  assert.match(source,/prepareMicrophone\(\)/);
+  assert.match(source,/getUserMedia\(\{audio:true\}\)/);
+  assert.match(source,/shouldAutoListen\(item\)/);
+  assert.match(source,/automatic listening scheduled/);
+  assert.match(source,/this\.listen\(\{automatic:true\}\)/);
+  assert.match(source,/recognition started automatically/);
+});
+
 test('progress resumes per child and completion awards remain idempotent',()=>{
   assert.match(app,/interactiveLessons/);
   assert.match(app,/EAInteractiveProgress/);

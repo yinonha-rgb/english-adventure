@@ -30,6 +30,14 @@ test('browser speech, microphone denial and button fallback remain complete',()=
   assert.match(teacher,/confirm\('לסיים את השיעור/);
 });
 
+test('daily voice teacher requests microphone access at lesson start and listens automatically',()=>{
+  assert.match(teacher,/function prepareMicrophone\(\)/);
+  assert.match(teacher,/navigator\.mediaDevices\?\.getUserMedia/);
+  assert.match(teacher,/getUserMedia\(\{audio:true\}\)/);
+  assert.match(teacher,/function startFree\(\)\{selectedMode='free';prepareMicrophone\(\)/);
+  assert.match(teacher,/if\(i\.listen\)listen\(i\);else nextPhase\(\)/);
+});
+
 test('speech recognition pipeline exposes every lifecycle event and releases stale listening state',()=>{
   for(const event of ['recognition created','recognition started','recognition ended','recognition restarted','onstart','onspeechstart','onspeechend','onaudiostart','onaudioend','onresult','onerror','transcript final'])assert.match(teacher,new RegExp(event));
   assert.match(teacher,/interimResults=true/);
