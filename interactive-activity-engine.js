@@ -150,7 +150,12 @@
         modal.querySelector('#interactivePause').onclick=()=>this.togglePause();
       }
       this.modal=modal;
-      if(!this.camera)this.camera=root.EAChildCamera?.create?.(this.modal.querySelector('#interactiveChildCamera'),{button:this.modal.querySelector('#interactiveCameraToggle'),onStatus:(_,message)=>this.feedback(message,false)});
+      if(!this.camera){
+        this.camera=root.EAChildCamera?.create?.(this.modal.querySelector('#interactiveChildCamera'),{button:this.modal.querySelector('#interactiveCameraToggle'),onStatus:(_,message)=>this.feedback(message,false)});
+        // This runs in the same gesture that starts the lesson when possible. A browser may
+        // still require first-time permission, and failure never blocks the learning flow.
+        this.camera?.start?.().catch?.(()=>{});
+      }
       const visualHost=this.modal.querySelector('#interactiveTeacherVisual');
       if(visualHost&&!this.visual){
         const renderer=root.EATeacherSystem?.createLessonTeacher?.(visualHost,{teacherId:this.teacherId,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,subtitles:'replay'});
