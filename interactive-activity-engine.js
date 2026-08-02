@@ -122,6 +122,8 @@
       this.answerLocked=true;
       this.recognition=null;
       this.recognitionGeneration=0;
+      this.microphoneWarmupAttempted=false;
+      this.autoListeningActivityId=null;
       this.speechDebug={microphone:'STOPPED',recognition:'STOPPED',lastTranscript:'—',lessonState:'idle',events:[]};
       this.selectedWord=null;
       this.matched=new Set();
@@ -130,7 +132,21 @@
     teacherText(female,male){return this.teacherGender==='male'?male:female}
     start(){
       this.ensureUI();
+      this.prepareMicrophone();
       this.render();
+    }
+    prepareMicrophone(){
+      // Start the browser permission flow from the lesson-start gesture.  The
+      // stream is immediately released: SpeechRecognition owns the real turn.
+      if(this.microphoneWarmupAttempted||!root.navigator?.mediaDevices?.getUserMedia)return;
+      this.microphoneWarmupAttempted=true;
+      root.navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+        stream.getTracks?.().forEach(track=>track.stop());
+        this.speechLog('microphone ready for automatic listening');
+      }).catch(error=>this.speechLog('microphone warmup unavailable',error?.name||'unknown'));
+    }
+    shouldAutoListen(item){
+      return item?.type===TYPES.REPEAT&&!this.paused&&this.autoListeningActivityId!==item.id;
     }
     ensureUI(){
       let modal=document.querySelector('#interactiveTeacher');
@@ -187,6 +203,7 @@
       if(!item)return this.complete();
       this.matched.clear();
       this.selectedWord=null;
+      this.autoListeningActivityId=null;
       this.modal.querySelector('.interactive-progress span').style.width=`${Math.round(this.state.index/this.lesson.activities.length*100)}%`;
       this.setInstruction(item.teacherInstructionEn,item.teacherInstructionHe);
       this.modal.querySelector('#interactiveFeedback').textContent='';
@@ -210,7 +227,7 @@
       this.modal.querySelector('.interactive-panel').dataset.focus='speaking';
       this.setVisualState('speaking');
       const text=[prefix,item.teacherInstructionEn,item.teacherInstructionHe].filter(Boolean).join(' ');
-      this.speakSegments(text,.82,()=>{if(this.current()===item&&!this.paused){this.answerLocked=false;this.modal.querySelector('#interactiveState').textContent='המורה מחכה לתשובה';this.modal.querySelector('.interactive-panel').dataset.focus='answer';this.setVisualState('waiting')}});
+      this.speakSegments(text,.82,()=>{if(this.current()===item&&!this.paused){this.answerLocked=false;this.modal.querySelector('#interactiveState').textContent='המורה מחכה לתשובה';this.modal.querySelector('.interactive-panel').dataset.focus='answer';this.setVisualState('waiting');if(this.shouldAutoListen(item)){this.autoListeningActivityId=item.id;this.speechLog('automatic listening scheduled',item.id);setTimeout(()=>{if(this.current()===item&&!this.paused&&!this.answerLocked)this.listen({automatic:true})},360)}});
     }
     speakSegments(text,rate=.85,onend=()=>{}){
       const Natural=root.EANaturalVoice;
@@ -335,7 +352,7 @@
         this.selectedWord=null;
       }
     }
-    listen(){
+    listen({automatic=false}={}){
       if(this.paused||this.answerLocked)return this.speechLog('start blocked',this.paused?'lesson paused':'teacher still speaking');
       const item=this.current(),SR=root.SpeechRecognition||root.webkitSpeechRecognition;
       if(!SR){this.speechLog('recognition unavailable');return this.feedback('זיהוי דיבור אינו זמין. לחצו “אמרתי” כדי להמשיך.',false)}
@@ -360,7 +377,7 @@
       recognition.onerror=event=>{if(!isCurrent())return;this.speechLog('onerror',event.error||'unknown');if(settled)return;settled=true;if(event.error==='not-allowed'||event.error==='service-not-allowed')this.feedback('המיקרופון לא אושר. אשרו הרשאה או לחצו “אמרתי”.',false);else this.feedback('לא שמעתי בבירור. אפשר לנסות שוב או ללחוץ “אמרתי”.',false)};
       recognition.onend=()=>{if(!isCurrent())return;this.speechDebug.microphone='STOPPED';this.speechDebug.recognition='STOPPED';this.speechLog('recognition ended',heardSpeech&&!finalTranscript?'speech without final transcript':'');if(this.recognition===recognition)this.recognition=null;const fallback=root.EANaturalVoice?.finalizeRecognitionResult?.({finalTranscript,interimTranscript,heardSpeech,interimConfidence});if(!settled&&fallback?.text&&fallback.fallback){settled=true;this.speechLog('interim promoted to final',fallback.text);this.answer(fallback.text);return}if(!settled){settled=true;this.feedback(heardSpeech?'שמעתי קול אבל לא התקבל תמלול. נסו שוב.':'לא נשמעה תשובה. נסו שוב או לחצו “אמרתי”.',false)}};
       root.navigator?.permissions?.query?.({name:'microphone'}).then(permission=>this.speechLog('microphone permission',permission.state)).catch(()=>this.speechLog('microphone permission','query unavailable'));
-      try{recognition.start();this.speechLog('recognition started')}catch(error){settled=true;this.speechLog('start exception',error?.message||'unknown');this.speechDebug.microphone='STOPPED';this.speechDebug.recognition='STOPPED';this.feedback('המיקרופון אינו זמין. לחצו “אמרתי”.',false)}
+      try{recognition.start();this.speechLog(automatic?'recognition started automatically':'recognition started')}catch(error){settled=true;this.speechLog('start exception',error?.message||'unknown');this.speechDebug.microphone='STOPPED';this.speechDebug.recognition='STOPPED';this.feedback('המיקרופון אינו זמין. לחצו “אמרתי”.',false)}
     }
     answer(value,button){
       if(this.paused||this.answerLocked)return;
