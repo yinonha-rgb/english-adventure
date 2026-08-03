@@ -37,6 +37,7 @@ test('camera releases its audio track before speech recognition listens',async()
     const view=fixture(),camera=new Camera.ChildCameraController(view.host,{button:view.button});
     assert.equal(await camera.start(),true);
     assert.equal(audio.stopped,true);
+    assert.equal(camera.microphonePermissionPrepared,true);
     assert.deepEqual(stream.tracks,[videoTrack]);
     assert.equal(videoTrack.stopped,false);
     camera.stop();
@@ -75,9 +76,9 @@ test('permission denial fails safely and lesson close destroys the camera',async
 
 test('camera UI is responsive, accessible and available offline',()=>{
   assert.match(html,/child-camera\.css\?v=4\.38\.0/);
-  assert.match(html,/child-camera\.js\?v=4\.42\.14[\s\S]*interactive-activity-engine\.js\?v=4\.42\.14/);
+  assert.match(html,/child-camera\.js\?v=4\.42\.15[\s\S]*interactive-activity-engine\.js\?v=4\.42\.15/);
   assert.match(sw,/child-camera\.css\?v=4\.38\.0/);
-  assert.match(sw,/child-camera\.js\?v=4\.42\.14/);
+  assert.match(sw,/child-camera\.js\?v=4\.42\.15/);
   assert.match(source,/aria-label="סגירת מצלמת הילד"/);
   assert.match(fs.readFileSync(path.join(root,'child-camera.css'),'utf8'),/@media\(max-width:700px\)/);
   assert.match(html,/interactive-top\{display:grid;grid-template-columns:auto minmax\(90px,auto\) minmax\(100px,1fr\) auto auto auto/);
