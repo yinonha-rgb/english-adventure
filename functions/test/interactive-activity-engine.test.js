@@ -131,6 +131,12 @@ test('progress resumes per child and completion awards remain idempotent',()=>{
   assert.match(source,/progress\?\.save/);
 });
 
+test('automatic voice listening is never interrupted by a prompt reminder timer',()=>{
+  assert.doesNotMatch(source,/this\.timer=setTimeout\(\(\)=>this\.speakCurrent\([^\n]+14000/);
+  assert.match(source,/reminder can never interrupt listening/);
+  assert.match(source,/if\(this\.shouldAutoListen\(item\)\)[\s\S]*?this\.listen\(\{automatic:true\}\)[\s\S]*?\}else\{/);
+});
+
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
   assert.match(html,/interactive-activity-engine\.js\?v=4\.42\.15/);
   assert.match(sw,/interactive-activity-engine\.js\?v=4\.42\.15/);
