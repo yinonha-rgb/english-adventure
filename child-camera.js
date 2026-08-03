@@ -1,8 +1,8 @@
 (function(root,factory){const api=factory(root);if(typeof module==='object'&&module.exports)module.exports=api;else root.EAChildCamera=api})(typeof globalThis!=='undefined'?globalThis:this,function(root){
   'use strict';
 
-  const PRIVACY_TEXT='המצלמה מוצגת רק במכשיר הזה. התמונה אינה מוקלטת, נשמרת או נשלחת לענן.';
-  const CAMERA_CONSTRAINTS=Object.freeze({audio:false,video:Object.freeze({facingMode:'user',width:Object.freeze({ideal:480}),height:Object.freeze({ideal:360})})});
+  const PRIVACY_TEXT='המצלמה והמיקרופון פועלים רק בשידור חי במכשיר הזה. וידאו וקול אינם מוקלטים, נשמרים או נשלחים לענן.';
+  const CAMERA_CONSTRAINTS=Object.freeze({audio:true,video:Object.freeze({facingMode:'user',width:Object.freeze({ideal:480}),height:Object.freeze({ideal:360})})});
 
   class ChildCameraController{
     constructor(host,{button=null,onStatus=()=>{}}={}){
@@ -29,14 +29,18 @@
       if(this.active||this.starting)return true;
       this.panel.hidden=false;
       if(!root.navigator?.mediaDevices?.getUserMedia){this.update('unsupported','המצלמה אינה נתמכת בדפדפן הזה');return false}
-      this.starting=true;this.update('starting','מבקש הרשאה למצלמה…');
+      this.starting=true;this.update('starting','מבקש הרשאה למצלמה ולמיקרופון…');
       try{
         const stream=await root.navigator.mediaDevices.getUserMedia(CAMERA_CONSTRAINTS);
         if(!this.starting){stream.getTracks().forEach(track=>track.stop());return false}
-        this.stream=stream;this.video.srcObject=stream;await this.video.play?.().catch(()=>{});this.active=true;this.update('on','המצלמה פועלת');return true;
+        // Ask for both permissions in the lesson-start gesture, then release the
+        // camera audio track. SpeechRecognition owns the microphone while the
+        // camera keeps showing video; this avoids Android microphone contention.
+        stream.getAudioTracks?.().forEach(track=>{track.stop();stream.removeTrack?.(track)});
+        this.stream=stream;this.video.srcObject=stream;await this.video.play?.().catch(()=>{});this.active=true;this.update('on','המצלמה פועלת והמיקרופון מוכן למורה');return true;
       }catch(error){
         const denied=error?.name==='NotAllowedError'||error?.name==='SecurityError';
-        this.update('error',denied?'לא ניתנה הרשאה למצלמה':'לא הצלחנו להפעיל את המצלמה');
+        this.update('error',denied?'לא ניתנה הרשאה למצלמה ולמיקרופון':'לא הצלחנו להפעיל את המצלמה והמיקרופון');
         return false;
       }finally{this.starting=false}
     }

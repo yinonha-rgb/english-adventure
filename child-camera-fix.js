@@ -24,6 +24,7 @@
         videoOnly=true;
       }
       if(!this.starting){stream.getTracks().forEach(track=>track.stop());return false;}
+      stream.getAudioTracks?.().forEach(track=>{track.stop();stream.removeTrack?.(track);});
       this.stream=stream;
       this.video.srcObject=stream;
       await this.video.play?.().catch(()=>{});
@@ -32,7 +33,7 @@
         this.update('video-only','המצלמה פועלת. המיקרופון לא זמין כרגע — אפשר להמשיך עם כפתורי התשובה.');
         this.button?.setAttribute('aria-pressed','true');
         if(this.button)this.button.title='כיבוי מצלמה';
-      }else this.update('on','המצלמה והמיקרופון פועלים');
+      }else this.update('on','המצלמה פועלת והמיקרופון מוכן למורה');
       return true;
     }catch(error){
       const denied=error?.name==='NotAllowedError'||error?.name==='SecurityError';

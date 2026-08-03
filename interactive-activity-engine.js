@@ -46,7 +46,7 @@
           teacherInstructionHe:`שלום ${childName}! היום נלמד שמות של חיות. מוכנים?`,
           teacherInstructionEn:`Hello ${childName}! Today we will learn animals. Are you ready?`,
           prompt:'כן, מתחילים',options:['כן, מתחילים'],correctAnswer:'כן, מתחילים',
-          acceptedAnswers:['yes','ready','I am ready',"I'm ready","let's start","let's go",'okay','ok','כן','מוכן','מוכנה','אני מוכן','אני מוכנה','מתחילים'],xp:0
+          acceptedAnswers:['yes','ready','I am ready',"I'm ready","let's start","let's go",'okay','ok','כן','בטח','מוכן','מוכנה','מוכנים','מוכנות','אני מוכן','אני מוכנה','אפשר להתחיל','מתחילים','קדימה','יאללה'],xp:0
         }),
         activity('animals-dog',TYPES.PICTURE_CHOICE,{
           teacherInstructionHe:'Listen carefully. איפה הכלב? לחצו על הכלב.',
@@ -146,6 +146,7 @@
       this.recognition=null;
       this.recognitionGeneration=0;
       this.microphoneWarmupAttempted=false;
+      this.cameraStartPromise=null;
       this.autoListeningActivityId=null;
       this.speechDebug={microphone:'STOPPED',recognition:'STOPPED',lastTranscript:'—',lessonState:'idle',events:[]};
       this.selectedWord=null;
@@ -153,21 +154,27 @@
       this.visual=null;
     }
     teacherText(female,male){return this.teacherGender==='male'?male:female}
-    start(){
+    async start(){
       this.ensureUI();
       this.startLessonTimer();
-      this.prepareMicrophone();
+      await this.prepareMicrophone();
       this.render();
     }
-    prepareMicrophone(){
+    async prepareMicrophone(){
       // Start the browser permission flow from the lesson-start gesture.  The
       // stream is immediately released: SpeechRecognition owns the real turn.
       if(this.microphoneWarmupAttempted||!root.navigator?.mediaDevices?.getUserMedia)return;
       this.microphoneWarmupAttempted=true;
-      root.navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+      try{
+        if(this.cameraStartPromise){
+          await this.cameraStartPromise;
+          this.speechLog('microphone permission prepared by camera');
+          return;
+        }
+        const stream=await root.navigator.mediaDevices.getUserMedia({audio:true});
         stream.getTracks?.().forEach(track=>track.stop());
         this.speechLog('microphone ready for automatic listening');
-      }).catch(error=>this.speechLog('microphone warmup unavailable',error?.name||'unknown'));
+      }catch(error){this.speechLog('microphone warmup unavailable',error?.name||'unknown')}
     }
     shouldAutoListen(item){
       return [TYPES.WELCOME,TYPES.REPEAT].includes(item?.type)&&!this.paused&&this.autoListeningActivityId!==item.id;
@@ -195,7 +202,7 @@
         this.camera=root.EAChildCamera?.create?.(this.modal.querySelector('#interactiveChildCamera'),{button:this.modal.querySelector('#interactiveCameraToggle'),onStatus:(_,message)=>this.feedback(message,false)});
         // This runs in the same gesture that starts the lesson when possible. A browser may
         // still require first-time permission, and failure never blocks the learning flow.
-        this.camera?.start?.().catch?.(()=>{});
+        this.cameraStartPromise=Promise.resolve(this.camera?.start?.()).catch(()=>false);
       }
       const visualHost=this.modal.querySelector('#interactiveTeacherVisual');
       if(visualHost&&!this.visual){
@@ -273,6 +280,7 @@
       const item=this.current();
       if(!item)return;
       clearTimeout(this.timer);
+      this.autoListeningActivityId=null;
       this.modal.querySelector('.interactive-panel').dataset.focus='speaking';
       this.setVisualState('speaking');
       const text=[prefix,item.teacherInstructionEn,item.teacherInstructionHe].filter(Boolean).join(' ');
@@ -467,7 +475,8 @@
       const isCurrent=()=>this.recognition===recognition&&this.recognitionGeneration===generation;
       this.speechLog('recognition created',`generation ${generation}`);
       if(generation>1)this.speechLog('recognition restarted',`generation ${generation}`);
-      recognition.lang='en-US';
+      recognition.lang=item.type===TYPES.WELCOME?'he-IL':'en-US';
+      this.speechLog('recognition language',recognition.lang);
       recognition.interimResults=true;
       recognition.continuous=false;
       recognition.maxAlternatives=3;
