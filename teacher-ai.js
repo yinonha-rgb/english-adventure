@@ -187,6 +187,45 @@ document.addEventListener('click',event=>{
 },{capture:true});
 window.addEventListener('beforeunload',()=>{if($('#teacherSession')?.classList.contains('open'))pauseAndClose()});
 
+// The greeting ends with "Are you ready?". Treat it as a real voice turn:
+// automatically listen after speech and advance when the child says yes/ready.
+const baseInstructionForReadiness=instruction;
+instruction=function(){
+  const item=baseInstructionForReadiness();
+  if(phase!==0)return item;
+  return Object.assign(item,{
+    listen:true,
+    answer:'Yes',
+    validation:Core.validationSpec({
+      lessonId:shared.lessonId,
+      exerciseId:'lesson-ready',
+      question:'Are you ready?',
+      expectedAnswers:['yes','ready','I am ready',"I'm ready","let's start","let's go"],
+      recognitionAlternatives:['yeah','yep','sure','okay','ok'],
+      requiredKeywords:['yes','ready','start','go','okay'],
+      keywordMode:'any',
+      contextKeywords:['lesson','ready','start'],
+      kind:'short-answer',
+      difficulty:'easy',
+      minimumThreshold:.72,
+      rejectedExamples:['no','not ready','I do not know'],
+      hints:['Say: Yes, I am ready.'],
+      followUpPrompts:['Are you ready to begin?'],
+      reviewWords:['ready']
+    })
+  });
+};
+const baseConversationIntentForReadiness=handleConversationIntent;
+handleConversationIntent=function(heard,item){
+  const intent=Providers.conversationIntent(heard).intent;
+  if(phase===0&&(intent===Providers.CONVERSATION_INTENTS.READY||intent===Providers.CONVERSATION_INTENTS.YES)){
+    line(context.child.name,heard);
+    speak('Great! Let us begin.','en-US',nextPhase,'celebration');
+    return true;
+  }
+  return baseConversationIntentForReadiness(heard,item);
+};
+
 function addChildVoiceControl(){const controls=$('#teacherSession .teacher-controls');if(!controls||$('#teacherSlower'))return;const b=document.createElement('button');b.className='btn';b.id='teacherSlower';b.textContent='יותר לאט';b.setAttribute('aria-label','השמעת המשפט האחרון לאט יותר');b.onclick=()=>{recognition?.abort();turnGuard.interrupt();voiceQueue.repeatSlower()};controls.insertBefore(b,$('#teacherHebrew'));const replay=document.createElement('section');replay.id='answerPlaybackControls';replay.hidden=true;replay.innerHTML='<strong id="answerPlaybackState" role="status"></strong><div class="teacher-controls"><button class="primary" id="playMyAnswer">התשובה שלי</button><button class="btn" id="playTeacherAnswer">המורה</button><button class="btn" id="tryMyAnswerAgain">שוב אני</button></div>';$('#teacherInstruction').after(replay);$('#playMyAnswer').onclick=()=>answerPlayback?.play();$('#playTeacherAnswer').onclick=()=>{answerPlayback?.beforeTeacherSpeech();speakCurrent()};$('#tryMyAnswerAgain').onclick=()=>{clearAnswerRecording();const i=instruction();listen(i)};$('#teacherPause').onclick=toggleTeacherPause}
 
 try{await ready;if(!Core||!Adaptive||!Natural||!Visual||!Providers||!Pricing)throw new Error('optional-teacher-dependency-missing');styles();visualStyles();premiumVisualStyles();lessonLayoutStyles();build();sync();initNaturalVoice();initAnswerPlayback();initVisualTeacher();buildVoiceControls();buildAnswerSettings();buildMockControls();addChildVoiceControl();entrypoints();const recordSession=window.EAApp.recordTeacherSession.bind(window.EAApp);window.EAApp.recordTeacherSession=summary=>{window.EACompleteDailyVoice?.(summary);return recordSession(summary)};window.EAVoiceTeacher={startDaily:startDailyVoice};new MutationObserver(()=>{entrypoints();enhanceMockPreflight();renderAdaptiveDashboard();renderReports()}).observe(document.body,{childList:true,subtree:true})}catch(error){console.warn('Optional voice teacher disabled; the free application remains available.',String(error?.message||'initialization-error'))}
