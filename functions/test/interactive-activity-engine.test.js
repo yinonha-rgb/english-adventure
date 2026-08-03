@@ -105,6 +105,17 @@ test('repeat-after-teacher turns start listening automatically after speech ends
   assert.match(source,/recognition started automatically/);
 });
 
+test('daily lesson greeting listens automatically and accepts spoken readiness',()=>{
+  const welcome=lesson.activities.find(item=>item.type==='welcome');
+  for(const answer of ['yes','ready','I am ready',"I'm ready","let's start",'okay']){
+    assert.equal(engine.validate(welcome,answer),true,answer);
+  }
+  assert.equal(engine.validate(welcome,'banana'),false);
+  assert.match(source,/\[TYPES\.WELCOME,TYPES\.REPEAT\]\.includes\(item\?\.type\)/);
+  assert.match(source,/automatic listening scheduled/);
+  assert.match(source,/this\.listen\(\{automatic:true\}\)/);
+});
+
 test('progress resumes per child and completion awards remain idempotent',()=>{
   assert.match(app,/interactiveLessons/);
   assert.match(app,/EAInteractiveProgress/);
@@ -115,8 +126,8 @@ test('progress resumes per child and completion awards remain idempotent',()=>{
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.42\.12/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.42\.12/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.42\.13/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.42\.13/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
 
