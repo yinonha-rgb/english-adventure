@@ -34,7 +34,9 @@
     button.addEventListener('click',()=>{if(video.muted){window.speechSynthesis?.cancel?.();video.muted=false;video.play();button.textContent='■ השתקת הקול';}else{video.muted=true;button.textContent='▶ קול של נועה';}});
     home.append(video,button);
   }
-  function scanAll(){scan();document.querySelectorAll('.teacher-home-avatar').forEach(addHomePreview);}
+  // The supplied clip belongs on the welcome screen and in the lesson preview.
+  // On the home world it covered the portrait with a black video frame.
+  function scanAll(){scan();}
   new MutationObserver(scanAll).observe(document.documentElement,{childList:true,subtree:true});
   document.addEventListener('DOMContentLoaded',scanAll);
 })();
