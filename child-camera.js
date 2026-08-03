@@ -37,6 +37,7 @@
         // camera audio track. SpeechRecognition owns the microphone while the
         // camera keeps showing video; this avoids Android microphone contention.
         stream.getAudioTracks?.().forEach(track=>{track.stop();stream.removeTrack?.(track)});
+        this.microphonePermissionPrepared=true;
         this.stream=stream;this.video.srcObject=stream;await this.video.play?.().catch(()=>{});this.active=true;this.update('on','המצלמה פועלת והמיקרופון מוכן למורה');return true;
       }catch(error){
         const denied=error?.name==='NotAllowedError'||error?.name==='SecurityError';
