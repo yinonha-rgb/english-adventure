@@ -45,7 +45,8 @@
         activity('animals-welcome',TYPES.WELCOME,{
           teacherInstructionHe:`שלום ${childName}! היום נלמד שמות של חיות. מוכנים?`,
           teacherInstructionEn:`Hello ${childName}! Today we will learn animals. Are you ready?`,
-          prompt:'כן, מתחילים',options:['כן, מתחילים'],correctAnswer:'כן, מתחילים',xp:0
+          prompt:'כן, מתחילים',options:['כן, מתחילים'],correctAnswer:'כן, מתחילים',
+          acceptedAnswers:['yes','ready','I am ready',"I'm ready","let's start","let's go",'okay','ok','כן','מוכן','מוכנה','אני מוכן','אני מוכנה','מתחילים'],xp:0
         }),
         activity('animals-dog',TYPES.PICTURE_CHOICE,{
           teacherInstructionHe:'Listen carefully. איפה הכלב? לחצו על הכלב.',
@@ -106,6 +107,10 @@
 
   const normalize=value=>String(value??'').toLowerCase().trim().replace(/[.!?,]/g,'').replace(/\s+/g,' ');
   function validate(activity,response){
+    if(activity.type===TYPES.WELCOME){
+      const heard=normalize(response),accepted=(activity.acceptedAnswers||[activity.correctAnswer]).map(normalize);
+      return accepted.includes(heard);
+    }
     if(activity.type===TYPES.DRAG_MATCH){
       const expected=(activity.correctAnswer||[]).map(normalize);
       const actual=Array.isArray(response)?response.map(normalize):[];
@@ -165,7 +170,7 @@
       }).catch(error=>this.speechLog('microphone warmup unavailable',error?.name||'unknown'));
     }
     shouldAutoListen(item){
-      return item?.type===TYPES.REPEAT&&!this.paused&&this.autoListeningActivityId!==item.id;
+      return [TYPES.WELCOME,TYPES.REPEAT].includes(item?.type)&&!this.paused&&this.autoListeningActivityId!==item.id;
     }
     ensureUI(){
       ensureMatchStyles();
