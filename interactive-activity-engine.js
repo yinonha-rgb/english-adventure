@@ -195,6 +195,7 @@
     }
     save(){
       this.progress?.save?.(this.lesson.id,{...this.state,updatedAt:new Date().toISOString()});
+      if(!this.state.completed)root.EAApp?.saveLessonCheckpoint?.({kind:'interactive',lessonId:this.lesson.id,lesson:this.lesson,index:this.state.index,results:[...this.state.results]});
     }
     render(){
       clearTimeout(this.timer);
@@ -227,7 +228,18 @@
       this.modal.querySelector('.interactive-panel').dataset.focus='speaking';
       this.setVisualState('speaking');
       const text=[prefix,item.teacherInstructionEn,item.teacherInstructionHe].filter(Boolean).join(' ');
-      this.speakSegments(text,.82,()=>{if(this.current()===item&&!this.paused){this.answerLocked=false;this.modal.querySelector('#interactiveState').textContent='המורה מחכה לתשובה';this.modal.querySelector('.interactive-panel').dataset.focus='answer';this.setVisualState('waiting');if(this.shouldAutoListen(item)){this.autoListeningActivityId=item.id;this.speechLog('automatic listening scheduled',item.id);setTimeout(()=>{if(this.current()===item&&!this.paused&&!this.answerLocked)this.listen({automatic:true})},360)}});
+      this.speakSegments(text,.82,()=>{
+        if(this.current()!==item||this.paused)return;
+        this.answerLocked=false;
+        this.modal.querySelector('#interactiveState').textContent='המורה מחכה לתשובה';
+        this.modal.querySelector('.interactive-panel').dataset.focus='answer';
+        this.setVisualState('waiting');
+        if(this.shouldAutoListen(item)){
+          this.autoListeningActivityId=item.id;
+          this.speechLog('automatic listening scheduled',item.id);
+          setTimeout(()=>{if(this.current()===item&&!this.paused&&!this.answerLocked)this.listen({automatic:true})},360);
+        }
+      });
     }
     speakSegments(text,rate=.85,onend=()=>{}){
       const Natural=root.EANaturalVoice;
@@ -418,6 +430,7 @@
       this.state.completed=true;
       this.state.completedAt=this.state.completedAt||new Date().toISOString();
       this.save();
+      root.EAApp?.clearLessonCheckpoint?.();
       const earned=this.lesson.activities.reduce((sum,item)=>sum+(item.xp||0),0);
       this.progress?.complete?.(this.lesson.id,earned);
       const host=this.modal.querySelector('#interactiveActivity');
