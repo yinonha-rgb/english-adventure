@@ -14,4 +14,4 @@
 @media(max-width:560px){.living-world .teacher-home-art{min-height:285px}.living-world .teacher-home-avatar{width:43%;height:62%;right:5%;bottom:32%}.dragon-companion{width:43%;height:50%;left:7%}.dragon-message{top:4%;left:4%;max-width:60%;font-size:.75rem}.living-world .teacher-home-copy{padding:20px 17px 82px}.daily-mission{padding:12px 13px;margin:12px 0}.world-trail{left:2%;right:10%;gap:5px}.world-trail span{width:46px;height:46px;font-size:1.1rem}.world-trail:before{top:17px}.world-trail small{margin-top:64px;font-size:.56rem}}
 @media(prefers-reduced-motion:reduce){.world-cloud,.world-star,.world-tree,.dragon-companion,.dragon-companion:after,.firefly,.world-trail span.active{animation:none!important}.world-cloud{display:none}.dragon-companion{transform:none}}
 /* On wide screens, keep the final world stop clear of the rounded right edge. */
-@media(min-width:561px){.world-trail{transform:translateX(-clamp(24px,4vw,48px))}}
+@media(min-width:561px){.world-trail{transform:translateX(clamp(-48px,-4vw,-24px))}}
