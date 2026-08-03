@@ -111,7 +111,10 @@ test('daily lesson greeting listens automatically and accepts spoken readiness',
     assert.equal(engine.validate(welcome,answer),true,answer);
   }
   assert.equal(engine.validate(welcome,'banana'),false);
+  for(const answer of ['כן','אני מוכן','אני מוכנה','אפשר להתחיל','קדימה'])assert.equal(engine.validate(welcome,answer),true,answer);
   assert.match(source,/\[TYPES\.WELCOME,TYPES\.REPEAT\]\.includes\(item\?\.type\)/);
+  assert.match(source,/recognition\.lang=item\.type===TYPES\.WELCOME\?'he-IL':'en-US'/);
+  assert.match(source,/this\.autoListeningActivityId=null;[\s\S]*automatic listening scheduled/);
   assert.match(source,/automatic listening scheduled/);
   assert.match(source,/this\.listen\(\{automatic:true\}\)/);
 });
@@ -126,8 +129,8 @@ test('progress resumes per child and completion awards remain idempotent',()=>{
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.42\.13/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.42\.13/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.42\.14/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.42\.14/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
 

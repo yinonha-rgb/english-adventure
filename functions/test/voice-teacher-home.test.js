@@ -31,10 +31,10 @@ test('browser speech, microphone denial and button fallback remain complete',()=
 });
 
 test('daily voice teacher requests microphone access at lesson start and listens automatically',()=>{
-  assert.match(teacher,/function prepareMicrophone\(\)/);
+  assert.match(teacher,/async function prepareMicrophone\(\)/);
   assert.match(teacher,/navigator\.mediaDevices\?\.getUserMedia/);
   assert.match(teacher,/getUserMedia\(\{audio:true\}\)/);
-  assert.match(teacher,/function startFree\(\)\{selectedMode='free';prepareMicrophone\(\)/);
+  assert.match(teacher,/async function startFree\(\)\{selectedMode='free';await prepareMicrophone\(\)/);
   assert.match(teacher,/if\(i\.listen\)listen\(i\);else nextPhase\(\)/);
 });
 
@@ -70,6 +70,15 @@ test('daily voice completion is per child and idempotent',()=>{
 test('daily voice startup makes zero OpenAI calls',()=>{
   const dailyStart=app.match(/function startDailyLesson[\s\S]*?function renderFilters/)?.[0]||'';
   assert.doesNotMatch(dailyStart,/fetch\(|openai|backend/i);
+});
+
+test('leaving a voice lesson stores a resumable checkpoint without awarding completion',()=>{
+  assert.match(app,/saveLessonCheckpoint/);
+  assert.match(app,/getLessonCheckpoint/);
+  assert.match(app,/להמשיך מאותה נקודה/);
+  assert.match(teacher,/function pauseAndClose/);
+  assert.match(teacher,/kind:'voice'/);
+  assert.match(app,/clearLessonCheckpoint/);
 });
 
 test('teacher lesson uses separate top, animation and bottom regions',()=>{

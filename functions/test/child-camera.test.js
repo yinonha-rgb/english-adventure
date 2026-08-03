@@ -18,18 +18,35 @@ function fixture(){
   return{host,panel,video,status,button};
 }
 
-test('child camera opens with the lesson, is front-facing and never requests microphone audio',()=>{
-  assert.equal(Camera.CAMERA_CONSTRAINTS.audio,false);
+test('child camera opens with the lesson, is front-facing and requests microphone audio for live lessons',()=>{
+  assert.equal(Camera.CAMERA_CONSTRAINTS.audio,true);
   assert.equal(Camera.CAMERA_CONSTRAINTS.video.facingMode,'user');
-  assert.match(Camera.PRIVACY_TEXT,/אינה מוקלטת, נשמרת או נשלחת לענן/);
+  assert.match(Camera.PRIVACY_TEXT,/אינם מוקלטים, נשמרים או נשלחים לענן/);
   assert.match(engine,/id="interactiveCameraToggle"[^>]+aria-pressed="false"/);
   assert.match(engine,/EAChildCamera\?\.create/);
-  assert.match(engine,/this\.camera\?\.start\?\.\(\)\.catch\?\./);
+  assert.match(engine,/this\.cameraStartPromise=Promise\.resolve\(this\.camera\?\.start\?\.\(\)\)/);
+  assert.match(engine,/await this\.prepareMicrophone\(\);[\s\S]*this\.render\(\)/);
+});
+
+test('camera releases its audio track before speech recognition listens',async()=>{
+  const original=Object.getOwnPropertyDescriptor(globalThis,'navigator');
+  const audio={kind:'audio',stopped:false,stop(){this.stopped=true}},videoTrack={kind:'video',stopped:false,stop(){this.stopped=true}};
+  const stream={tracks:[audio,videoTrack],getTracks(){return this.tracks},getAudioTracks(){return[audio]},removeTrack(track){this.tracks=this.tracks.filter(item=>item!==track)}};
+  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{mediaDevices:{getUserMedia:async()=>stream}}});
+  try{
+    const view=fixture(),camera=new Camera.ChildCameraController(view.host,{button:view.button});
+    assert.equal(await camera.start(),true);
+    assert.equal(audio.stopped,true);
+    assert.deepEqual(stream.tracks,[videoTrack]);
+    assert.equal(videoTrack.stopped,false);
+    camera.stop();
+    assert.equal(videoTrack.stopped,true);
+  }finally{if(original)Object.defineProperty(globalThis,'navigator',original);else delete globalThis.navigator}
 });
 
 test('temporary camera stream is shown locally and every track is stopped on close',async()=>{
   const original=Object.getOwnPropertyDescriptor(globalThis,'navigator'),track={stopped:false,stop(){this.stopped=true}},stream={getTracks:()=>[track]};
-  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{mediaDevices:{getUserMedia:async constraints=>{assert.equal(constraints.audio,false);return stream}}}});
+  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{mediaDevices:{getUserMedia:async constraints=>{assert.equal(constraints.audio,true);return stream}}}});
   try{
     const view=fixture(),camera=new Camera.ChildCameraController(view.host,{button:view.button});
     assert.equal(view.panel.hidden,true);
@@ -57,10 +74,10 @@ test('permission denial fails safely and lesson close destroys the camera',async
 });
 
 test('camera UI is responsive, accessible and available offline',()=>{
-  assert.match(html,/child-camera\.css\?v=4\.24\.0/);
-  assert.match(html,/child-camera\.js\?v=4\.24\.0[\s\S]*interactive-activity-engine\.js/);
-  assert.match(sw,/child-camera\.css\?v=4\.24\.0/);
-  assert.match(sw,/child-camera\.js\?v=4\.24\.0/);
+  assert.match(html,/child-camera\.css\?v=4\.38\.0/);
+  assert.match(html,/child-camera\.js\?v=4\.42\.14[\s\S]*interactive-activity-engine\.js\?v=4\.42\.14/);
+  assert.match(sw,/child-camera\.css\?v=4\.38\.0/);
+  assert.match(sw,/child-camera\.js\?v=4\.42\.14/);
   assert.match(source,/aria-label="סגירת מצלמת הילד"/);
   assert.match(fs.readFileSync(path.join(root,'child-camera.css'),'utf8'),/@media\(max-width:700px\)/);
   assert.match(html,/interactive-top\{display:grid;grid-template-columns:auto minmax\(90px,auto\) minmax\(100px,1fr\) auto auto auto/);
