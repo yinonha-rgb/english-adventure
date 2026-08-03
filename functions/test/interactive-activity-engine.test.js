@@ -57,6 +57,28 @@ test('validators accept correct participation and reject unrelated choices',()=>
   assert.equal(engine.validate(drag,['dog','cat','pizza']),false);
 });
 
+test('drag matching renders dependable vector pictures instead of font-only emoji',()=>{
+  for(const animal of ['dog','cat','bird']){
+    const picture=engine.animalPicture(animal);
+    assert.match(picture,/^<svg/);
+    assert.match(picture,new RegExp(`<title>${animal}</title>`));
+  }
+  assert.match(source,/class="match-animal-svg"/);
+  assert.match(source,/class="match-picture"/);
+  assert.match(source,/role="img" aria-label=/);
+});
+
+test('drag matching supports desktop, touch and tap-to-match input',()=>{
+  assert.match(source,/word\.draggable=true/);
+  assert.match(source,/word\.onpointerdown=/);
+  assert.match(source,/word\.onpointermove=/);
+  assert.match(source,/word\.onpointerup=/);
+  assert.match(source,/document\.elementFromPoint/);
+  assert.match(source,/selectMatchWord\(value,word\)/);
+  assert.match(source,/touch-action:none/);
+  assert.match(source,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+});
+
 test('microphone fallback and touch alternatives are always present',()=>{
   assert.match(source,/if\(!SR\)\{this\.speechLog\('recognition unavailable'\);return this\.feedback/);
   assert.match(source,/לחצו “אמרתי” כדי להמשיך/);
@@ -83,8 +105,8 @@ test('progress resumes per child and completion awards remain idempotent',()=>{
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.24\.0/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.24\.0/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.42\.11/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.42\.11/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
 
