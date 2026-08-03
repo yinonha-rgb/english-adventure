@@ -79,6 +79,16 @@ test('drag matching supports desktop, touch and tap-to-match input',()=>{
   assert.match(source,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
 });
 
+test('interactive daily lesson keeps an accessible countdown visible and pausable',()=>{
+  assert.match(source,/id="interactiveTimer"/);
+  assert.match(source,/this\.lessonRemainingSeconds=Number\(this\.state\.lessonRemainingSeconds\)\|\|600/);
+  assert.match(source,/startLessonTimer\(\)/);
+  assert.match(source,/if\(this\.paused\)\{this\.lessonTimerLast=Date\.now\(\);return\}/);
+  assert.match(source,/זמן נותר בשיעור/);
+  assert.match(source,/this\.stopLessonTimer\(\)/);
+  assert.match(source,/\.interactive-timer\{/);
+});
+
 test('microphone fallback and touch alternatives are always present',()=>{
   assert.match(source,/if\(!SR\)\{this\.speechLog\('recognition unavailable'\);return this\.feedback/);
   assert.match(source,/לחצו “אמרתי” כדי להמשיך/);
@@ -105,8 +115,8 @@ test('progress resumes per child and completion awards remain idempotent',()=>{
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.42\.11/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.42\.11/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.42\.12/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.42\.12/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
 
