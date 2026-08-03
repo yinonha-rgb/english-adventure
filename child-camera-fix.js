@@ -25,6 +25,7 @@
       }
       if(!this.starting){stream.getTracks().forEach(track=>track.stop());return false;}
       stream.getAudioTracks?.().forEach(track=>{track.stop();stream.removeTrack?.(track);});
+      this.microphonePermissionPrepared=!videoOnly;
       this.stream=stream;
       this.video.srcObject=stream;
       await this.video.play?.().catch(()=>{});
