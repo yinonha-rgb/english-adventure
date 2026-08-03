@@ -31,7 +31,7 @@
     if(document.querySelector('#interactiveMatchStyles'))return;
     const style=document.createElement('style');
     style.id='interactiveMatchStyles';
-    style.textContent=`.match-game{width:100%;display:grid;gap:clamp(10px,2vh,18px);align-content:center}.match-targets,.match-words{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(6px,1.4vw,14px);width:100%}.match-targets .interactive-choice,.match-words .interactive-choice{min-width:0;width:100%;margin:0}.match-targets .interactive-choice{min-height:clamp(82px,18vh,150px);padding:6px}.match-picture{display:grid;place-items:center;width:100%;height:clamp(62px,14vh,118px)}.match-animal-svg{display:block;width:100%;height:100%;max-width:150px;overflow:visible;filter:drop-shadow(0 5px 5px #244c6a28)}.match-picture-label{font-size:clamp(.72rem,1.7vw,.95rem);color:#34495e}.match-word{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.match-word.dragging{z-index:20;cursor:grabbing;animation:none!important;box-shadow:0 18px 35px #223c5980;transition:none}.match-word.matched{opacity:.48;text-decoration:line-through}.match-targets .interactive-choice.drop-ready{outline:5px solid #ffe16b;transform:scale(1.04)}@media(max-width:700px){.match-game{gap:8px}.match-targets,.match-words{gap:5px}.match-targets .interactive-choice{min-height:76px}.match-picture{height:58px}.match-picture-label{font-size:.68rem}.match-words .interactive-choice{min-height:44px;padding:6px;font-size:.85rem}}`;
+    style.textContent=`.interactive-top{grid-template-columns:auto minmax(90px,auto) minmax(100px,1fr) auto auto auto auto}.interactive-timer{white-space:nowrap;padding:5px 9px;border-radius:999px;background:#fff3c7;color:#725300;font-weight:900;font-variant-numeric:tabular-nums}.match-game{width:100%;display:grid;gap:clamp(10px,2vh,18px);align-content:center}.match-targets,.match-words{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(6px,1.4vw,14px);width:100%}.match-targets .interactive-choice,.match-words .interactive-choice{min-width:0;width:100%;margin:0}.match-targets .interactive-choice{min-height:clamp(82px,18vh,150px);padding:6px}.match-picture{display:grid;place-items:center;width:100%;height:clamp(62px,14vh,118px)}.match-animal-svg{display:block;width:100%;height:100%;max-width:150px;overflow:visible;filter:drop-shadow(0 5px 5px #244c6a28)}.match-picture-label{font-size:clamp(.72rem,1.7vw,.95rem);color:#34495e}.match-word{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.match-word.dragging{z-index:20;cursor:grabbing;animation:none!important;box-shadow:0 18px 35px #223c5980;transition:none}.match-word.matched{opacity:.48;text-decoration:line-through}.match-targets .interactive-choice.drop-ready{outline:5px solid #ffe16b;transform:scale(1.04)}@media(max-width:700px){.interactive-top{grid-template-columns:minmax(54px,auto) minmax(36px,1fr) auto auto auto auto}.interactive-teacher-mini{display:none}.interactive-timer{padding:4px 6px;font-size:.72rem}.match-game{gap:8px}.match-targets,.match-words{gap:5px}.match-targets .interactive-choice{min-height:76px}.match-picture{height:58px}.match-picture-label{font-size:.68rem}.match-words .interactive-choice{min-height:44px;padding:6px;font-size:.85rem}}`;
     document.head.append(style);
   }
 
@@ -133,6 +133,9 @@
       this.teacherGender=this.teacherProfile?.gender||'female';
       this.state={index:0,attempts:0,results:[],...(progress?.load?.(lesson.id)||{})};
       this.timer=null;
+      this.lessonTimerId=null;
+      this.lessonRemainingSeconds=Number(this.state.lessonRemainingSeconds)||600;
+      this.lessonTimerLast=0;
       this.paused=false;
       this.answerLocked=true;
       this.recognition=null;
@@ -147,6 +150,7 @@
     teacherText(female,male){return this.teacherGender==='male'?male:female}
     start(){
       this.ensureUI();
+      this.startLessonTimer();
       this.prepareMicrophone();
       this.render();
     }
@@ -173,7 +177,7 @@
         modal.setAttribute('role','dialog');
         modal.setAttribute('aria-modal','true');
         modal.setAttribute('aria-labelledby','interactiveTeacherTitle');
-        modal.innerHTML=`<article class="panel interactive-panel" data-focus="speaking" data-teacher-state="speaking"><header class="interactive-top"><div class="interactive-teacher-mini" aria-hidden="true">✨</div><div class="interactive-child"><strong id="interactiveChildName"></strong><small id="interactiveState" aria-live="polite">המורה מדברת</small></div><div class="interactive-progress" aria-label="התקדמות בשיעור"><span></span></div><button class="btn interactive-camera" id="interactiveCameraToggle" type="button" aria-label="הפעלת מצלמת הילד" aria-pressed="false">📷</button><button class="btn interactive-pause" id="interactivePause" type="button" aria-label="השהיית השיעור">⏸️</button><button class="close" type="button" data-close aria-label="סגירת החלון">×</button></header><main class="interactive-center" aria-label="אזור הפעילות"><section class="adventure-stage" aria-label="במת משחק מונפשת"><div class="stage-sky" aria-hidden="true"><i></i><i></i><i></i></div><div class="stage-scenery" aria-hidden="true"><span class="stage-sun">☀️</span><span class="stage-hill hill-a"></span><span class="stage-hill hill-b"></span><span class="stage-sparkles">✦ · ✧</span></div><aside class="stage-teacher" id="interactiveTeacherVisual" aria-label="המורה המלווה"></aside><div class="stage-activity" id="interactiveActivity"></div><div class="child-camera-host" id="interactiveChildCamera"></div><figure class="lesson-dragon" id="interactiveDragon" data-state="watching" aria-label="הדרקון החבר"><img src="assets/baby-dragon.svg" alt=""><span aria-hidden="true">✦</span></figure><div class="lesson-celebration" id="interactiveCelebration" aria-hidden="true"><i>★</i><i>✦</i><i>●</i><i>★</i><i>✧</i><i>●</i></div><output class="animation-fps" id="interactiveFps" hidden aria-label="קצב אנימציה"></output></section></main><footer class="interactive-bottom"><div class="interactive-speech" id="interactiveInstruction" aria-live="polite"></div><div class="interactive-vocabulary" id="interactiveVocabulary" aria-label="מילות השיעור"></div><div class="interactive-answer-controls" id="interactiveAnswerControls"></div><p class="interactive-feedback" id="interactiveFeedback" role="status"></p><div class="interactive-tools"><button class="btn" id="interactiveReplay">🔊 שוב</button><button class="btn" id="interactiveHint">💡 רמז</button><button class="danger" id="interactiveEnd">סיום</button></div></footer><pre class="teacher-debug" id="interactiveSpeechDebug" hidden aria-label="מצב צינור זיהוי הדיבור"></pre></article>`;
+        modal.innerHTML=`<article class="panel interactive-panel" data-focus="speaking" data-teacher-state="speaking"><header class="interactive-top"><div class="interactive-teacher-mini" aria-hidden="true">✨</div><div class="interactive-child"><strong id="interactiveChildName"></strong><small id="interactiveState" aria-live="polite">המורה מדברת</small></div><div class="interactive-progress" aria-label="התקדמות בשיעור"><span></span></div><output class="interactive-timer" id="interactiveTimer" aria-live="off">⏳ 10:00</output><button class="btn interactive-camera" id="interactiveCameraToggle" type="button" aria-label="הפעלת מצלמת הילד" aria-pressed="false">📷</button><button class="btn interactive-pause" id="interactivePause" type="button" aria-label="השהיית השיעור">⏸️</button><button class="close" type="button" data-close aria-label="סגירת החלון">×</button></header><main class="interactive-center" aria-label="אזור הפעילות"><section class="adventure-stage" aria-label="במת משחק מונפשת"><div class="stage-sky" aria-hidden="true"><i></i><i></i><i></i></div><div class="stage-scenery" aria-hidden="true"><span class="stage-sun">☀️</span><span class="stage-hill hill-a"></span><span class="stage-hill hill-b"></span><span class="stage-sparkles">✦ · ✧</span></div><aside class="stage-teacher" id="interactiveTeacherVisual" aria-label="המורה המלווה"></aside><div class="stage-activity" id="interactiveActivity"></div><div class="child-camera-host" id="interactiveChildCamera"></div><figure class="lesson-dragon" id="interactiveDragon" data-state="watching" aria-label="הדרקון החבר"><img src="assets/baby-dragon.svg" alt=""><span aria-hidden="true">✦</span></figure><div class="lesson-celebration" id="interactiveCelebration" aria-hidden="true"><i>★</i><i>✦</i><i>●</i><i>★</i><i>✧</i><i>●</i></div><output class="animation-fps" id="interactiveFps" hidden aria-label="קצב אנימציה"></output></section></main><footer class="interactive-bottom"><div class="interactive-speech" id="interactiveInstruction" aria-live="polite"></div><div class="interactive-vocabulary" id="interactiveVocabulary" aria-label="מילות השיעור"></div><div class="interactive-answer-controls" id="interactiveAnswerControls"></div><p class="interactive-feedback" id="interactiveFeedback" role="status"></p><div class="interactive-tools"><button class="btn" id="interactiveReplay">🔊 שוב</button><button class="btn" id="interactiveHint">💡 רמז</button><button class="danger" id="interactiveEnd">סיום</button></div></footer><pre class="teacher-debug" id="interactiveSpeechDebug" hidden aria-label="מצב צינור זיהוי הדיבור"></pre></article>`;
         document.body.append(modal);
         modal.querySelector('.close').onclick=()=>this.end();
         modal.querySelector('#interactiveReplay').onclick=()=>this.speakCurrent();
@@ -201,6 +205,28 @@
       document.body.style.overflow='hidden';
     }
     current(){return this.lesson.activities[this.state.index]}
+    renderLessonTimer(){
+      const box=this.modal?.querySelector('#interactiveTimer');
+      if(!box)return;
+      const minutes=Math.floor(this.lessonRemainingSeconds/60),seconds=this.lessonRemainingSeconds%60;
+      box.textContent=`⏳ ${minutes}:${String(seconds).padStart(2,'0')}`;
+      box.setAttribute('aria-label',`זמן נותר בשיעור: ${minutes} דקות ו-${seconds} שניות`);
+    }
+    startLessonTimer(){
+      clearInterval(this.lessonTimerId);
+      this.lessonTimerLast=Date.now();
+      this.renderLessonTimer();
+      this.lessonTimerId=setInterval(()=>{
+        if(this.paused){this.lessonTimerLast=Date.now();return}
+        const elapsed=Math.floor((Date.now()-this.lessonTimerLast)/1000);
+        if(elapsed<1)return;
+        this.lessonRemainingSeconds=Math.max(0,this.lessonRemainingSeconds-elapsed);
+        this.lessonTimerLast+=elapsed*1000;
+        this.state.lessonRemainingSeconds=this.lessonRemainingSeconds;
+        this.renderLessonTimer();
+      },300);
+    }
+    stopLessonTimer(){clearInterval(this.lessonTimerId);this.lessonTimerId=null}
     speechLog(event,detail=''){
       this.speechDebug.lessonState=`activity ${this.state.index+1} / ${this.modal?.querySelector('.interactive-panel')?.dataset.teacherState||'idle'}`;
       this.speechDebug.events.push({at:new Date().toISOString(),event,detail:String(detail||'')});
@@ -210,6 +236,7 @@
       if(box){box.hidden=!enabled;box.textContent=`Microphone: ${this.speechDebug.microphone}\nRecognition: ${this.speechDebug.recognition}\nLast transcript: ${this.speechDebug.lastTranscript}\nCurrent lesson state: ${this.speechDebug.lessonState}\n\n${this.speechDebug.events.map(x=>`${x.at.slice(11,23)} ${x.event}${x.detail?`: ${x.detail}`:''}`).join('\n')}`}
     }
     save(){
+      this.state.lessonRemainingSeconds=this.lessonRemainingSeconds;
       this.progress?.save?.(this.lesson.id,{...this.state,updatedAt:new Date().toISOString()});
       if(!this.state.completed)root.EAApp?.saveLessonCheckpoint?.({kind:'interactive',lessonId:this.lesson.id,lesson:this.lesson,index:this.state.index,results:[...this.state.results]});
     }
@@ -320,6 +347,7 @@
     }
     togglePause(){
       this.paused=!this.paused;
+      this.lessonTimerLast=Date.now();
       this.answerLocked=true;
       const button=this.modal.querySelector('#interactivePause');
       button.textContent=this.paused?'▶️':'⏸️';
@@ -487,6 +515,7 @@
     }
     complete(){
       clearTimeout(this.timer);
+      this.stopLessonTimer();
       this.state.completed=true;
       this.state.completedAt=this.state.completedAt||new Date().toISOString();
       this.save();
@@ -507,6 +536,7 @@
     }
     close(){
       clearTimeout(this.timer);
+      this.stopLessonTimer();
       clearInterval(this.animationMonitor);
       speechSynthesis?.cancel();
       this.recognition?.abort();
