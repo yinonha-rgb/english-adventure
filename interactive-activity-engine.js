@@ -277,7 +277,6 @@
       this.setVisualState('speaking');
       this.save();
       this.speakCurrent();
-      this.timer=setTimeout(()=>this.speakCurrent('לא נורא, אני אחזור על ההוראה.'),14000);
     }
     speakCurrent(prefix=''){
       const item=this.current();
@@ -297,6 +296,12 @@
           this.autoListeningActivityId=item.id;
           this.speechLog('automatic listening scheduled',item.id);
           setTimeout(()=>{if(this.current()===item&&!this.paused&&!this.answerLocked)this.listen({automatic:true})},360);
+        }else{
+          // A visual reminder starts only after the teacher has finished. Voice
+          // turns own their timeout so a reminder can never interrupt listening.
+          this.timer=setTimeout(()=>{
+            if(this.current()===item&&!this.paused&&!this.answerLocked)this.speakCurrent('לא נורא, אני אחזור על ההוראה.');
+          },20000);
         }
       });
     }
