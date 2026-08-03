@@ -138,8 +138,8 @@ test('automatic voice listening is never interrupted by a prompt reminder timer'
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.42\.15/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.42\.15/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.42\.17/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.42\.17/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
 
