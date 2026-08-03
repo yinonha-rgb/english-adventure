@@ -34,7 +34,7 @@ test('daily voice teacher requests microphone access at lesson start and listens
   assert.match(teacher,/async function prepareMicrophone\(\)/);
   assert.match(teacher,/navigator\.mediaDevices\?\.getUserMedia/);
   assert.match(teacher,/getUserMedia\(\{audio:true\}\)/);
-  assert.match(teacher,/async function startFree\(\)\{selectedMode='free';await prepareMicrophone\(\)/);
+  assert.match(teacher,/async function startFree\(\)\{selectedMode='free';microphoneWarmupAttempted=false;await prepareMicrophone\(\)/);
   assert.match(teacher,/if\(i\.listen\)listen\(i\);else nextPhase\(\)/);
 });
 
