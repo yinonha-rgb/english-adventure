@@ -1,8 +1,9 @@
 /* Keep a child-visible camera preview available when microphone access is busy or denied. */
 (()=>{
-  const api=window.EAChildCamera;
+  function applyFix(api){
   const Controller=api?.ChildCameraController;
-  if(!Controller||Controller.prototype.__eaCameraFallback) return;
+  if(!Controller) return false;
+  if(Controller.prototype.__eaCameraFallback) return true;
   Controller.prototype.__eaCameraFallback=true;
 
   Controller.prototype.start=async function(){
@@ -39,4 +40,21 @@
       return false;
     }finally{this.starting=false;}
   };
+  return true;
+  }
+
+  let fallbackRequested=false;
+  function boot(){
+    if(applyFix(window.EAChildCamera)) return;
+    if(fallbackRequested) return;
+    fallbackRequested=true;
+    // The legacy script can be skipped by an old PWA cache. Load a fresh copy
+    // before a lesson begins, then apply the safe video-only fallback.
+    const loader=document.createElement('script');
+    loader.src='child-camera.js?v=4.41.0';
+    loader.async=false;
+    loader.onload=()=>applyFix(window.EAChildCamera);
+    document.head.append(loader);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
