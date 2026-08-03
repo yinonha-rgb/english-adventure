@@ -20,6 +20,21 @@
     ...value
   });
 
+  function animalPicture(kind){
+    const open=`<svg class="match-animal-svg" viewBox="0 0 120 100" role="img" aria-label="${kind}"><title>${kind}</title>`;
+    if(kind==='dog')return`${open}<path d="M26 26 9 8 7 52 30 46Z" fill="#8b542f"/><path d="m94 26 17-18 2 44-23-6Z" fill="#8b542f"/><ellipse cx="60" cy="51" rx="42" ry="38" fill="#d89a58"/><circle cx="45" cy="45" r="5" fill="#263238"/><circle cx="75" cy="45" r="5" fill="#263238"/><ellipse cx="60" cy="62" rx="17" ry="13" fill="#f4d2a6"/><path d="M54 58q6-6 12 0-1 8-6 8t-6-8Z" fill="#38251d"/><path d="M60 66q0 11-10 12m10-12q0 11 10 12" fill="none" stroke="#6d3f29" stroke-width="3" stroke-linecap="round"/></svg>`;
+    if(kind==='cat')return`${open}<path d="M22 36 27 5 49 25M98 36 93 5 71 25" fill="#d9823b" stroke="#a95d2a" stroke-width="3"/><ellipse cx="60" cy="52" rx="40" ry="37" fill="#eda658"/><path d="M49 20 57 35M71 20 63 35" stroke="#a95d2a" stroke-width="4" stroke-linecap="round"/><circle cx="45" cy="48" r="5" fill="#263238"/><circle cx="75" cy="48" r="5" fill="#263238"/><path d="m60 59-7 6h14Z" fill="#d35f6d"/><path d="M58 66q-6 8-13 5m17-5q6 8 13 5M45 62 14 57m31 11-32 7m62-13 31-5M75 68l32 7" fill="none" stroke="#6d3f29" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+    return`${open}<ellipse cx="56" cy="55" rx="35" ry="28" fill="#55a9df"/><circle cx="79" cy="38" r="19" fill="#75c8ee"/><path d="m96 39 22 9-22 8Z" fill="#f5a623"/><circle cx="84" cy="34" r="4" fill="#263238"/><path d="M52 49q-22 5-19 26 23 4 34-14Z" fill="#337eb6"/><path d="M27 55 6 42l7 24Z" fill="#3f91c8"/><path d="M65 80v12m13-13v13M57 92h13m1 0h14" stroke="#7b5530" stroke-width="3" stroke-linecap="round"/></svg>`;
+  }
+
+  function ensureMatchStyles(){
+    if(document.querySelector('#interactiveMatchStyles'))return;
+    const style=document.createElement('style');
+    style.id='interactiveMatchStyles';
+    style.textContent=`.match-game{width:100%;display:grid;gap:clamp(10px,2vh,18px);align-content:center}.match-targets,.match-words{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(6px,1.4vw,14px);width:100%}.match-targets .interactive-choice,.match-words .interactive-choice{min-width:0;width:100%;margin:0}.match-targets .interactive-choice{min-height:clamp(82px,18vh,150px);padding:6px}.match-picture{display:grid;place-items:center;width:100%;height:clamp(62px,14vh,118px)}.match-animal-svg{display:block;width:100%;height:100%;max-width:150px;overflow:visible;filter:drop-shadow(0 5px 5px #244c6a28)}.match-picture-label{font-size:clamp(.72rem,1.7vw,.95rem);color:#34495e}.match-word{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.match-word.dragging{z-index:20;cursor:grabbing;animation:none!important;box-shadow:0 18px 35px #223c5980;transition:none}.match-word.matched{opacity:.48;text-decoration:line-through}.match-targets .interactive-choice.drop-ready{outline:5px solid #ffe16b;transform:scale(1.04)}@media(max-width:700px){.match-game{gap:8px}.match-targets,.match-words{gap:5px}.match-targets .interactive-choice{min-height:76px}.match-picture{height:58px}.match-picture-label{font-size:.68rem}.match-words .interactive-choice{min-height:44px;padding:6px;font-size:.85rem}}`;
+    document.head.append(style);
+  }
+
   function createAnimalsLesson(childName='Friend'){
     return{
       id:'daily-animals-interactive-v1',
@@ -149,6 +164,7 @@
       return item?.type===TYPES.REPEAT&&!this.paused&&this.autoListeningActivityId!==item.id;
     }
     ensureUI(){
+      ensureMatchStyles();
       let modal=document.querySelector('#interactiveTeacher');
       if(!modal){
         modal=document.createElement('div');
@@ -332,11 +348,12 @@
         controls.append(this.button('🎤 דברו למיקרופון','microphone',()=>this.listen()),this.button('✅ אמרתי','אמרתי',()=>this.answer(item.correctAnswer)));
         host.append(word);
       }else if(item.type===TYPES.DRAG_MATCH){
+        const game=document.createElement('div');game.className='match-game';
         const targets=document.createElement('div');targets.className='match-targets';
-        item.pairs.forEach(pair=>{const target=this.button(`${pair.label}<small>${pair.value}</small>`,pair.value,value=>this.matchTarget(value));target.dataset.target=value;target.ondragover=event=>event.preventDefault();target.ondrop=event=>{event.preventDefault();this.selectedWord=event.dataTransfer.getData('text/plain');this.matchTarget(value)};targets.append(target)});
+        item.pairs.forEach(pair=>{const target=this.button(`<span class="match-picture">${animalPicture(pair.value)}</span><small class="match-picture-label">${pair.value}</small>`,pair.value,value=>this.matchTarget(value));target.dataset.target=pair.value;target.setAttribute('aria-label',`Match a word to the ${pair.value} picture`);target.ondragenter=()=>target.classList.add('drop-ready');target.ondragleave=()=>target.classList.remove('drop-ready');target.ondragover=event=>{event.preventDefault();event.dataTransfer.dropEffect='move'};target.ondrop=event=>{event.preventDefault();target.classList.remove('drop-ready');this.selectedWord=event.dataTransfer.getData('text/plain');this.matchTarget(pair.value)};targets.append(target)});
         const words=document.createElement('div');words.className='match-words';
-        item.pairs.slice().reverse().forEach(pair=>{const word=this.button(pair.value,pair.value,value=>{this.selectedWord=value;word.classList.add('selected')});word.draggable=true;word.ondragstart=event=>event.dataTransfer.setData('text/plain',pair.value);words.append(word)});
-        host.append(targets,words);
+        item.pairs.slice().reverse().forEach(pair=>{const word=this.button(pair.value,pair.value,value=>{if(word.dataset.ignoreClick)return;this.selectMatchWord(value,word)});word.classList.add('match-word');word.dataset.word=pair.value;word.setAttribute('aria-pressed','false');this.wireMatchWord(word,pair.value);words.append(word)});
+        game.append(targets,words);host.append(game);
       }else if(item.type===TYPES.MEMORY){
         const grid=document.createElement('div');grid.className='interactive-options memory';
         item.options.forEach(option=>{const card=this.button(option.label,option.value,(value,button)=>this.answer(value,button));card.dataset.value=option.value;grid.append(card)});
@@ -351,17 +368,60 @@
         host.append(sentence);
       }
     }
+    clearMatchSelection(){
+      this.modal.querySelectorAll('.match-word.selected').forEach(word=>{word.classList.remove('selected');word.setAttribute('aria-pressed','false')});
+    }
+    selectMatchWord(value,word){
+      if(word.disabled)return;
+      this.clearMatchSelection();
+      this.selectedWord=value;
+      word.classList.add('selected');
+      word.setAttribute('aria-pressed','true');
+      this.feedback(`Selected ${value}. Now tap its picture.`,true);
+    }
+    wireMatchWord(word,value){
+      word.draggable=true;
+      word.ondragstart=event=>{this.selectedWord=value;event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',value);word.classList.add('dragging')};
+      word.ondragend=()=>word.classList.remove('dragging');
+      word.onpointerdown=event=>{
+        if(event.pointerType==='mouse'||word.disabled)return;
+        this.touchDrag={word,value,pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,moved:false};
+        word.setPointerCapture?.(event.pointerId);
+      };
+      word.onpointermove=event=>{
+        const drag=this.touchDrag;
+        if(!drag||drag.word!==word||drag.pointerId!==event.pointerId)return;
+        const x=event.clientX-drag.startX,y=event.clientY-drag.startY;
+        if(Math.hypot(x,y)>7)drag.moved=true;
+        if(!drag.moved)return;
+        event.preventDefault();word.classList.add('dragging');word.style.transform=`translate(${x}px,${y}px) scale(1.06)`;
+      };
+      word.onpointerup=event=>{
+        const drag=this.touchDrag;
+        if(!drag||drag.word!==word)return;
+        this.touchDrag=null;word.releasePointerCapture?.(event.pointerId);word.classList.remove('dragging');word.style.transform='';
+        if(!drag.moved)return this.selectMatchWord(value,word);
+        word.dataset.ignoreClick='1';setTimeout(()=>delete word.dataset.ignoreClick,0);
+        word.style.pointerEvents='none';const hit=document.elementFromPoint(event.clientX,event.clientY);word.style.pointerEvents='';
+        const target=hit?.closest?.('[data-target]');
+        if(target){this.selectedWord=value;this.matchTarget(target.dataset.target)}
+        else{this.clearMatchSelection();this.selectedWord=null;this.feedback('Drop the word on one of the animal pictures.',false)}
+      };
+      word.onpointercancel=()=>{this.touchDrag=null;word.classList.remove('dragging');word.style.transform=''};
+    }
     matchTarget(target){
       if(!this.selectedWord)return this.feedback('בחרו קודם מילה.',false);
       if(this.selectedWord===target){
         this.matched.add(target);
-        this.modal.querySelector(`[data-target="${target}"]`)?.classList.add('matched');
+        const targetButton=this.modal.querySelector(`[data-target="${target}"]`),wordButton=this.modal.querySelector(`[data-word="${target}"]`);
+        targetButton?.classList.add('matched');if(targetButton)targetButton.disabled=true;
+        wordButton?.classList.add('matched');if(wordButton)wordButton.disabled=true;
         this.feedback('התאמה מצוינת!',true);
-        this.selectedWord=null;
+        this.clearMatchSelection();this.selectedWord=null;
         if(this.matched.size===this.current().pairs.length)this.answer([...this.matched]);
       }else{
         this.feedback('כמעט! נסו לחבר את המילה לתמונה אחרת.',false);
-        this.selectedWord=null;
+        this.clearMatchSelection();this.selectedWord=null;
       }
     }
     listen({automatic=false}={}){
@@ -475,5 +535,5 @@
     return teacher;
   }
 
-  root.EAInteractiveTeacher={TYPES,COMPONENTS,createAnimalsLesson,validate,transition,startAnimals};
+  root.EAInteractiveTeacher={TYPES,COMPONENTS,createAnimalsLesson,animalPicture,validate,transition,startAnimals};
 })(typeof window!=='undefined'?window:globalThis);
