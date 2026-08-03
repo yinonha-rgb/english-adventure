@@ -36,7 +36,16 @@
   }
   // The supplied clip belongs on the welcome screen and in the lesson preview.
   // On the home world it covered the portrait with a black video frame.
-  function scanAll(){scan();}
+  function restoreHomePortraits(){
+    document.querySelectorAll('.teacher-home-avatar.noa-video-home').forEach(home=>{
+      home.classList.remove('noa-video-home');
+      delete home.dataset.noaVideoHome;
+      home.querySelectorAll('video,button').forEach(node=>node.remove());
+      const photo=home.querySelector('img.teacher-photo');
+      if(photo)photo.style.visibility='visible';
+    });
+  }
+  function scanAll(){restoreHomePortraits();scan();}
   new MutationObserver(scanAll).observe(document.documentElement,{childList:true,subtree:true});
   document.addEventListener('DOMContentLoaded',scanAll);
 })();
