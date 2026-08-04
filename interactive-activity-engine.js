@@ -106,6 +106,17 @@
   }
 
   const normalize=value=>String(value??'').toLowerCase().trim().replace(/[.!?,]/g,'').replace(/\s+/g,' ');
+  function probableSpeechEcho(heard,spoken,elapsedMs=Infinity){
+    if(elapsedMs>3200)return false;
+    const answer=normalize(heard),teacher=normalize(spoken);
+    const answerTokens=answer.split(' ').filter(Boolean),teacherTokens=teacher.split(' ').filter(Boolean);
+    // Short child answers such as "yes" and "I am ready" must never be
+    // discarded merely because the teacher used the same word.
+    if(answerTokens.length<4||teacherTokens.length<4)return false;
+    if(teacher.includes(answer))return true;
+    const teacherSet=new Set(teacherTokens),overlap=answerTokens.filter(token=>teacherSet.has(token)).length;
+    return overlap/answerTokens.length>=.75;
+  }
   function validate(activity,response){
     if(activity.type===TYPES.WELCOME){
       const heard=normalize(response),accepted=(activity.acceptedAnswers||[activity.correctAnswer]).map(normalize);
@@ -148,6 +159,8 @@
       this.microphoneWarmupAttempted=false;
       this.cameraStartPromise=null;
       this.autoListeningActivityId=null;
+      this.lastSpokenText='';
+      this.lastSpeechEndedAt=0;
       this.speechDebug={microphone:'STOPPED',recognition:'STOPPED',lastTranscript:'—',lessonState:'idle',events:[]};
       this.selectedWord=null;
       this.matched=new Set();
@@ -295,7 +308,9 @@
         if(this.shouldAutoListen(item)){
           this.autoListeningActivityId=item.id;
           this.speechLog('automatic listening scheduled',item.id);
-          setTimeout(()=>{if(this.current()===item&&!this.paused&&!this.answerLocked)this.listen({automatic:true})},360);
+          // Leave an acoustic gap so Chrome does not feed the tail of the
+          // teacher's synthesized voice back into SpeechRecognition.
+          setTimeout(()=>{if(this.current()===item&&!this.paused&&!this.answerLocked)this.listen({automatic:true})},750);
         }else{
           // A visual reminder starts only after the teacher has finished. Voice
           // turns own their timeout so a reminder can never interrupt listening.
@@ -309,10 +324,12 @@
       const Natural=root.EANaturalVoice;
       const segments=Natural?.splitSpeechSegments?.(text,'en-US')||[{text:Natural?.normalizeTextForSpeech?.(text,'en-US')||String(text||''),lang:'en-US'}];
       speechSynthesis?.cancel();
+      this.lastSpokenText=String(text||'');
+      this.lastSpeechEndedAt=0;
       let index=0;
       const next=()=>{
         const segment=segments[index++];
-        if(!segment)return onend();
+        if(!segment){this.lastSpeechEndedAt=Date.now();return onend()}
         const speechText=Natural?.normalizeTextForSpeech?.(segment.text,segment.lang)||segment.text;
         if(!speechText)return next();
         const utterance=new SpeechSynthesisUtterance(speechText);
@@ -473,7 +490,7 @@
         this.clearMatchSelection();this.selectedWord=null;
       }
     }
-    listen({automatic=false,retryAttempt=0}={}){
+    listen({automatic=false,retryAttempt=0,echoAttempt=0}={}){
       if(this.paused||this.answerLocked)return this.speechLog('start blocked',this.paused?'lesson paused':'teacher still speaking');
       const item=this.current(),SR=root.SpeechRecognition||root.webkitSpeechRecognition;
       if(!SR){this.speechLog('recognition unavailable');return this.feedback('זיהוי דיבור אינו זמין. לחצו “אמרתי” כדי להמשיך.',false)}
@@ -495,7 +512,7 @@
       recognition.onspeechstart=()=>{if(!isCurrent())return;heardSpeech=true;this.speechLog('onspeechstart')};
       recognition.onspeechend=()=>{if(isCurrent())this.speechLog('onspeechend')};
       recognition.onaudioend=()=>{if(!isCurrent())return;this.speechDebug.microphone='STOPPED';this.speechLog('onaudioend')};
-      recognition.onresult=event=>{if(!isCurrent())return;let interim='';this.speechLog('onresult',`index ${event.resultIndex}`);for(let n=event.resultIndex;n<event.results.length;n++){const result=event.results[n],alternative=result[0],text=alternative?.transcript||'';if(result.isFinal)finalTranscript=`${finalTranscript} ${text}`.trim();else{interim=`${interim} ${text}`.trim();interimConfidence=Math.max(interimConfidence,Number(alternative?.confidence)||0)}}if(interim)interimTranscript=interim;this.speechDebug.lastTranscript=finalTranscript||interim||'—';this.speechLog(finalTranscript?'transcript final':'transcript interim',this.speechDebug.lastTranscript);if(finalTranscript&&!settled){settled=true;this.answer(finalTranscript)}};
+      recognition.onresult=event=>{if(!isCurrent())return;let interim='';this.speechLog('onresult',`index ${event.resultIndex}`);for(let n=event.resultIndex;n<event.results.length;n++){const result=event.results[n],alternative=result[0],text=alternative?.transcript||'';if(result.isFinal)finalTranscript=`${finalTranscript} ${text}`.trim();else{interim=`${interim} ${text}`.trim();interimConfidence=Math.max(interimConfidence,Number(alternative?.confidence)||0)}}if(interim)interimTranscript=interim;this.speechDebug.lastTranscript=finalTranscript||interim||'—';this.speechLog(finalTranscript?'transcript final':'transcript interim',this.speechDebug.lastTranscript);if(finalTranscript&&!settled){const elapsed=Date.now()-(this.lastSpeechEndedAt||0);if(probableSpeechEcho(finalTranscript,this.lastSpokenText,elapsed)){settled=true;this.speechLog('teacher echo ignored',finalTranscript);try{recognition.abort()}catch{}if(echoAttempt<1)setTimeout(()=>this.listen({automatic:true,retryAttempt,echoAttempt:echoAttempt+1}),900);else this.feedback('לא שמעתי תשובה ברורה. נסו שוב או לחצו “אמרתי”.',false);return}settled=true;this.answer(finalTranscript)}};
       recognition.onerror=event=>{if(!isCurrent())return;const error=event.error||'unknown';this.speechLog('onerror',error);if(settled)return;if(error==='no-speech'&&retryAttempt<2){settled=true;this.speechLog('recognition restart scheduled',`attempt ${retryAttempt+1}`);this.modal.querySelector('#interactiveState').textContent='מקשיבה שוב…';setTimeout(()=>this.listen({automatic:true,retryAttempt:retryAttempt+1}),420);return}settled=true;if(error==='not-allowed'||error==='service-not-allowed')this.feedback('המיקרופון לא אושר. אשרו הרשאה או לחצו “אמרתי”.',false);else this.feedback('לא שמעתי בבירור. אפשר לנסות שוב או ללחוץ “אמרתי”.',false)};
       recognition.onend=()=>{if(!isCurrent())return;this.speechDebug.microphone='STOPPED';this.speechDebug.recognition='STOPPED';this.speechLog('recognition ended',heardSpeech&&!finalTranscript?'speech without final transcript':'');if(this.recognition===recognition)this.recognition=null;const fallback=root.EANaturalVoice?.finalizeRecognitionResult?.({finalTranscript,interimTranscript,heardSpeech,interimConfidence});if(!settled&&fallback?.text&&fallback.fallback){settled=true;this.speechLog('interim promoted to final',fallback.text);this.answer(fallback.text);return}if(!settled){settled=true;this.feedback(heardSpeech?'שמעתי קול אבל לא התקבל תמלול. נסו שוב.':'לא נשמעה תשובה. נסו שוב או לחצו “אמרתי”.',false)}};
       root.navigator?.permissions?.query?.({name:'microphone'}).then(permission=>this.speechLog('microphone permission',permission.state)).catch(()=>this.speechLog('microphone permission','query unavailable'));
@@ -515,12 +532,13 @@
         setTimeout(()=>this.render(),850);
       }else{
         button?.classList.add('wrong');
-        this.feedback(this.state.hintVisible?`${item.retryFeedback} ${item.hint||''}`:item.retryFeedback,false);
+        const retryText=this.state.hintVisible?`${item.retryFeedback} ${item.hint||''}`:item.retryFeedback;
+        this.feedback(retryText,false,{speak:false});
         this.save();
-        this.speakCurrent(this.state.hintVisible?item.hint:'');
+        this.speakCurrent(retryText);
       }
     }
-    feedback(text,positive){
+    feedback(text,positive,{speak=true}={}){
       const box=this.modal.querySelector('#interactiveFeedback');
       box.textContent=text;
       box.dataset.kind=positive?'success':'retry';
@@ -529,7 +547,7 @@
       this.modal.querySelector('#interactiveState').textContent=positive?this.teacherText('נועה מעודדת','אדם מעודד'):this.teacherText('נועה עוזרת','אדם עוזר');
       this.setVisualState(positive?'success':'retry');
       this.animateCue();
-      this.speakSegments(text,.85);
+      if(speak)this.speakSegments(text,.85);
     }
     showHint(){
       const hint=this.current()?.hint||'הסתכלו שוב ונסו צעד קטן.';
@@ -587,5 +605,5 @@
     return teacher;
   }
 
-  root.EAInteractiveTeacher={TYPES,COMPONENTS,createAnimalsLesson,animalPicture,validate,transition,startAnimals};
+  root.EAInteractiveTeacher={TYPES,COMPONENTS,createAnimalsLesson,animalPicture,validate,transition,probableSpeechEcho,startAnimals};
 })(typeof window!=='undefined'?window:globalThis);
