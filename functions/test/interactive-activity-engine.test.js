@@ -137,9 +137,19 @@ test('automatic voice listening is never interrupted by a prompt reminder timer'
   assert.match(source,/if\(this\.shouldAutoListen\(item\)\)[\s\S]*?this\.listen\(\{automatic:true\}\)[\s\S]*?\}else\{/);
 });
 
+test('automatic listening ignores synthesized-teacher echo without rejecting short child answers',()=>{
+  assert.equal(engine.probableSpeechEcho('hello today we will learn animals','Hello! Today we will learn animals. Are you ready?',900),true);
+  assert.equal(engine.probableSpeechEcho('yes','Are you ready?',900),false);
+  assert.equal(engine.probableSpeechEcho('I am ready','I am ready to start our lesson',900),false);
+  assert.equal(engine.probableSpeechEcho('hello today we will learn animals','Hello! Today we will learn animals.',5000),false);
+  assert.match(source,/teacher echo ignored/);
+  assert.match(source,/\},750\)/);
+  assert.match(source,/feedback\(retryText,false,\{speak:false\}\)/);
+});
+
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.42\.17/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.42\.17/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.42\.18/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.42\.18/);
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
 
