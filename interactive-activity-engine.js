@@ -64,12 +64,12 @@
           teacherInstructionEn:'Listen carefully. Where is the dog?',
           prompt:'dog',audioText:'dog',
           options:[{value:'dog',label:'🐶',word:'dog'},{value:'cat',label:'🐱',word:'cat'},{value:'bird',label:'🐦',word:'bird'}],
-          correctAnswer:'dog',hint:'הכלב אומר woof!'
+          correctAnswer:'dog',acceptedAnswers:['dog','כלב','הכלב'],hint:'הכלב אומר woof!'
         }),
         activity('animals-repeat-dog',TYPES.REPEAT,{
           teacherInstructionHe:'Great! עכשיו אמרו: Dog.',
           teacherInstructionEn:'Great! Say: Dog.',
-          prompt:'Dog',audioText:'dog',correctAnswer:'dog',
+          prompt:'Dog',audioText:'dog',correctAnswer:'dog',acceptedAnswers:['dog','כלב','הכלב'],
           options:['אמרתי'],hint:'הקשיבו שוב למורה: dog.'
         }),
         activity('animals-listen-cat',TYPES.LISTENING,{
@@ -77,7 +77,7 @@
           teacherInstructionEn:'Listen. Tap the cat.',
           prompt:'cat',audioText:'cat',
           options:[{value:'bird',label:'🐦',word:'bird'},{value:'cat',label:'🐱',word:'cat'},{value:'dog',label:'🐶',word:'dog'}],
-          correctAnswer:'cat',hint:'החתול אומר meow!'
+          correctAnswer:'cat',acceptedAnswers:['cat','חתול','החתול'],hint:'החתול אומר meow!'
         }),
         activity('animals-drag',TYPES.DRAG_MATCH,{
           teacherInstructionHe:'גררו כל מילה אל התמונה המתאימה. אפשר גם ללחוץ על מילה ואז על תמונה.',
@@ -91,7 +91,7 @@
           teacherInstructionEn:'Remember where the cat is.',
           prompt:'cat',
           options:[{value:'dog',label:'🐶'},{value:'cat',label:'🐱'},{value:'bird',label:'🐦'}],
-          correctAnswer:'cat',hint:'החתול היה באמצע.'
+          correctAnswer:'cat',acceptedAnswers:['cat','חתול','החתול'],hint:'החתול היה באמצע.'
         }),
         activity('animals-move',TYPES.MOVEMENT,{
           teacherInstructionHe:'עכשיו עמדו ועשו תנועה של ציפור. נפנפו בעדינות בכנפיים!',
@@ -102,7 +102,7 @@
           teacherInstructionHe:'איזו חיה אתם אוהבים? השלימו את המשפט.',
           teacherInstructionEn:'What animal do you like? Complete the sentence.',
           prompt:'I like…',
-          options:['dogs','cats','birds'],correctAnswer:['dogs','cats','birds'],keywordMode:'any',
+          options:['dogs','cats','birds'],correctAnswer:['dogs','cats','birds'],acceptedAnswers:['dogs','cats','birds','כלב','כלבים','חתול','חתולים','ציפור','ציפורים','אני אוהב כלבים','אני אוהבת כלבים','אני אוהב חתולים','אני אוהבת חתולים','אני אוהב ציפורים','אני אוהבת ציפורים'],keywordMode:'any',
           hint:'בחרו אחת מהחיות שלמדנו.'
         }),
         activity('animals-final',TYPES.STORY,{
@@ -110,7 +110,7 @@
           teacherInstructionEn:'Final challenge! Which animal can fly?',
           prompt:'Who can fly?',
           options:[{value:'dog',label:'🐶 dog'},{value:'bird',label:'🐦 bird'},{value:'cat',label:'🐱 cat'}],
-          correctAnswer:'bird',xp:10,hint:'חפשו חיה עם כנפיים.'
+          correctAnswer:'bird',acceptedAnswers:['bird','ציפור','הציפור'],xp:10,hint:'חפשו חיה עם כנפיים.'
         })
       ]
     };
@@ -138,9 +138,9 @@
       const actual=Array.isArray(response)?response.map(normalize):[];
       return expected.length===actual.length&&expected.every(value=>actual.includes(value));
     }
-    const accepted=(Array.isArray(activity.correctAnswer)?activity.correctAnswer:[activity.correctAnswer]).map(normalize);
+    const accepted=[...(Array.isArray(activity.correctAnswer)?activity.correctAnswer:[activity.correctAnswer]),...(activity.acceptedAnswers||[])].map(normalize);
     const heard=normalize(response);
-    return accepted.includes(heard)||accepted.some(value=>heard===`i like ${value}`);
+    return accepted.includes(heard)||accepted.some(value=>heard===`i like ${value}`)||accepted.some(value=>heard===`אני אוהב ${value}`||heard===`אני אוהבת ${value}`);
   }
   function transition(state,response,correct){
     const attempts=(state.attempts||0)+1;
