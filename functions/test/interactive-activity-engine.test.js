@@ -27,6 +27,21 @@ test('complete Animals lesson contains teacher-led participation throughout',()=
   for(const type of ['picture-choice','repeat-after-teacher','drag-match','memory','movement','sentence-builder','listening','story-choice'])assert.ok(types.has(type),type);
 });
 
+test('successful answers get varied adventure feedback before the next activity opens',()=>{
+  const messages=Array.from({length:8},(_,index)=>engine.successMessage(index));
+  assert.ok(new Set(messages).size>=4);
+  assert.ok(messages.some(message=>/Pip|adventure|magic path/i.test(message)));
+  assert.match(source,/this\.feedback\(successText,true,\{speak:false\}\)/);
+  assert.match(source,/this\.speakSegments\(successText,\.88,advance\)/);
+  assert.doesNotMatch(source,/setTimeout\(\(\)=>this\.render\(\),850\)/);
+});
+
+test('lesson flow continues when speech synthesis is unavailable or the lesson is paused',()=>{
+  assert.match(source,/if\(!root\.speechSynthesis\|\|typeof root\.SpeechSynthesisUtterance!==['"]function['"]\)/);
+  assert.match(source,/this\.pendingRender=true/);
+  assert.match(source,/else if\(this\.pendingRender\)\{this\.pendingRender=false;this\.render\(\)\}/);
+});
+
 test('activity state never advances before a correct child response',()=>{
   const initial={index:1,attempts:0};
   assert.equal(engine.transition(initial,'cat',false).index,1);
@@ -205,8 +220,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.48\.0/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.48\.0/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.49\.0/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.49\.0/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
