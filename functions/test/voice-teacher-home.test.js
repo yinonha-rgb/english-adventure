@@ -82,6 +82,15 @@ test('daily voice startup makes zero OpenAI calls',()=>{
   assert.doesNotMatch(dailyStart,/fetch\(|openai|backend/i);
 });
 
+test('Emily keeps a long continuous child turn and answers contextual questions',()=>{
+  assert.match(teacher,/r\.continuous=true;r\.maxAlternatives=5/);
+  assert.match(teacher,/\},20000\)\}/);
+  assert.match(teacher,/CONVERSATION_INTENTS\.INSTRUCTION/);
+  assert.match(teacher,/CONVERSATION_INTENTS\.LESSON_TOPIC/);
+  assert.match(teacher,/CONVERSATION_INTENTS\.LANGUAGE_CHOICE/);
+  assert.match(teacher,/\(\)=>listen\(i\)/);
+});
+
 test('leaving a voice lesson stores a resumable checkpoint without awarding completion',()=>{
   assert.match(app,/saveLessonCheckpoint/);
   assert.match(app,/getLessonCheckpoint/);
