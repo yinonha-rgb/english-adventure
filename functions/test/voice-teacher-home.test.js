@@ -114,3 +114,12 @@ test('completed voice lesson asks the child to press Finish before saving comple
   assert.doesNotMatch(teacher,/speak\(i\.en,'en-US',\(\)=>finish\('completed'\)\)/);
   assert.match(teacher,/if\(sessionFinished\)return/);
 });
+
+test('Pip celebrates only after the validation engine accepts an answer',()=>{
+  assert.match(teacher,/id="teacherCompanion"[\s\S]*?assets\/baby-dragon\.svg/);
+  assert.match(teacher,/function celebrateCompanion\(\)/);
+  assert.match(teacher,/companion\.dataset\.state=state/);
+  assert.match(teacher,/if\(verdict\.valid\)\{\s*celebrateCompanion\(\)/);
+  assert.doesNotMatch(teacher,/if\(!verdict\.valid\)\{[\s\S]{0,120}celebrateCompanion\(\)/);
+  assert.match(teacher,/Pip הדרקון מתלהב מהתשובה הנכונה/);
+});
