@@ -9,7 +9,7 @@ test('daily lesson greeting automatically opens a voice turn', () => {
   assert.match(source, /exerciseId:'lesson-ready'/);
   assert.match(source, /listen:true/);
   assert.match(source, /expectedAnswers:\['yes','ready'/);
-  assert.match(source, /r\.lang=phase===0\?'he-IL':'en-US'/);
+  assert.match(source, /Providers\.recognitionLanguage/);
   assert.match(source, /async function startFree\(\)[^\n]+await prepareMicrophone\(\)/);
   assert.match(source, /lastError==='no-speech'&&restartAttempt<2/);
   assert.match(source, /microphoneWarmupAttempted=false;await prepareMicrophone\(\)/);
