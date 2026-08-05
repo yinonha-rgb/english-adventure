@@ -4,7 +4,7 @@
   const src='assets/entry-welcome.mp4?v=4.42.9';
   const ENTRY_VIEW='intro';
   const HOME_VIEW='home';
-  let page=null;
+  let page=null,previousBodyOverflow='';
   const viewState=view=>({...history.state,eaView:view});
   const setEntryHistory=()=>{
     if(history.state?.eaView!==ENTRY_VIEW)history.replaceState(viewState(ENTRY_VIEW),'',location.href);
@@ -27,10 +27,22 @@
     video.volume=1;
     const close=({pushHistory=true}={})=>{
       sessionStorage.setItem(seenKey,'1');
+      document.removeEventListener('keydown',onKeydown);
       page?.remove();
       page=null;
+      document.body.style.overflow=previousBodyOverflow;
       if(pushHistory)pushHomeHistory();
       document.querySelector('.daily-start,#dailyLessonBtn')?.focus?.();
+    };
+    const onKeydown=event=>{
+      if(!page||!document.body.contains(page))return;
+      if(event.key==='Escape'){event.preventDefault();close();return}
+      if(event.key!=='Tab')return;
+      const controls=[...page.querySelectorAll('button')].filter(control=>!control.hidden&&!control.disabled);
+      if(!controls.length)return;
+      const first=controls[0],last=controls[controls.length-1];
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
     };
     page.querySelector('.ea-video-entry-close').addEventListener('click',close);
     page.querySelector('.ea-video-entry-enter').addEventListener('click',close);
@@ -49,8 +61,9 @@
       sound.textContent=enableSound?'🔇 השתקת קול':'▶️ הפעלת הפתיח עם קול';
       video.play().catch(()=>{sound.textContent='▶️ לחצו שוב להפעלת הקול';});
     },true);
-    sound.addEventListener('click',()=>{video.muted=!video.muted;sound.setAttribute('aria-pressed',String(!video.muted));sound.textContent=video.muted?'🔊 הפעלת קול':'🔇 השתקת קול';video.play().catch(()=>{});});
-    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.body.contains(page))close();},{once:true});
+    document.addEventListener('keydown',onKeydown);
+    previousBodyOverflow=document.body.style.overflow;
+    document.body.style.overflow='hidden';
     document.body.append(page);
     if(!fromHistory)setEntryHistory();
     video.load();
