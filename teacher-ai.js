@@ -115,7 +115,7 @@ async function listen(i,{manual=false,restartAttempt=0}={}){
   r.onresult=event=>{
     if(!isCurrent())return;
     let interim='';speechLog('onresult',`index ${event.resultIndex}`);
-    for(let n=event.resultIndex;n<event.results.length;n++){const result=event.results[n],alternative=result[0];if(result.isFinal){finalTranscript=`${finalTranscript} ${alternative.transcript}`.trim();finalConfidence=Math.max(finalConfidence,Number(alternative.confidence)||0)}else{interim=`${interim} ${alternative.transcript}`.trim();interimConfidence=Math.max(interimConfidence,Number(alternative.confidence)||0)}}
+    for(let n=event.resultIndex;n<event.results.length;n++){const result=event.results[n],alternative=result[0],text=alternative?.transcript||'';if(text.trim())heardSpeech=true;if(result.isFinal){finalTranscript=`${finalTranscript} ${text}`.trim();finalConfidence=Math.max(finalConfidence,Number(alternative?.confidence)||0)}else{interim=`${interim} ${text}`.trim();interimConfidence=Math.max(interimConfidence,Number(alternative?.confidence)||0)}}
     if(interim)interimTranscript=interim;
     const visible=finalTranscript||interim;speechDebug.lastTranscript=visible||'—';updateLiveTranscript(visible);speechLog(finalTranscript?'transcript final':'transcript interim',speechDebug.lastTranscript);
     if(!finalTranscript||!turnGuard.handleAnswer())return;
