@@ -104,3 +104,13 @@ test('voice lesson shows an accessible countdown that pauses with the lesson',()
   assert.match(teacher,/זמן נותר בשיעור/);
   assert.match(teacher,/teacher-timer/);
 });
+
+test('completed voice lesson asks the child to press Finish before saving completion',()=>{
+  assert.match(teacher,/function promptLessonFinish\(\)/);
+  assert.match(teacher,/השיעור הסתיים\. לחצו על סיום\./);
+  assert.match(teacher,/id='teacherFinishLesson'/);
+  assert.match(teacher,/button\.onclick=\(\)=>finish\('completed'\)/);
+  assert.match(teacher,/speak\(i\.en,'en-US',promptLessonFinish\)/);
+  assert.doesNotMatch(teacher,/speak\(i\.en,'en-US',\(\)=>finish\('completed'\)\)/);
+  assert.match(teacher,/if\(sessionFinished\)return/);
+});
