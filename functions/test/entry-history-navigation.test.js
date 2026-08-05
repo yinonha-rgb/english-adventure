@@ -23,6 +23,6 @@ test('browser Back restores the intro and Forward restores the home screen',()=>
 
 test('the navigation fix is served by the new application cache',()=>{
   assert.match(html,/entry-video\.js\?v=4\.46\.0/);
-  assert.match(sw,/english-adventure-4\.46\.8/);
+  assert.match(sw,/english-adventure-4\.46\.9/);
   assert.match(sw,/entry-video\.js\?v=4\.46\.0/);
 });
