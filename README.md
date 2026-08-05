@@ -50,6 +50,8 @@ Firebase web configuration can be committed because it identifies the public web
 
 Version 4.20 improves the free teacher with local conversational intent handling. The child can ask to repeat, slow down, explain a word, give a hint, try again, pause, or finish in Hebrew or English. Chrome recognition may recover from an early empty stop up to two times, but recognition errors never count as wrong answers and never create an endless retry loop. A subtle live transcript shows what the browser heard.
 
+Version 4.48 improves recognition without weakening answer validation. When Chrome returns several possible transcripts, the teacher ranks all of them against the current exercise instead of blindly using only the first. A bounded retry alternates to Hebrew when the exercise accepts Hebrew and English answers. The selected transcript still passes through the same strict deterministic validator, so unrelated speech is never accepted merely because it appeared in the recognition alternatives.
+
 The **Free Guided Teacher** is the production teacher. It runs entirely with browser speech features and deterministic lesson logic and never calls a paid API. The repository retains a local mock provider for testing architecture, but the advanced provider is locked in the shipped build: `ADVANCED_AI_ENABLED` is `false`, its endpoint is empty, real pricing is unset, the backend transport is explicitly `implemented:false`, no OpenAI secret is bound, and backend deployment is intentionally blocked.
 
 Hebrew guides: [teacher-mode comparison](TEACHER_MODES_HE.md) and [free teacher](FREE_VOICE_TEACHER_HE.md).
