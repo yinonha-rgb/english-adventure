@@ -52,6 +52,8 @@ Version 4.20 improves the free teacher with local conversational intent handling
 
 Version 4.48 improves recognition without weakening answer validation. When Chrome returns several possible transcripts, the teacher ranks all of them against the current exercise instead of blindly using only the first. A bounded retry alternates to Hebrew when the exercise accepts Hebrew and English answers. The selected transcript still passes through the same strict deterministic validator, so unrelated speech is never accepted merely because it appeared in the recognition alternatives.
 
+Version 4.49 makes the interactive lesson feel smoother and less repetitive. Correct-answer celebrations now finish before the next instruction begins, praise rotates through adventure-themed responses involving Pip and the magic path, and a paused lesson resumes at the pending next activity. Devices without speech synthesis continue immediately through the same visual flow instead of getting stuck.
+
 The **Free Guided Teacher** is the production teacher. It runs entirely with browser speech features and deterministic lesson logic and never calls a paid API. The repository retains a local mock provider for testing architecture, but the advanced provider is locked in the shipped build: `ADVANCED_AI_ENABLED` is `false`, its endpoint is empty, real pricing is unset, the backend transport is explicitly `implemented:false`, no OpenAI secret is bound, and backend deployment is intentionally blocked.
 
 Hebrew guides: [teacher-mode comparison](TEACHER_MODES_HE.md) and [free teacher](FREE_VOICE_TEACHER_HE.md).
