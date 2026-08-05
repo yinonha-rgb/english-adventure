@@ -37,3 +37,11 @@ test('central translations preserve the Hebrew Daily Goal label',()=>{
   require(path.join(root,'translations.js'));
   assert.equal(globalThis.EATranslations.he.dailyGoal,'היעד היומי');
 });
+
+test('privacy copy accurately distinguishes local storage from optional parent cloud sync',()=>{
+  require(path.join(root,'translations.js'));
+  assert.match(globalThis.EATranslations.he.privacyText,/ללא כניסה/);
+  assert.match(globalThis.EATranslations.he.privacyText,/חשבון הענן/);
+  assert.match(globalThis.EATranslations.en.privacyText,/Without sign-in/);
+  assert.match(globalThis.EATranslations.en.privacyText,/cloud account/);
+});
