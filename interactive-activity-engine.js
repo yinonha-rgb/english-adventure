@@ -613,7 +613,7 @@
       const earned=this.lesson.activities.reduce((sum,item)=>sum+(item.xp||0),0);
       this.progress?.complete?.(this.lesson.id,earned);
       const host=this.modal.querySelector('#interactiveActivity');
-      host.innerHTML=`<div class="interactive-complete"><div>🏆✨</div><h2>כל הכבוד! סיימתם את השיעור היומי עם המורה</h2><p>למדנו: dog, cat and bird</p><p><strong>+${earned} XP</strong></p><button class="primary" id="interactiveHome" aria-label="סיום השיעור וחזרה למסך הבית">סיום ✓</button></div>`;
+      host.innerHTML=`<div class="interactive-complete"><div>🏆✨</div><h2>כל הכבוד! סיימתם את השיעור היומי עם המורה</h2><p>למדנו: dog, cat and bird</p><p class="xp-reward" role="status" aria-label="קיבלתם ${earned} נקודות ניסיון">+${earned} XP</p><button class="primary" id="interactiveHome" aria-label="סיום השיעור וחזרה למסך הבית">סיום ✓</button></div>`;
       this.modal.querySelector('#interactiveInstruction').textContent='Great work! Today you learned dog, cat and bird.';
       this.modal.querySelector('#interactiveState').textContent='המורה חוגגת';
       this.setVisualState('success');
