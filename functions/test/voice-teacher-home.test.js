@@ -61,6 +61,15 @@ test('a new listening turn cannot be cancelled by stale Chrome recognition callb
   assert.match(teacher,/finalizeRecognitionResult/);
 });
 
+test('teacher speech echo and silence can never earn a correct answer',()=>{
+  assert.match(teacher,/function probableTeacherEcho\(heard,prompt,onsetDelayMs=Infinity\)/);
+  assert.match(teacher,/onsetDelayMs>500/);
+  assert.match(teacher,/teacher echo ignored/);
+  assert.match(teacher,/if\(!finalTranscript\)return;[\s\S]*probableTeacherEcho[\s\S]*if\(!turnGuard\.handleAnswer\(\)\)return/);
+  assert.match(teacher,/restartAttempt<2[\s\S]*showAnswers\(i,'שמעתי את המורה במקום תשובה/);
+  assert.match(teacher,/if\(!finalTranscript\)return/);
+});
+
 test('daily voice completion is per child and idempotent',()=>{
   assert.match(app,/EACompleteDailyVoice/);
   assert.match(app,/daily-lesson-complete/);
