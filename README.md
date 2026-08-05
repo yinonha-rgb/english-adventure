@@ -21,6 +21,7 @@ The application is being split incrementally so existing progress and deployed f
 - Conflict-safe Hebrew migration, offline change queue, manual sync, cloud deletion backup, and account controls
 - Interactive lesson-scoped free voice teacher with a nine-phase teaching flow and a no-cost local mock mode
 - Local Hebrew/English classroom-intent handling, live recognition transcript, bounded recognition recovery, and deterministic answer validation
+- Offline accessibility center with readable font, text scaling, letter spacing, high contrast, a pointer-following reading ruler, and an explicit reduced-motion preference
 - Offline caching, install support, versioned updates, keyboard navigation, focus trapping, and reduced-motion support
 
 ## Install and run
