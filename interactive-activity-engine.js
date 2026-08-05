@@ -117,6 +117,8 @@
   }
 
   const normalize=value=>String(value??'').toLowerCase().trim().replace(/[.!?,]/g,'').replace(/\s+/g,' ');
+  const containsHebrew=value=>/[\u0590-\u05ff]/.test(String(value||''));
+  const englishAnswer=item=>String(Array.isArray(item?.correctAnswer)?item.correctAnswer[0]:item?.correctAnswer||'').trim();
   function probableSpeechEcho(heard,spoken,elapsedMs=Infinity){
     if(elapsedMs>3200)return false;
     const answer=normalize(heard),teacher=normalize(spoken);
@@ -551,12 +553,14 @@
       this.state=transition(this.state,value,correct);
       if(correct){
         button?.classList.add('correct');
-        this.feedback(item.successFeedback,true);
+        const bridge=containsHebrew(value)&&englishAnswer(item)?`Correct! In English, we say: ${englishAnswer(item)}.`:'';
+        this.feedback(bridge||item.successFeedback,true);
         this.save();
         setTimeout(()=>this.render(),850);
       }else{
         button?.classList.add('wrong');
-        const retryText=this.state.hintVisible?`${item.retryFeedback} ${item.hint||''}`:item.retryFeedback;
+        const bridge=this.state.hintVisible&&containsHebrew(value)&&englishAnswer(item)?` Let's try in English. Say: ${englishAnswer(item)}.`:'';
+        const retryText=this.state.hintVisible?`${item.retryFeedback} ${item.hint||''}${bridge}`:item.retryFeedback;
         this.feedback(retryText,false,{speak:false});
         this.save();
         this.speakCurrent(retryText);
