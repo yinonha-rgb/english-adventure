@@ -42,6 +42,7 @@ test('speech recognition pipeline exposes every lifecycle event and releases sta
   for(const event of ['recognition created','recognition started','recognition ended','recognition restarted','onstart','onspeechstart','onspeechend','onaudiostart','onaudioend','onresult','onerror','transcript final'])assert.match(teacher,new RegExp(event));
   assert.match(teacher,/interimResults=true/);
   assert.match(teacher,/result\.isFinal/);
+  assert.match(teacher,/if\(text\.trim\(\)\)heardSpeech=true/);
   assert.match(teacher,/r\.onend=[\s\S]*?turnGuard\.handleAnswer\(\)/);
   assert.match(teacher,/listen\(instruction\(\),\{manual:true\}\)/);
   assert.match(teacher,/shouldRestartRecognition/);
