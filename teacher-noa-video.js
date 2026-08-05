@@ -1,3 +1,54 @@
+/* The parent-supplied Emily recording is an optional greeting/voice preview.
+   It never replaces the lesson's dynamic local speech engine. */
+(()=>{
+  const SRC='assets/teacher-noa-greeting.mp4';
+  const style=document.createElement('style');
+  style.textContent='.noa-video-preview{display:grid;gap:7px;margin-top:9px}.noa-video-preview video{width:min(230px,100%);border-radius:14px;background:#17203b;box-shadow:0 8px 18px #17203b33}.noa-video-play{border:0;border-radius:12px;background:#d95a93;color:#fff;padding:9px 12px;font-weight:800;cursor:pointer}.teacher-home-avatar.noa-video-home{position:relative;overflow:hidden;background:#17203b}.noa-video-home>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2}.noa-video-home>img{visibility:hidden}.noa-video-home button{position:absolute;z-index:3;bottom:7px;inset-inline:7px;border:0;border-radius:10px;background:#d95a93e8;color:#fff;font-size:.78rem;font-weight:800;padding:7px;cursor:pointer}';
+  document.head.append(style);
+  function addPreview(presence){
+    if(presence.dataset.noaVideoReady==='true') return;
+    presence.dataset.noaVideoReady='true';
+    const bubbles=presence.querySelector('.teacher-bubbles');
+    if(!bubbles) return;
+    const box=document.createElement('div');
+    box.className='noa-video-preview';
+    box.innerHTML=`<video playsinline preload="metadata" aria-label="סרטון המורה אמילי"><source src="${SRC}" type="video/mp4"></video><button type="button" class="noa-video-play" aria-label="השמעת הסרטון והקול של אמילי">▶ סרטון וקול של אמילי</button>`;
+    const video=box.querySelector('video'),button=box.querySelector('button');
+    button.addEventListener('click',()=>{
+      if(!video.paused){video.pause();button.textContent='▶ סרטון וקול של אמילי';return;}
+      window.speechSynthesis?.cancel?.();
+      video.currentTime=0;
+      video.muted=false;
+      video.play().then(()=>{ button.textContent='■ עצירת הסרטון'; }).catch(()=>{ button.textContent='לא ניתן להפעיל את הסרטון כאן'; });
+    });
+    video.addEventListener('ended',()=>{button.textContent='▶ סרטון וקול של אמילי';});
+    bubbles.append(box);
+  }
+  function scan(){document.querySelectorAll('.teacher-presence-photo[data-character="female-young"]').forEach(addPreview);}
+  function addHomePreview(home){
+    if(home.dataset.noaVideoHome==='true'||!home.querySelector('img[src*="teacher-noa"]')) return;
+    home.dataset.noaVideoHome='true';home.classList.add('noa-video-home');
+    const video=document.createElement('video'),button=document.createElement('button');
+    video.src=SRC;video.playsInline=true;video.loop=true;video.muted=true;video.autoplay=true;video.setAttribute('aria-label','סרטון המורה אמילי');
+    button.type='button';button.textContent='▶ קול של אמילי';button.setAttribute('aria-label','הפעלת הקול המקורי של אמילי');
+    button.addEventListener('click',()=>{if(video.muted){window.speechSynthesis?.cancel?.();video.muted=false;video.play();button.textContent='■ השתקת הקול';}else{video.muted=true;button.textContent='▶ קול של אמילי';}});
+    home.append(video,button);
+  }
+  // The supplied clip belongs on the welcome screen and in the lesson preview.
+  // On the home world it covered the portrait with a black video frame.
+  function restoreHomePortraits(){
+    document.querySelectorAll('.teacher-home-avatar.noa-video-home').forEach(home=>{
+      home.classList.remove('noa-video-home');
+      delete home.dataset.noaVideoHome;
+      home.querySelectorAll('video,button').forEach(node=>node.remove());
+      const photo=home.querySelector('img.teacher-photo');
+      if(photo)photo.style.visibility='visible';
+    });
+  }
+  function scanAll(){restoreHomePortraits();scan();}
+  new MutationObserver(scanAll).observe(document.documentElement,{childList:true,subtree:true});
+  document.addEventListener('DOMContentLoaded',scanAll);
+})();
 /* The parent-supplied Noa recording is an optional greeting/voice preview.
    It never replaces the lesson's dynamic local speech engine. */
 (()=>{
