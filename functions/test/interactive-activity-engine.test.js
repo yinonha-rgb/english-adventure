@@ -154,6 +154,16 @@ test('every spoken question opens recognition instead of falling into the repeat
   assert.match(source,/אמילי מקשיבה לתשובה/);
 });
 
+test('memory animals stay visible for a full preview after teacher speech',()=>{
+  assert.match(source,/if\(item\.type===TYPES\.MEMORY\)\{this\.startMemoryPreview\(item\);return\}/);
+  assert.match(source,/startMemoryPreview\(item\)\{/);
+  assert.match(source,/החיות יוצגו במשך ארבע שניות/);
+  assert.match(source,/cards\.forEach\(card=>\{card\.disabled=true;card\.classList\.remove\('hidden-card'\)/);
+  assert.match(source,/cards\.forEach\(card=>\{card\.textContent='❓';card\.classList\.add\('hidden-card'\);card\.disabled=false/);
+  assert.match(source,/\},4000\)/);
+  assert.doesNotMatch(source,/setTimeout\(\(\)=>grid\.querySelectorAll\('button'\)/);
+});
+
 test('progress resumes per child and completion awards remain idempotent',()=>{
   assert.match(app,/interactiveLessons/);
   assert.match(app,/EAInteractiveProgress/);
@@ -183,8 +193,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.7/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.7/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.8/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.8/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
