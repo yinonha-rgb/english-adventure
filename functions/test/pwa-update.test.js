@@ -8,8 +8,13 @@ test('PWA navigations are network-first with an offline index fallback',()=>{
 });
 test('only successful basic responses enter the cache and one bad optional asset cannot abort install',()=>{
   assert.match(sw,/response\?\.ok&&response\.type==='basic'/);
-  assert.match(sw,/Promise\.allSettled\(CORE\.map/);
+  assert.match(sw,/Promise\.allSettled\(PRECACHE_URLS\.map/);
   assert.doesNotMatch(sw,/cache\.addAll/);
+});
+test('precache keeps only the newest URL for each asset path',()=>{
+  assert.match(sw,/const PRECACHE_URLS=\[\.\.\.CORE\.reduce/);
+  assert.match(sw,/newerAsset\(url,latest\.get\(path\)\)/);
+  assert.match(sw,/searchParams\.get\('v'\)/);
 });
 test('activation deletes obsolete app caches and immediately claims clients',()=>{
   assert.match(sw,/key\.startsWith\(CACHE_PREFIX\)&&key!==VERSION/);
@@ -22,7 +27,7 @@ test('service-worker updates bypass cache, show an accessible action and reload 
   assert.match(app,/updateBtn\.disabled=true/);
   assert.match(html,/id="updateNotice" role="status" aria-live="polite"/);
 });
-test('4.32.0 precache contains every local script referenced by index',()=>{
+test('4.33.0 precache contains every local script referenced by index',()=>{
   for(const match of html.matchAll(/<script(?: type="module")? src="([^"]+)"/g))assert.ok(sw.includes(`'./${match[1]}'`),match[1]);
 });
 test('service worker never handles cross-origin Firebase or API traffic',()=>{
