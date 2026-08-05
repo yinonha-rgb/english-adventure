@@ -1,0 +1,207 @@
+/* Emily visual system — layered, playful and calm enough for focused learning. */
+:root{
+  --ea-violet:#6557e8;
+  --ea-violet-dark:#4337b8;
+  --ea-mint:#22a985;
+  --ea-sky:#70d6f6;
+  --ea-sun:#ffc94f;
+  --ea-coral:#ff756b;
+  --ea-ink:#1f2945;
+  --ea-surface:rgba(255,255,255,.92);
+  --ea-border:rgba(103,88,208,.14);
+  --ea-shadow:0 18px 50px rgba(54,43,120,.13);
+  --ea-shadow-hover:0 24px 58px rgba(54,43,120,.2);
+}
+
+body{
+  background:
+    radial-gradient(circle at 8% 3%,rgba(255,211,105,.28),transparent 28rem),
+    radial-gradient(circle at 91% 5%,rgba(120,106,244,.2),transparent 32rem),
+    linear-gradient(180deg,#fbfaff 0,#f7fbff 48%,#fffaf0 100%);
+}
+
+.top{
+  position:sticky;
+  top:0;
+  z-index:20;
+  margin-inline:calc((100vw - min(1160px,calc(100vw - 26px)))/-2);
+  padding-inline:max(13px,calc((100vw - 1160px)/2));
+  background:rgba(251,250,255,.82);
+  border-bottom:1px solid rgba(101,87,232,.1);
+  box-shadow:0 8px 30px rgba(46,38,104,.06);
+  backdrop-filter:blur(18px) saturate(1.2);
+}
+
+.logo{
+  background:linear-gradient(145deg,var(--ea-violet),#8b79ff 58%,var(--ea-coral));
+  box-shadow:0 10px 24px rgba(101,87,232,.35),inset 0 1px rgba(255,255,255,.55);
+}
+
+.profilebar,.progress-card,.daily,.reviewcard,.privacy,.lesson{
+  border:1px solid var(--ea-border);
+  background:var(--ea-surface);
+  box-shadow:var(--ea-shadow);
+  backdrop-filter:blur(12px);
+}
+
+.profilebar{
+  position:relative;
+  overflow:hidden;
+}
+.profilebar::after{
+  content:"";
+  position:absolute;
+  inset-inline-end:-30px;
+  inset-block-start:-44px;
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(112,214,246,.25),transparent 68%);
+  pointer-events:none;
+}
+
+.btn,.icon,.primary,.chip,.filter,.round{
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease;
+}
+.btn:hover,.icon:hover,.chip:hover,.filter:hover,.round:hover{
+  transform:translateY(-2px);
+  border-color:rgba(101,87,232,.34);
+  box-shadow:0 9px 20px rgba(60,48,128,.12);
+}
+.primary:hover,.daily-start:hover{
+  transform:translateY(-3px) scale(1.008);
+  box-shadow:0 18px 34px rgba(82,64,190,.3);
+}
+.btn:active,.icon:active,.primary:active,.daily-start:active,.chip:active,.filter:active{
+  transform:translateY(1px) scale(.985);
+}
+
+.teacher-home{
+  isolation:isolate;
+  border:1px solid rgba(255,255,255,.85);
+  box-shadow:0 28px 75px rgba(46,42,116,.18),inset 0 1px rgba(255,255,255,.8);
+}
+.teacher-home::after{
+  content:"✦";
+  position:absolute;
+  z-index:-1;
+  inset-inline-start:5%;
+  inset-block-start:8%;
+  color:rgba(255,201,79,.75);
+  font-size:clamp(2rem,6vw,5rem);
+  filter:drop-shadow(0 6px 14px rgba(255,178,45,.3));
+  animation:eaPolishSparkle 3.8s ease-in-out infinite;
+}
+.daily-start{
+  border:2px solid rgba(255,255,255,.75);
+  background:linear-gradient(120deg,#168b65 0,var(--ea-mint) 38%,var(--ea-violet) 100%);
+  box-shadow:0 16px 34px rgba(70,61,176,.27),inset 0 1px rgba(255,255,255,.45);
+}
+
+.stat{
+  border:1px solid rgba(101,87,232,.1);
+  background:linear-gradient(145deg,#fff,#f5f2ff);
+}
+.stat strong{color:var(--ea-violet-dark)}
+.goalbar{box-shadow:inset 0 2px 5px rgba(48,37,110,.1)}
+.goalbar span{background:linear-gradient(90deg,var(--ea-sun),var(--ea-coral))}
+
+.lesson{
+  position:relative;
+  overflow:hidden;
+}
+.lesson::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto;
+  height:4px;
+  background:linear-gradient(90deg,var(--ea-sky),var(--ea-violet),var(--ea-coral));
+  opacity:.75;
+}
+.lesson:hover{transform:translateY(-6px);box-shadow:var(--ea-shadow-hover)}
+.lesson .emoji{display:inline-grid;place-items:center;width:54px;height:54px;border-radius:18px;background:linear-gradient(145deg,#f2f8ff,#f3efff)}
+
+.interactive-panel{
+  border:1px solid rgba(255,255,255,.85);
+  box-shadow:0 30px 90px rgba(17,25,66,.35),inset 0 1px rgba(255,255,255,.9);
+}
+.interactive-top{
+  background:rgba(255,255,255,.92);
+  box-shadow:0 7px 20px rgba(36,48,93,.07);
+  backdrop-filter:blur(16px);
+}
+.interactive-progress{
+  height:10px;
+  padding:2px;
+  border:1px solid rgba(101,87,232,.12);
+  background:#ece9fb;
+}
+.interactive-progress span{
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--ea-mint),var(--ea-sky),var(--ea-violet));
+  box-shadow:0 0 12px rgba(101,87,232,.28);
+}
+.adventure-stage{
+  border:1px solid rgba(255,255,255,.88);
+  box-shadow:0 18px 46px rgba(40,78,116,.18),inset 0 1px rgba(255,255,255,.8);
+}
+.interactive-bottom{
+  background:rgba(255,255,255,.96);
+  box-shadow:0 -12px 32px rgba(31,41,69,.08);
+  backdrop-filter:blur(14px);
+}
+.interactive-speech{
+  border-color:rgba(101,87,232,.48);
+  background:linear-gradient(145deg,#fff,#f7f5ff);
+  box-shadow:0 7px 18px rgba(69,54,148,.08);
+}
+.interactive-choice{
+  border-color:rgba(101,87,232,.18);
+  background:linear-gradient(145deg,#fff,#f7f6ff);
+  box-shadow:0 9px 22px rgba(46,42,116,.1);
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+.interactive-choice:hover{
+  transform:translateY(-4px) scale(1.02);
+  border-color:rgba(101,87,232,.5);
+  box-shadow:0 15px 30px rgba(46,42,116,.17);
+}
+
+/* Never show a harsh black tile while camera permission is being prepared. */
+.child-camera{
+  background:linear-gradient(145deg,#5649c9,#3f8db9);
+  border-color:rgba(255,255,255,.95);
+  box-shadow:0 14px 34px rgba(25,34,76,.35);
+}
+.child-camera video{background:transparent;transition:opacity .25s ease}
+.child-camera[data-state="starting"] video,.child-camera[data-state="error"] video,.child-camera[data-state="unsupported"] video{opacity:0}
+.child-camera[data-state="starting"]::before,.child-camera[data-state="error"]::before,.child-camera[data-state="unsupported"]::before{
+  content:"📷";
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  padding-block-start:10px;
+  color:#fff;
+  font-size:clamp(1.8rem,5vw,3rem);
+  background:radial-gradient(circle at 50% 46%,rgba(255,255,255,.18),transparent 42%);
+}
+.child-camera[data-state="starting"]::before{animation:eaCameraReady 1.35s ease-in-out infinite}
+.child-camera[data-state="error"]{background:linear-gradient(145deg,#a64d68,#744174)}
+.child-camera-bar{z-index:2;background:linear-gradient(rgba(24,31,72,.78),transparent)}
+
+@keyframes eaPolishSparkle{0%,100%{transform:translateY(0) rotate(-5deg);opacity:.5}50%{transform:translateY(-8px) rotate(8deg) scale(1.12);opacity:1}}
+@keyframes eaCameraReady{50%{transform:scale(1.12);filter:drop-shadow(0 0 12px rgba(255,255,255,.65))}}
+
+@media(max-width:700px){
+  .top{margin-inline:-13px;padding-inline:13px}
+  .teacher-home{border-radius:24px}
+  .lesson:hover,.interactive-choice:hover{transform:none}
+  .interactive-panel{border-radius:22px}
+  .interactive-top{gap:6px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .teacher-home::after,.child-camera[data-state="starting"]::before{animation:none!important}
+  .btn,.icon,.primary,.chip,.filter,.round,.lesson,.interactive-choice,.child-camera video{transition:none!important}
+}
