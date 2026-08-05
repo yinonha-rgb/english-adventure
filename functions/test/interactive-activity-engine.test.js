@@ -9,6 +9,7 @@ const source=fs.readFileSync(path.join(root,'interactive-activity-engine.js'),'u
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
+const teacher=fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8');
 const context={globalThis:{}};
 vm.runInNewContext(source,context);
 const engine=context.globalThis.EAInteractiveTeacher;
@@ -78,6 +79,17 @@ test('interactive completion speaks and focuses an explicit Finish action',()=>{
   assert.match(source,/id="interactiveHome" aria-label="סיום השיעור וחזרה למסך הבית">סיום ✓/);
   assert.match(source,/speakSegments\('השיעור הסתיים\. לחצו על סיום\.'/);
   assert.match(source,/querySelector\('#interactiveHome'\)\.focus\(\)/);
+});
+
+test('earned XP is large, gold and animated on every lesson completion screen',()=>{
+  assert.match(source,/class="xp-reward" role="status"/);
+  assert.match(app,/el\('p','xp-reward'/);
+  assert.match(teacher,/function decorateTeacherAchievement\(\)/);
+  assert.match(teacher,/reward\.className='xp-reward'/);
+  assert.match(html,/\.xp-reward\{[\s\S]*font-size:clamp/);
+  assert.match(html,/\.xp-reward\{[\s\S]*linear-gradient/);
+  assert.match(html,/@keyframes xpRewardGrow/);
+  assert.match(html,/@media\(prefers-reduced-motion:reduce\)\{\.xp-reward\{animation:none!important\}\}/);
 });
 
 test('drag matching renders dependable vector pictures instead of font-only emoji',()=>{
@@ -193,8 +205,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.8/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.8/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.9/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.9/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
