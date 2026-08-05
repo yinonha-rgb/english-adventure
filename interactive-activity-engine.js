@@ -591,12 +591,15 @@
       const earned=this.lesson.activities.reduce((sum,item)=>sum+(item.xp||0),0);
       this.progress?.complete?.(this.lesson.id,earned);
       const host=this.modal.querySelector('#interactiveActivity');
-      host.innerHTML=`<div class="interactive-complete"><div>🏆✨</div><h2>כל הכבוד! סיימתם את השיעור היומי עם המורה</h2><p>למדנו: dog, cat and bird</p><p><strong>+${earned} XP</strong></p><button class="primary" id="interactiveHome">חזרה למסך הבית</button></div>`;
+      host.innerHTML=`<div class="interactive-complete"><div>🏆✨</div><h2>כל הכבוד! סיימתם את השיעור היומי עם המורה</h2><p>למדנו: dog, cat and bird</p><p><strong>+${earned} XP</strong></p><button class="primary" id="interactiveHome" aria-label="סיום השיעור וחזרה למסך הבית">סיום ✓</button></div>`;
       this.modal.querySelector('#interactiveInstruction').textContent='Great work! Today you learned dog, cat and bird.';
       this.modal.querySelector('#interactiveState').textContent='המורה חוגגת';
       this.setVisualState('success');
       this.speakSegments(`כל הכבוד ${this.child.name}! Today you learned dog, cat and bird.`,.82);
+      this.setInstruction('השיעור הסתיים. לחצו על סיום.');
+      this.speakSegments('השיעור הסתיים. לחצו על סיום.',.9);
       host.querySelector('#interactiveHome').onclick=()=>this.close();
+      host.querySelector('#interactiveHome').focus();
       this.onComplete?.();
     }
     end(){
