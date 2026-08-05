@@ -18,6 +18,12 @@ test('gender-marked Hebrew lesson answers expand into natural spoken variants',(
   assert.ok(variants.includes('אני רעב'));
   assert.ok(variants.includes('אני רעבה'));
 });
+test('a Hebrew answer receives a concise English learning bridge only when needed',()=>{
+  const bilingual=Core.validationSpec({expectedAnswers:['dog','כלב'],requiredKeywords:['dog'],kind:'single-word'});
+  assert.equal(Core.englishBridge('dog',bilingual,true),'');
+  assert.equal(Core.englishBridge('כלב',bilingual,true),'Correct! In English, we say: dog.');
+  assert.equal(Core.englishBridge('חתול',bilingual,false),"Let's try in English. The answer is: dog. Can you say dog?");
+});
 test('unrelated word is rejected',()=>{const v=Core.validateAnswer('banana',colorSpec);assert.equal(v.valid,false);assert.equal(v.reason,'missing-required-keyword')});
 test('random sentence remains rejected even when it contains the target word',()=>assert.equal(Core.validateAnswer('banana red dog hello',colorSpec).valid,false));
 test('silence and background noise are rejected explicitly',()=>{assert.equal(Core.validateAnswer('',colorSpec).reason,'silence');assert.equal(Core.validateAnswer('uh hmm noise',colorSpec).reason,'background-noise')});
