@@ -114,8 +114,8 @@ test('interactive daily lesson keeps an accessible countdown visible and pausabl
 
 test('microphone fallback and touch alternatives are always present',()=>{
   assert.match(source,/if\(!SR\)\{this\.speechLog\('recognition unavailable'\);return this\.feedback/);
-  assert.match(source,/לחצו “אמרתי” כדי להמשיך/);
-  assert.match(source,/this\.button\('✅ אמרתי'/);
+  assert.match(source,/const hebrewChoice=\(item\.acceptedAnswers\|\|\[\]\)\.find\(containsHebrew\)/);
+  assert.match(source,/`🔤 \$\{item\.prompt\}/);
   assert.match(source,/onclick/);
 });
 
@@ -173,15 +173,18 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
   assert.equal(engine.probableSpeechEcho('hello today we will learn animals','Hello! Today we will learn animals. Are you ready?',900),true);
   assert.equal(engine.probableSpeechEcho('yes','Are you ready?',900),false);
   assert.equal(engine.probableSpeechEcho('I am ready','I am ready to start our lesson',900),false);
+  assert.equal(engine.probableSpeechEcho('dog','Please repeat dog',900,120),true);
+  assert.equal(engine.probableSpeechEcho('dog','Please repeat dog',900,900),false);
   assert.equal(engine.probableSpeechEcho('hello today we will learn animals','Hello! Today we will learn animals.',5000),false);
   assert.match(source,/teacher echo ignored/);
+  assert.match(source,/speechStartedAt-startedListeningAt/);
   assert.match(source,/\},750\)/);
   assert.match(source,/feedback\(retryText,false,\{speak:false\}\)/);
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.6/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.6/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.7/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.7/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
