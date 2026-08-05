@@ -37,7 +37,10 @@
     NO:'no',
     GREETING:'greeting',
     THANKS:'thanks',
-    ENCOURAGEMENT:'encouragement'
+    ENCOURAGEMENT:'encouragement',
+    INSTRUCTION:'instruction-question',
+    LESSON_TOPIC:'lesson-topic-question',
+    LANGUAGE_CHOICE:'language-choice-question'
   });
   function normalizeConversationText(text){
     return String(text||'').normalize('NFKC').toLocaleLowerCase().replace(/[.,!?;:"'()[\]{}]/g,' ').replace(/\s+/g,' ').trim();
@@ -60,6 +63,9 @@
     if(has([/^(yes|yeah|yep|sure|okay|ok)$/,/^(כן|בטח|אוקיי)$/]))return{intent:CONVERSATION_INTENTS.YES,normalized,confidence:.9};
     if(has([/^(no|nope)$/,/^(לא)$/]))return{intent:CONVERSATION_INTENTS.NO,normalized,confidence:.9};
     if(has([/\b(this is fun|i like this|great game)\b/,/(כיף לי|אני אוהב|אני אוהבת|איזה כיף)/]))return{intent:CONVERSATION_INTENTS.ENCOURAGEMENT,normalized,confidence:.94};
+    if(has([/^(what should i do|what do i do|what now|i do not understand|i don't understand)$/,/^(מה לעשות|מה עושים|מה עושים עכשיו|לא הבנתי|לא הבנתי מה לעשות)$/]))return{intent:CONVERSATION_INTENTS.INSTRUCTION,normalized,confidence:.97};
+    if(has([/^(what are we learning|what is the lesson|what are we doing today)$/,/^(מה לומדים|מה לומדים היום|על מה השיעור|מה השיעור)$/]))return{intent:CONVERSATION_INTENTS.LESSON_TOPIC,normalized,confidence:.97};
+    if(has([/^(can i answer in hebrew|can i answer in english|in hebrew|in english)$/,/^(אפשר לענות בעברית|אפשר לענות באנגלית|אפשר בעברית|אפשר באנגלית)$/]))return{intent:CONVERSATION_INTENTS.LANGUAGE_CHOICE,normalized,confidence:.98};
     return{intent:CONVERSATION_INTENTS.ANSWER,normalized,confidence:1};
   }
   function shouldRestartRecognition({elapsedMs=0,heardSpeech=false,finalTranscript='',error='',restartCount=0,maxRestarts=2}={}){
