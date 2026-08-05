@@ -17,5 +17,10 @@ test('daily lesson greeting automatically opens a voice turn', () => {
 
 test('spoken yes or ready advances beyond the greeting', () => {
   assert.match(source, /phase===0&&\(intent===Providers\.CONVERSATION_INTENTS\.READY\|\|intent===Providers\.CONVERSATION_INTENTS\.YES\)/);
-  assert.match(source, /speak\('Great! Let us begin\.'[^\n]+nextPhase/);
+  assert.match(source, /speak\("Lovely — let's begin!"[^\n]+nextPhase/);
+});
+
+test('ready never triggers Great outside the explicit readiness question', () => {
+  assert.match(source, /if\(intent===Providers\.CONVERSATION_INTENTS\.READY\)return false/);
+  assert.doesNotMatch(source, /CONVERSATION_INTENTS\.READY\)\{speak\('Great\. Let us continue/);
 });
