@@ -23,6 +23,13 @@
     TYPES.STORY
   ]);
   const supportsVoiceAnswer=item=>Boolean(item&&VOICE_ANSWER_TYPES.has(item.type));
+  const SUCCESS_MESSAGES=[
+    'Amazing! You opened the next part of the adventure!',
+    'Wonderful! Pip is cheering for you!',
+    'Great listening! The magic path is glowing!',
+    'You did it! Let’s discover what comes next!'
+  ];
+  const successMessage=index=>SUCCESS_MESSAGES[Math.abs(Number(index)||0)%SUCCESS_MESSAGES.length];
 
   const activity=(id,type,value)=>({
     id,type,difficulty:'easy',skill:'vocabulary',xp:5,
@@ -167,6 +174,7 @@
       this.lessonRemainingSeconds=Number(this.state.lessonRemainingSeconds)||600;
       this.lessonTimerLast=0;
       this.paused=false;
+      this.pendingRender=false;
       this.answerLocked=true;
       this.recognition=null;
       this.recognitionGeneration=0;
@@ -369,13 +377,19 @@
       speechSynthesis?.cancel();
       this.lastSpokenText=String(text||'');
       this.lastSpeechEndedAt=0;
+      if(!root.speechSynthesis||typeof root.SpeechSynthesisUtterance!=='function'){
+        this.lastSpeechEndedAt=Date.now();
+        this.visual?.stopMouth();
+        onend();
+        return;
+      }
       let index=0;
       const next=()=>{
         const segment=segments[index++];
         if(!segment){this.lastSpeechEndedAt=Date.now();return onend()}
         const speechText=Natural?.normalizeTextForSpeech?.(segment.text,segment.lang)||segment.text;
         if(!speechText)return next();
-        const utterance=new SpeechSynthesisUtterance(speechText);
+        const utterance=new root.SpeechSynthesisUtterance(speechText);
         this.visual?.showSpeech(speechText,segment.lang);
         this.visual?.startMouth();
         this.animateCue();
@@ -386,7 +400,7 @@
         if(settings.developerDebug||new URLSearchParams(location.search).get('speechDebug')==='1')console.debug(`[EA Interactive Voice] teacher=${this.teacherProfile?.id||'unknown'} requested=${this.teacherProfile?.voiceGender||this.teacherGender} lang=${segment.lang} voice=${choice?.voice?.name||'browser-default'} actual=${choice?.actualGender||'unknown'} pitch=${utterance.pitch} fallback=${choice?.fallbackReason||'none'}`);
         utterance.onend=()=>{this.visual?.stopMouth();next()};
         utterance.onerror=()=>{this.visual?.stopMouth();next()};
-        speechSynthesis?.speak(utterance);
+        root.speechSynthesis.speak(utterance);
       };
       next();
     }
@@ -437,7 +451,7 @@
       const button=this.modal.querySelector('#interactivePause');
       button.textContent=this.paused?'▶️':'⏸️';
       button.setAttribute('aria-label',this.paused?'המשך השיעור':'השהיית השיעור');
-      if(this.paused){speechSynthesis?.cancel();this.visual?.stopMouth();this.recognition?.abort();this.modal.querySelector('#interactiveState').textContent='השיעור מושהה';this.modal.querySelector('.interactive-panel').dataset.focus='answer';this.setVisualState('paused')}else this.speakCurrent();
+      if(this.paused){speechSynthesis?.cancel();this.visual?.stopMouth();this.recognition?.abort();this.modal.querySelector('#interactiveState').textContent='השיעור מושהה';this.modal.querySelector('.interactive-panel').dataset.focus='answer';this.setVisualState('paused')}else if(this.pendingRender){this.pendingRender=false;this.render()}else this.speakCurrent();
     }
     button(label,value,action){
       const button=document.createElement('button');
@@ -576,9 +590,17 @@
       if(correct){
         button?.classList.add('correct');
         const bridge=containsHebrew(value)&&englishAnswer(item)?`Correct! In English, we say: ${englishAnswer(item)}.`:'';
-        this.feedback(bridge||item.successFeedback,true);
+        const successText=bridge||successMessage(this.state.index-1);
+        this.feedback(successText,true,{speak:false});
         this.save();
-        setTimeout(()=>this.render(),850);
+        const nextIndex=this.state.index;
+        const advance=()=>{
+          if(this.state.index!==nextIndex||!this.modal.classList.contains('open'))return;
+          if(this.paused){this.pendingRender=true;return}
+          this.modal.querySelector('#interactiveState').textContent=this.teacherText('אמילי פותחת את האתגר הבא','אדם פותח את האתגר הבא');
+          this.timer=setTimeout(()=>{if(this.state.index===nextIndex&&!this.paused)this.render();else if(this.paused)this.pendingRender=true},280);
+        };
+        this.speakSegments(successText,.88,advance);
       }else{
         button?.classList.add('wrong');
         const bridge=this.state.hintVisible&&containsHebrew(value)&&englishAnswer(item)?` Let's try in English. Say: ${englishAnswer(item)}.`:'';
@@ -658,5 +680,5 @@
     return teacher;
   }
 
-  root.EAInteractiveTeacher={TYPES,VOICE_ANSWER_TYPES,supportsVoiceAnswer,COMPONENTS,createAnimalsLesson,animalPicture,validate,transition,probableSpeechEcho,startAnimals};
+  root.EAInteractiveTeacher={TYPES,VOICE_ANSWER_TYPES,supportsVoiceAnswer,SUCCESS_MESSAGES,successMessage,COMPONENTS,createAnimalsLesson,animalPicture,validate,transition,probableSpeechEcho,startAnimals};
 })(typeof window!=='undefined'?window:globalThis);
