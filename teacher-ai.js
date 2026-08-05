@@ -9,6 +9,14 @@ const speechDebug={microphone:'STOPPED',recognition:'STOPPED',lastTranscript:'�
 let resumeCheckpoint=null;
 const speechDebugEnabled=()=>settings.developerDebug||new URLSearchParams(location.search).get('speechDebug')==='1';
 function speechLog(event,detail=''){const entry={at:new Date().toISOString(),event,detail:String(detail||'')};speechDebug.events.push(entry);speechDebug.events=speechDebug.events.slice(-24);if(speechDebugEnabled())console.debug('[EA Speech]',event,detail);renderSpeechDebug()}
+function probableTeacherEcho(heard,prompt,onsetDelayMs=Infinity){
+  const answer=Core.normalize(heard),teacher=Core.normalize(prompt);
+  if(!answer||!teacher||onsetDelayMs>500)return false;
+  if(teacher.includes(answer)||answer.includes(teacher))return true;
+  const answerTokens=Core.tokens(answer),teacherTokens=new Set(Core.tokens(teacher));
+  if(!answerTokens.length)return false;
+  return answerTokens.filter(token=>teacherTokens.has(token)).length/answerTokens.length>=.75;
+}
 async function prepareMicrophone(){
   // Called from the lesson-start click. It asks only for permission, releases
   // the stream, and lets SpeechRecognition own the actual listening turn.
@@ -118,14 +126,14 @@ async function listen(i,{manual=false,restartAttempt=0}={}){
   if(recognition){const stale=recognition;recognition=null;recognitionGeneration++;clearTimeout(listenTimer);turnGuard.interrupt();for(const event of ['onstart','onaudiostart','onspeechstart','onspeechend','onaudioend','onresult','onerror','onend'])stale[event]=null;try{stale.abort()}catch{}speechLog('recognition retired','before new listening turn')}
   if(!turnGuard.beginListening()){speechLog('start blocked','turn guard not ready');return}
   const generation=++recognitionGeneration,r=recognition=new SR(),startedListeningAt=Date.now();
-  let settled=false,heardSpeech=false,finalTranscript='',finalConfidence=0,interimTranscript='',interimConfidence=0,lastError='';
+  let settled=false,heardSpeech=false,finalTranscript='',finalConfidence=0,interimTranscript='',interimConfidence=0,lastError='',speechStartedAt=Infinity;
   const isCurrent=()=>recognition===r&&recognitionGeneration===generation;
   speechLog('recognition created',`generation ${generation}`);
   if(restartAttempt>0)speechLog('recognition restarted',`attempt ${restartAttempt}`);
   r.lang=phase===0?'he-IL':'en-US';r.interimResults=true;r.continuous=false;r.maxAlternatives=3;speechLog('recognition language',r.lang);
   r.onstart=()=>{if(!isCurrent())return;speechDebug.microphone='READY';speechDebug.recognition='RUNNING';speechLog('onstart');conversationState('childSpeaking');$('#teacherMute').textContent='⏹️ עצירת הקשבה'};
   r.onaudiostart=()=>{if(!isCurrent())return;speechDebug.microphone='LISTENING';speechLog('onaudiostart')};
-  r.onspeechstart=()=>{if(!isCurrent())return;heardSpeech=true;speechLog('onspeechstart')};
+  r.onspeechstart=()=>{if(!isCurrent())return;heardSpeech=true;speechStartedAt=Date.now();speechLog('onspeechstart')};
   r.onspeechend=()=>{if(isCurrent())speechLog('onspeechend')};
   r.onaudioend=()=>{if(!isCurrent())return;speechDebug.microphone='STOPPED';speechLog('onaudioend')};
   r.onresult=event=>{
@@ -134,7 +142,13 @@ async function listen(i,{manual=false,restartAttempt=0}={}){
     for(let n=event.resultIndex;n<event.results.length;n++){const result=event.results[n],alternative=result[0],text=alternative?.transcript||'';if(text.trim())heardSpeech=true;if(result.isFinal){finalTranscript=`${finalTranscript} ${text}`.trim();finalConfidence=Math.max(finalConfidence,Number(alternative?.confidence)||0)}else{interim=`${interim} ${text}`.trim();interimConfidence=Math.max(interimConfidence,Number(alternative?.confidence)||0)}}
     if(interim)interimTranscript=interim;
     const visible=finalTranscript||interim;speechDebug.lastTranscript=visible||'—';updateLiveTranscript(visible);speechLog(finalTranscript?'transcript final':'transcript interim',speechDebug.lastTranscript);
-    if(!finalTranscript||!turnGuard.handleAnswer())return;
+    if(!finalTranscript)return;
+    const echoPrompt=[i.en,i.he].filter(Boolean).join(' '),onsetDelay=speechStartedAt-startedListeningAt;
+    if(probableTeacherEcho(finalTranscript,echoPrompt,onsetDelay)){
+      settled=true;clearTimeout(listenTimer);endAnswerRecording();speechLog('teacher echo ignored',`${finalTranscript} (${onsetDelay}ms)`);turnGuard.interrupt();try{r.abort()}catch{}
+      if(restartAttempt<2)setTimeout(()=>listen(i,{manual:true,restartAttempt:restartAttempt+1}),650);else showAnswers(i,'שמעתי את המורה במקום תשובה. נסו שוב או בחרו תשובה.');return
+    }
+    if(!turnGuard.handleAnswer())return;
     settled=true;clearTimeout(listenTimer);endAnswerRecording();
     if(handleConversationIntent(finalTranscript,i))return;
     if(PHASES[phase]==='listen-repeat'&&settings.answerPlaybackConsent&&!comparisonRepeat){comparisonRepeat=true;conversationState('waitingForChild','אפשר לשמוע את התשובה, להשוות למורה ולנסות שוב.');$('#answerPlaybackControls').hidden=false;return}
@@ -154,6 +168,7 @@ async function listen(i,{manual=false,restartAttempt=0}={}){
     if(!isCurrent())return;
     speechDebug.recognition='STOPPED';speechDebug.microphone='STOPPED';speechLog('recognition ended',heardSpeech&&!finalTranscript?'speech without final transcript':'');if(recognition===r)recognition=null;$('#teacherMute').textContent='🎤 התחלת הקשבה';
     const fallback=Natural.finalizeRecognitionResult({finalTranscript,interimTranscript,heardSpeech,finalConfidence,interimConfidence});
+    if(!settled&&fallback.text&&fallback.fallback&&probableTeacherEcho(fallback.text,[i.en,i.he].filter(Boolean).join(' '),speechStartedAt-startedListeningAt)){settled=true;clearTimeout(listenTimer);endAnswerRecording();speechLog('teacher echo ignored',fallback.text);turnGuard.interrupt();if(restartAttempt<2)setTimeout(()=>listen(i,{manual:true,restartAttempt:restartAttempt+1}),650);else showAnswers(i,'שמעתי את המורה במקום תשובה. נסו שוב או בחרו תשובה.');return}
     if(!settled&&fallback.text&&fallback.fallback&&turnGuard.handleAnswer()){settled=true;clearTimeout(listenTimer);endAnswerRecording();speechLog('interim promoted to final',fallback.text);if(handleConversationIntent(fallback.text,i))return;conversationState('validating');evaluate(fallback.text,i,{confidence:fallback.confidence,source:'speech-finalized-interim'});return}
     const canRestart=!settled&&turnGuard.snapshot().listening&&Providers.shouldRestartRecognition({elapsedMs:Date.now()-startedListeningAt,heardSpeech,finalTranscript,error:lastError,restartCount:restartAttempt});
     if(canRestart){settled=true;clearTimeout(listenTimer);endAnswerRecording();turnGuard.interrupt();speechLog('recognition restart scheduled',`attempt ${restartAttempt+1}`);setTimeout(()=>listen(i,{manual:true,restartAttempt:restartAttempt+1}),280);return}
