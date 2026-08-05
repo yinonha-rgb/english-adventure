@@ -75,6 +75,8 @@
     .teacher-photo-speech{transform:translateX(-50%) scale(var(--mouth-sx),.18)}
     @keyframes teacherPhotoMouth{to{transform:translateX(-50%) scale(var(--mouth-sx),var(--mouth-open))}}
   </style>
+<script src="services/storage.js?v=4.43.0"></script>
+<script src="services/state.js?v=4.43.0"></script>
 </head>
 <body><header class="shell top"><div class="brand"><span class="logo">EA</span><span>English Adventure</span></div><div class="actions"><button class="sync-pill" id="syncStatus" data-state="offline" aria-label="מצב סנכרון"><span class="sync-dot"></span><span class="sync-label" id="syncStatusText">עובד במצב לא מקוון</span></button><button class="btn" id="accountBtn">☁️ חשבון</button><button class="btn" id="langBtn" aria-label="Switch language">EN</button><button class="btn" id="installBtn" hidden data-i="install">התקנה</button><button class="btn" id="parentBtn" data-i="parents">להורים</button></div></header>
 <main class="shell"><section class="profilebar" aria-label="בחירת ילד"><div class="profile-current"><div class="avatar" aria-hidden="true">🧒</div><div><small data-i="learningNow">לומדים עכשיו</small><strong id="currentName" style="display:block;font-size:1.25rem"></strong></div></div><div class="chips" id="profileChips"></div><button class="icon" id="manageProfiles" aria-label="ניהול פרופילים">⚙️</button></section>

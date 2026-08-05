@@ -4,6 +4,10 @@ A warm, bilingual, child-friendly English learning PWA for ages 6–12. Core lea
 
 The voice teacher now uses six human-style answer categories, three difficulty levels, misconception explanations, spaced review, and parent learning insights. See [HUMAN_TEACHER_HE.md](HUMAN_TEACHER_HE.md).
 
+## Architecture migration
+
+The application is being split incrementally so existing progress and deployed flows remain compatible throughout the migration. Version 4.43 introduces `services/storage.js` and `services/state.js` as the single tested foundation for local persistence, immutable snapshots, active-profile lookup, idempotent XP awards, and deduplicated mistakes. The existing `ea-v2` localStorage key and Firestore document shape are intentionally unchanged. Pages and routing will move onto this foundation in later, separately tested phases rather than through a risky all-at-once rewrite.
+
 ## Highlights
 
 - Hebrew-first parent-facing interface with an English switch and complete RTL support
