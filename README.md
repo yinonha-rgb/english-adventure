@@ -38,7 +38,7 @@ Open `http://localhost:8000`. On supported browsers, use the **Install** button 
 
 ## Browser support
 
-Current Chrome, Edge, Firefox, and Safari support the core lessons, profiles, quizzes, progress, and offline use. Speech synthesis availability and installed voices vary by device. Speech recognition currently works best in Chromium-based browsers; when unavailable, the app explains that listening and spoken repetition remain usable. Microphone permission is requested only after the microphone button is pressed.
+Current Chrome, Edge, Firefox, and Safari support the core lessons, profiles, quizzes, progress, and offline use. Speech synthesis availability and installed voices vary by device. Speech recognition currently works best in Chromium-based browsers; when unavailable, the app explains that listening and spoken repetition remain usable. Microphone permission is requested from the user action that starts a voice lesson or presses a microphone control; denial never blocks the visual answer fallback.
 
 ## Firebase synchronization setup
 
