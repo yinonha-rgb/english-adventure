@@ -1,4 +1,4 @@
-const VERSION='english-adventure-4.47.0';
+const VERSION='english-adventure-4.47.1';
 const CACHE_PREFIX='english-adventure-';
 const CORE=['./','./index.html','./teacher-rig.css?v=4.38.0','./adventure-home.css?v=4.38.0','./translations.js?v=4.38.0','./ui-controls.js?v=4.38.0','./answer-playback.js?v=4.38.0','./natural-voice.js?v=4.38.0','./teacher-visual.js?v=4.38.0','./teacher-rig.js?v=4.38.0','./teacher-system.js?v=4.38.0','./adventure-home.js?v=4.38.0','./adaptive-learning.js?v=4.38.0','./daily-lesson-core.js?v=4.38.0','./interactive-activity-engine.js?v=4.38.0','./advanced-ai-config.js?v=4.38.0','./pricing-config.js?v=4.38.0','./advanced-ai-policy.js?v=4.38.0','./teacher-providers.js?v=4.38.0','./app.js?v=4.38.0','./teacher-modes-core.js?v=4.38.0','./firebase-sync.js?v=4.38.0','./teacher-ai.js?v=4.38.0','./firebase-config.js','./content.json','./manifest.json','./update-manifest.json','./icon.svg','./icon-maskable.svg','./assets/baby-dragon.svg','./assets/teacher-adam.png','./assets/teacher-noa.png','./assets/teacher-adam-body-v2.png','./assets/teacher-adam-expression-celebrating-v2.png','./assets/teacher-adam-expression-encouraging-v2.png','./assets/teacher-adam-expression-happy-v2.png','./assets/teacher-adam-expression-listening-v2.png','./assets/teacher-adam-expression-neutral-v2.png','./assets/teacher-adam-expression-thinking-v2.png','./assets/teacher-adam-mouth-a-v2.png','./assets/teacher-adam-mouth-e-v2.png','./assets/teacher-adam-mouth-o-v2.png','./assets/teacher-adam-mouth-rest-v2.png','./assets/teacher-adam-mouth-smile-v2.png','./assets/teacher-noa-body-v2.png','./assets/teacher-noa-expression-celebrating-v2.png','./assets/teacher-noa-expression-encouraging-v2.png','./assets/teacher-noa-expression-happy-v2.png','./assets/teacher-noa-expression-listening-v2.png','./assets/teacher-noa-expression-neutral-v2.png','./assets/teacher-noa-expression-thinking-v2.png','./assets/teacher-noa-mouth-a-v2.png','./assets/teacher-noa-mouth-e-v2.png','./assets/teacher-noa-mouth-o-v2.png','./assets/teacher-noa-mouth-rest-v2.png','./assets/teacher-noa-mouth-smile-v2.png'];
 
@@ -23,8 +23,21 @@ CORE.push('./accessibility-tools.js?v=4.45.0','./app.js?v=4.45.0');
 CORE.push('./accessibility-tools.js?v=4.46.0','./app.js?v=4.46.0','./entry-video.js?v=4.46.0','./home-teacher-restore.js?v=4.46.0','./interactive-activity-engine.js?v=4.46.0','./landing-page.js?v=4.46.0','./teacher-ai.js?v=4.46.0','./teacher-noa-video.js?v=4.46.0','./teacher-rig.js?v=4.46.0','./teacher-system.js?v=4.46.0','./teacher-visual.js?v=4.46.0');
 CORE.push('./app.js?v=4.46.9','./interactive-activity-engine.js?v=4.46.9','./teacher-modes-core.js?v=4.46.9','./teacher-ai.js?v=4.46.9');
 CORE.push('./app.js?v=4.47.0','./teacher-providers.js?v=4.47.0','./teacher-ai.js?v=4.47.0');
+CORE.push('./app.js?v=4.47.1','./translations.js?v=4.47.1','./entry-video.js?v=4.47.1');
 CORE.push('./teacher-noa-video.js?v=4.42.2','./assets/teacher-noa-greeting.mp4','./entry-video.js?v=4.40.0','./assets/entry-welcome.mp4');
 CORE.push('./child-camera.css?v=4.38.0','./child-camera.js?v=4.38.0','./child-camera-fix.js?v=4.41.1','./child-camera.js?v=4.41.0','./home-teacher-restore.js?v=4.42.0');
+
+const assetVersion=url=>(new URL(url,'https://local.invalid').searchParams.get('v')||'0').split('.').map(Number);
+const newerAsset=(candidate,current)=>{
+  const a=assetVersion(candidate),b=assetVersion(current),length=Math.max(a.length,b.length);
+  for(let index=0;index<length;index++){const difference=(a[index]||0)-(b[index]||0);if(difference)return difference>0}
+  return false;
+};
+const PRECACHE_URLS=[...CORE.reduce((latest,url)=>{
+  const path=new URL(url,'https://local.invalid').pathname;
+  if(!latest.has(path)||newerAsset(url,latest.get(path)))latest.set(path,url);
+  return latest;
+},new Map()).values()];
 
 const cacheGoodResponse=async(cache,request,response)=>{
   if(response?.ok&&response.type==='basic')await cache.put(request,response.clone());
@@ -34,7 +47,7 @@ const cacheGoodResponse=async(cache,request,response)=>{
 self.addEventListener('install',event=>event.waitUntil((async()=>{
   const cache=await caches.open(VERSION);
   // One unavailable optional asset must not reject the whole service-worker install.
-  await Promise.allSettled(CORE.map(async url=>{
+  await Promise.allSettled(PRECACHE_URLS.map(async url=>{
     const response=await fetch(new Request(url,{cache:'reload'}));
     if(response.ok&&response.type==='basic')await cache.put(url,response);
   }));
