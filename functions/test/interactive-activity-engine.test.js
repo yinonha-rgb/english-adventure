@@ -73,6 +73,13 @@ test('Hebrew participation is reinforced with the expected English answer',()=>{
   assert.match(source,/containsHebrew\(value\)/);
 });
 
+test('interactive completion speaks and focuses an explicit Finish action',()=>{
+  assert.match(source,/השיעור הסתיים\. לחצו על סיום\./);
+  assert.match(source,/id="interactiveHome" aria-label="סיום השיעור וחזרה למסך הבית">סיום ✓/);
+  assert.match(source,/speakSegments\('השיעור הסתיים\. לחצו על סיום\.'/);
+  assert.match(source,/querySelector\('#interactiveHome'\)\.focus\(\)/);
+});
+
 test('drag matching renders dependable vector pictures instead of font-only emoji',()=>{
   for(const animal of ['dog','cat','bird']){
     const picture=engine.animalPicture(animal);
@@ -173,8 +180,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.4/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.4/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.5/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.5/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
