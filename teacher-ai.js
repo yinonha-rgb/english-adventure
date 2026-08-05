@@ -115,6 +115,9 @@ function handleConversationIntent(heard,i){
   // answer. It must pass validation before any success praise is spoken.
   if(intent===Providers.CONVERSATION_INTENTS.READY)return false;
   if(intent===Providers.CONVERSATION_INTENTS.ENCOURAGEMENT){speak("I love that you're enjoying this — let's keep going!",'en-US',()=>listen(i),'celebration');return true}
+  if(intent===Providers.CONVERSATION_INTENTS.INSTRUCTION){speak(`עכשיו מקשיבים לשאלה ועונים עליה. אפשר לענות באנגלית או בעברית. ${i.he||i.en}`,'he-IL',()=>listen(i),'explanation');return true}
+  if(intent===Providers.CONVERSATION_INTENTS.LESSON_TOPIC){speak(`היום אנחנו לומדים ${shared.lesson.titleHe||shared.lesson.title}. מיד נחזור לשאלה.`,'he-IL',()=>listen(i),'explanation');return true}
+  if(intent===Providers.CONVERSATION_INTENTS.LANGUAGE_CHOICE){speak('כן. אפשר לענות באנגלית או בעברית. אם תענו בעברית, אני אעזור גם עם המילה באנגלית.','he-IL',()=>listen(i),'encouragement');return true}
   return false
 }
 async function listen(i,{manual=false,restartAttempt=0}={}){
@@ -130,7 +133,7 @@ async function listen(i,{manual=false,restartAttempt=0}={}){
   const isCurrent=()=>recognition===r&&recognitionGeneration===generation;
   speechLog('recognition created',`generation ${generation}`);
   if(restartAttempt>0)speechLog('recognition restarted',`attempt ${restartAttempt}`);
-  r.lang=phase===0?'he-IL':'en-US';r.interimResults=true;r.continuous=false;r.maxAlternatives=3;speechLog('recognition language',r.lang);
+  r.lang=phase===0?'he-IL':'en-US';r.interimResults=true;r.continuous=true;r.maxAlternatives=5;speechLog('recognition language',r.lang);
   r.onstart=()=>{if(!isCurrent())return;speechDebug.microphone='READY';speechDebug.recognition='RUNNING';speechLog('onstart');conversationState('childSpeaking');$('#teacherMute').textContent='⏹️ עצירת הקשבה'};
   r.onaudiostart=()=>{if(!isCurrent())return;speechDebug.microphone='LISTENING';speechLog('onaudiostart')};
   r.onspeechstart=()=>{if(!isCurrent())return;heardSpeech=true;speechStartedAt=Date.now();speechLog('onspeechstart')};
@@ -175,7 +178,7 @@ async function listen(i,{manual=false,restartAttempt=0}={}){
     if(!settled&&turnGuard.handleAnswer()){settled=true;clearTimeout(listenTimer);endAnswerRecording();showAnswers(i,heardSpeech?'שמעתי קול אבל לא התקבל תמלול. נסו שוב או בחרו תשובה.':'לא נשמעה תשובה. נסו שוב או בחרו תשובה.')}
   };
   navigator.permissions?.query?.({name:'microphone'}).then(permission=>speechLog('microphone permission',permission.state)).catch(()=>speechLog('microphone permission','query unavailable'));
-  try{r.start();speechLog('recognition started');beginAnswerRecording().catch(()=>{});listenTimer=setTimeout(()=>{if(!settled&&turnGuard.handleAnswer()){settled=true;speechLog('recognition timeout');r.abort();endAnswerRecording();showAnswers(i,'לא שמעתי תשובה. אפשר לנסות שוב או לבחור תשובה.',2)}},12000)}
+  try{r.start();speechLog('recognition started');beginAnswerRecording().catch(()=>{});listenTimer=setTimeout(()=>{if(!settled&&turnGuard.handleAnswer()){settled=true;speechLog('recognition timeout');r.abort();endAnswerRecording();showAnswers(i,'אני עדיין כאן ומקשיבה. אפשר לנסות שוב בקול או לבחור תשובה.',2)}},20000)}
   catch(error){speechLog('start exception',error?.message||'unknown');turnGuard.interrupt();clearAnswerRecording();speechDebug.recognition='STOPPED';speechDebug.microphone='STOPPED';showAnswers(i,'המיקרופון אינו זמין כרגע. אפשר לענות בלחיצה.')}
 }
 function showAnswers(i,note='זיהוי דיבור אינו זמין בדפדפן הזה. אפשר לענות בלחיצה.',limit=3){status('idle',note);const box=$('#teacherAnswers');box.replaceChildren();const q=shared.lesson.quiz?.[0],correctAnswer=i.answer||i.validation?.expectedAnswers?.[0]||'I tried',approved=new Set((i.validation?.expectedAnswers||[correctAnswer]).map(Core.normalize)),candidates=[...(q?.options||[]),...(i.validation?.rejectedExamples||[]),'I do not know'],distractors=[...new Set(candidates)].filter(x=>!approved.has(Core.normalize(x))),opts=[correctAnswer,...distractors].slice(0,limit);opts.forEach(v=>{const b=document.createElement('button');b.className='option';b.textContent=v;b.onclick=()=>evaluate(v,i,{confidence:1,source:'button'});box.append(b)})}
