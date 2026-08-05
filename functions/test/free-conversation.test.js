@@ -19,9 +19,18 @@ test('free teacher understands common Hebrew and English classroom intents local
     ['שלום','greeting'],
     ['thank you','thanks'],
     ['תודה','thanks'],
-    ['כיף לי','encouragement']
+    ['כיף לי','encouragement'],
+    ['מה עושים עכשיו','instruction-question'],
+    ['מה לומדים היום','lesson-topic-question'],
+    ['אפשר לענות בעברית','language-choice-question']
   ];
   for(const [text,intent] of cases)assert.equal(Providers.conversationIntent(text).intent,intent,text);
+});
+
+test('Emily answers contextual child questions locally',()=>{
+  for(const text of ['what should I do','what are we learning','can I answer in Hebrew']){
+    assert.notEqual(Providers.conversationIntent(text).intent,Providers.CONVERSATION_INTENTS.ANSWER);
+  }
 });
 
 test('ordinary and unrelated answers remain answers for deterministic validation',()=>{
