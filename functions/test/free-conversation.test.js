@@ -61,3 +61,25 @@ test('recognition restart policy is bounded and only recovers an early empty sto
   assert.equal(Providers.shouldRestartRecognition({elapsedMs:900,error:'network',restartCount:0}),false);
   assert.equal(Providers.shouldRestartRecognition({elapsedMs:900,restartCount:2}),false);
 });
+
+test('recognition selects the most lesson-relevant browser alternative without accepting it automatically',()=>{
+  const result={0:{transcript:'banana',confidence:.91},1:{transcript:'red',confidence:.72},2:{transcript:'read',confidence:.68},length:3};
+  const selected=Providers.selectRecognitionAlternative(result,{scoreAlternative:text=>text==='red'?1:0});
+  assert.equal(selected.transcript,'red');
+  assert.equal(selected.index,1);
+  assert.equal(selected.relevance,1);
+});
+
+test('recognition keeps the highest-confidence alternative when lesson relevance is equal',()=>{
+  const result={0:{transcript:'cat',confidence:.45},1:{transcript:'cap',confidence:.82},length:2};
+  assert.equal(Providers.selectRecognitionAlternative(result).transcript,'cap');
+});
+
+test('recognition alternates to Hebrew on a bounded retry when Hebrew answers are accepted',()=>{
+  const expectedAnswers=['dog','כלב'];
+  assert.equal(Providers.recognitionLanguage({phase:'speaking',restartAttempt:0,expectedAnswers}),'en-US');
+  assert.equal(Providers.recognitionLanguage({phase:'speaking',restartAttempt:1,expectedAnswers}),'he-IL');
+  assert.equal(Providers.recognitionLanguage({phase:'speaking',restartAttempt:2,expectedAnswers}),'en-US');
+  assert.equal(Providers.recognitionLanguage({phase:'greeting',restartAttempt:0,expectedAnswers:['yes']}),'he-IL');
+  assert.equal(Providers.recognitionLanguage({phase:'speaking',restartAttempt:1,expectedAnswers:['dog']}),'en-US');
+});
