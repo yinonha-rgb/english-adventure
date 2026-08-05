@@ -71,6 +71,21 @@
   function shouldRestartRecognition({elapsedMs=0,heardSpeech=false,finalTranscript='',error='',restartCount=0,maxRestarts=2}={}){
     return !error&&!finalTranscript&&restartCount<maxRestarts&&elapsedMs<4500&&!heardSpeech;
   }
+  function recognitionLanguage({phase='',restartAttempt=0,expectedAnswers=[]}={}){
+    const hasHebrew=expectedAnswers.some(answer=>/[\u0590-\u05ff]/.test(String(answer||'')));
+    if(phase==='greeting')return 'he-IL';
+    return hasHebrew&&restartAttempt%2===1?'he-IL':'en-US';
+  }
+  function selectRecognitionAlternative(result,{scoreAlternative=()=>0}={}){
+    const alternatives=Array.from(result||[]).map((alternative,index)=>{
+      const transcript=String(alternative?.transcript||'').trim(),confidence=Number(alternative?.confidence)||0;
+      let relevance=0;
+      try{relevance=Number(scoreAlternative(transcript,{confidence,index}))||0}catch{}
+      return{transcript,confidence,relevance,index};
+    }).filter(alternative=>alternative.transcript);
+    alternatives.sort((a,b)=>b.relevance-a.relevance||b.confidence-a.confidence||a.index-b.index);
+    return alternatives[0]||{transcript:'',confidence:0,relevance:0,index:-1};
+  }
   class FreeConversationProvider extends ConversationProvider{
     constructor(options={}){super({...options,type:'free'})}
     handleChildInput(text,context={}){
@@ -134,5 +149,5 @@
       return{provider:free,result,fallback:true,reason:error.code||'provider-failure',context};
     }
   }
-  return{METHODS,SCENARIOS,CONVERSATION_INTENTS,normalizeConversationText,conversationIntent,shouldRestartRecognition,DisabledProviderError,ConversationProvider,FreeConversationProvider,MockAdvancedConversationProvider,MockConversationProvider,AdvancedConversationProvider,TeacherProvider,FreeGuidedTeacherProvider,MockAITeacherProvider,activationStatus,createProvider,createProductionProvider,startSessionWithFallback};
+  return{METHODS,SCENARIOS,CONVERSATION_INTENTS,normalizeConversationText,conversationIntent,shouldRestartRecognition,recognitionLanguage,selectRecognitionAlternative,DisabledProviderError,ConversationProvider,FreeConversationProvider,MockAdvancedConversationProvider,MockConversationProvider,AdvancedConversationProvider,TeacherProvider,FreeGuidedTeacherProvider,MockAITeacherProvider,activationStatus,createProvider,createProductionProvider,startSessionWithFallback};
 });
