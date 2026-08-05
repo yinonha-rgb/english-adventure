@@ -67,6 +67,12 @@ test('every spoken animal answer accepts the matching Hebrew or English meaning'
   assert.equal(engine.validate(sentence,'פיצה'),false);
 });
 
+test('Hebrew participation is reinforced with the expected English answer',()=>{
+  assert.match(source,/Correct! In English, we say:/);
+  assert.match(source,/Let's try in English\. Say:/);
+  assert.match(source,/containsHebrew\(value\)/);
+});
+
 test('drag matching renders dependable vector pictures instead of font-only emoji',()=>{
   for(const animal of ['dog','cat','bird']){
     const picture=engine.animalPicture(animal);
@@ -167,8 +173,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.2/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.2/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.3/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.3/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
