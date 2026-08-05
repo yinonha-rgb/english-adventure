@@ -133,7 +133,7 @@ async function listen(i,{manual=false,restartAttempt=0}={}){
   const isCurrent=()=>recognition===r&&recognitionGeneration===generation;
   speechLog('recognition created',`generation ${generation}`);
   if(restartAttempt>0)speechLog('recognition restarted',`attempt ${restartAttempt}`);
-  r.lang=phase===0?'he-IL':'en-US';r.interimResults=true;r.continuous=true;r.maxAlternatives=5;speechLog('recognition language',r.lang);
+  r.lang=Providers.recognitionLanguage({phase:PHASES[phase],restartAttempt,expectedAnswers:i.validation?.expectedAnswers||[]});r.interimResults=true;r.continuous=true;r.maxAlternatives=5;speechLog('recognition language',r.lang);
   r.onstart=()=>{if(!isCurrent())return;speechDebug.microphone='READY';speechDebug.recognition='RUNNING';speechLog('onstart');conversationState('childSpeaking');$('#teacherMute').textContent='⏹️ עצירת הקשבה'};
   r.onaudiostart=()=>{if(!isCurrent())return;speechDebug.microphone='LISTENING';speechLog('onaudiostart')};
   r.onspeechstart=()=>{if(!isCurrent())return;heardSpeech=true;speechStartedAt=Date.now();speechLog('onspeechstart')};
@@ -142,7 +142,7 @@ async function listen(i,{manual=false,restartAttempt=0}={}){
   r.onresult=event=>{
     if(!isCurrent())return;
     let interim='';speechLog('onresult',`index ${event.resultIndex}`);
-    for(let n=event.resultIndex;n<event.results.length;n++){const result=event.results[n],alternative=result[0],text=alternative?.transcript||'';if(text.trim())heardSpeech=true;if(result.isFinal){finalTranscript=`${finalTranscript} ${text}`.trim();finalConfidence=Math.max(finalConfidence,Number(alternative?.confidence)||0)}else{interim=`${interim} ${text}`.trim();interimConfidence=Math.max(interimConfidence,Number(alternative?.confidence)||0)}}
+    for(let n=event.resultIndex;n<event.results.length;n++){const result=event.results[n],alternative=Providers.selectRecognitionAlternative(result,{scoreAlternative:(text,meta)=>Core.validateAnswer(text,i.validation,{confidence:meta.confidence,source:'speech-alternative'}).score}),text=alternative.transcript;if(text)heardSpeech=true;if(alternative.index>0)speechLog('recognition alternative selected',`option ${alternative.index+1} of ${result.length}`);if(result.isFinal){finalTranscript=`${finalTranscript} ${text}`.trim();finalConfidence=Math.max(finalConfidence,alternative.confidence)}else{interim=`${interim} ${text}`.trim();interimConfidence=Math.max(interimConfidence,alternative.confidence)}}
     if(interim)interimTranscript=interim;
     const visible=finalTranscript||interim;speechDebug.lastTranscript=visible||'—';updateLiveTranscript(visible);speechLog(finalTranscript?'transcript final':'transcript interim',speechDebug.lastTranscript);
     if(!finalTranscript)return;
