@@ -32,6 +32,6 @@ test('the intro traps focus, closes reliably with Escape and locks background sc
 
 test('the navigation fix is served by the new application cache',()=>{
   assert.match(html,/entry-video\.js\?v=4\.47\.1/);
-  assert.match(sw,/english-adventure-4\.49\.0/);
+  assert.match(sw,/english-adventure-4\.50\.0/);
   assert.match(sw,/entry-video\.js\?v=4\.47\.1/);
 });
