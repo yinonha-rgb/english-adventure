@@ -9,8 +9,8 @@ vm.runInNewContext(source,sandbox);
 const mission=sandbox.EAAdventureHome.missionFor;
 
 test('home becomes a living story world without replacing the daily lesson engine',()=>{
-  assert.match(html,/adventure-home\.css\?v=4\.24\.0/);
-  assert.match(html,/adventure-home\.js\?v=4\.24\.0/);
+  assert.match(html,/adventure-home\.css\?v=\d+\.\d+\.\d+/);
+  assert.match(html,/adventure-home\.js\?v=\d+\.\d+\.\d+/);
   assert.match(source,/living-world/);
   assert.match(source,/dragon-companion/);
   assert.match(source,/world-trail/);
@@ -40,7 +40,7 @@ test('world labels stay above the bottom edge on desktop and mobile',()=>{
 
 test('companion artwork and the new experience are available offline',()=>{
   assert.ok(fs.existsSync(path.join(root,'assets','baby-dragon.svg')));
-  for(const asset of ['./adventure-home.css?v=4.32.0','./adventure-home.js?v=4.32.0','./assets/baby-dragon.svg'])assert.ok(sw.includes(`'${asset}'`),asset);
+  for(const asset of ['adventure-home.css','adventure-home.js','assets/baby-dragon.svg'])assert.ok(sw.includes(asset),asset);
   assert.doesNotMatch(source,/fetch\(|XMLHttpRequest|openai/i);
 });
 

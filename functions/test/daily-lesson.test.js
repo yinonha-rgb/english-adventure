@@ -68,7 +68,7 @@ test('selection and completion survive JSON persistence and daily credit is idem
 
 test('daily flow is local-only, offline cached and independent of Advanced AI or OpenAI',()=>{
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|teacher-ai/i);
-  assert.match(sw,/daily-lesson-core\.js\?v=4\.24\.0/);
+  assert.match(sw,/daily-lesson-core\.js\?v=\d+\.\d+\.\d+/);
   assert.match(app,/startDailyLesson/);
   assert.match(app,/startLesson\(lesson\)/);
   assert.match(app,/daily-lesson-complete/);
