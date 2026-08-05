@@ -21,8 +21,17 @@ test('browser Back restores the intro and Forward restores the home screen',()=>
   assert.match(entry,/close\(\{pushHistory:false\}\)/);
 });
 
+test('the intro traps focus, closes reliably with Escape and locks background scrolling',()=>{
+  assert.match(entry,/document\.body\.style\.overflow='hidden'/);
+  assert.match(entry,/document\.body\.style\.overflow=previousBodyOverflow/);
+  assert.match(entry,/if\(event\.key==='Escape'\)\{event\.preventDefault\(\);close\(\);return\}/);
+  assert.match(entry,/if\(event\.key!=='Tab'\)return/);
+  assert.match(entry,/document\.removeEventListener\('keydown',onKeydown\)/);
+  assert.doesNotMatch(entry,/document\.addEventListener\('keydown'[^\n]+once:true/);
+});
+
 test('the navigation fix is served by the new application cache',()=>{
-  assert.match(html,/entry-video\.js\?v=4\.46\.0/);
-  assert.match(sw,/english-adventure-4\.47\.0/);
-  assert.match(sw,/entry-video\.js\?v=4\.46\.0/);
+  assert.match(html,/entry-video\.js\?v=4\.47\.1/);
+  assert.match(sw,/english-adventure-4\.47\.1/);
+  assert.match(sw,/entry-video\.js\?v=4\.47\.1/);
 });
