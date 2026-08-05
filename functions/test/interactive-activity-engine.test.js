@@ -112,7 +112,7 @@ test('daily lesson greeting listens automatically and accepts spoken readiness',
   }
   assert.equal(engine.validate(welcome,'banana'),false);
   for(const answer of ['כן','אני מוכן','אני מוכנה','אפשר להתחיל','קדימה'])assert.equal(engine.validate(welcome,answer),true,answer);
-  assert.match(source,/\[TYPES\.WELCOME,TYPES\.REPEAT\]\.includes\(item\?\.type\)/);
+  assert.equal(engine.supportsVoiceAnswer(welcome),true);
   assert.match(source,/recognition\.lang=item\.type===TYPES\.WELCOME\?'he-IL':'en-US'/);
   assert.match(source,/camera did not prepare microphone/);
   assert.match(source,/error==='no-speech'&&retryAttempt<2/);
@@ -120,6 +120,15 @@ test('daily lesson greeting listens automatically and accepts spoken readiness',
   assert.match(source,/this\.autoListeningActivityId=null;[\s\S]*automatic listening scheduled/);
   assert.match(source,/automatic listening scheduled/);
   assert.match(source,/this\.listen\(\{automatic:true\}\)/);
+});
+
+test('every spoken question opens recognition instead of falling into the repeat timer',()=>{
+  const voiceTypes=['welcome','picture-choice','repeat-after-teacher','memory','sentence-builder','listening','story-choice'];
+  for(const type of voiceTypes)assert.equal(engine.supportsVoiceAnswer({type,id:`voice-${type}`}),true,type);
+  for(const type of ['drag-match','movement'])assert.equal(engine.supportsVoiceAnswer({type,id:`manual-${type}`}),false,type);
+  assert.match(source,/supportsVoiceAnswer\(item\)/);
+  assert.match(source,/אמילי שואלת/);
+  assert.match(source,/אמילי מקשיבה לתשובה/);
 });
 
 test('progress resumes per child and completion awards remain idempotent',()=>{
@@ -148,8 +157,9 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.0/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.0/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.1/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.1/);
+  assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
 
@@ -158,6 +168,8 @@ test('daily interactive teacher handles the complete Chrome recognition lifecycl
   assert.match(source,/interimResults=true/);
   assert.match(source,/result\.isFinal/);
   assert.match(source,/speech without final transcript/);
+  assert.match(source,/if\(text\.trim\(\)\)heardSpeech=true/);
+  assert.match(source,/try\{recognition\.stop\(\)\}catch\{\}this\.answer\(finalTranscript\)/);
   assert.match(source,/interactiveSpeechDebug/);
 });
 
