@@ -51,10 +51,20 @@ test('wrong attempts retry and then reveal a hint',()=>{
 test('validators accept correct participation and reject unrelated choices',()=>{
   const picture=lesson.activities.find(item=>item.id==='animals-dog');
   assert.equal(engine.validate(picture,'dog'),true);
+  assert.equal(engine.validate(picture,'כלב'),true);
   assert.equal(engine.validate(picture,'pizza'),false);
   const drag=lesson.activities.find(item=>item.type==='drag-match');
   assert.equal(engine.validate(drag,['dog','cat','bird']),true);
   assert.equal(engine.validate(drag,['dog','cat','pizza']),false);
+});
+
+test('every spoken animal answer accepts the matching Hebrew or English meaning',()=>{
+  const cases=[['animals-dog','dog','כלב'],['animals-repeat-dog','dog','הכלב'],['animals-listen-cat','cat','חתול'],['animals-memory','cat','החתול'],['animals-final','bird','ציפור']];
+  for(const [id,english,hebrew] of cases){const item=lesson.activities.find(activity=>activity.id===id);assert.equal(engine.validate(item,english),true,`${id} English`);assert.equal(engine.validate(item,hebrew),true,`${id} Hebrew`)}
+  const sentence=lesson.activities.find(item=>item.id==='animals-sentence');
+  assert.equal(engine.validate(sentence,'I like dogs'),true);
+  assert.equal(engine.validate(sentence,'אני אוהבת כלבים'),true);
+  assert.equal(engine.validate(sentence,'פיצה'),false);
 });
 
 test('drag matching renders dependable vector pictures instead of font-only emoji',()=>{
@@ -157,8 +167,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.1/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.1/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.46\.2/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.46\.2/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
