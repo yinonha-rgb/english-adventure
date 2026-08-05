@@ -65,6 +65,8 @@ Version 4.23 adds a lightweight, silent, seamless animated WebP loop for each te
 
 Version 4.24 adds an optional self-view camera tile to the interactive lesson. Camera permission is requested only after the child or parent presses the camera button. The stream is displayed locally, never recorded or uploaded, and every media track is stopped when the tile or lesson closes, the page is left, or permission fails.
 
+Version 4.44 adapts the useful classroom ideas from the Wordy prototype to the existing free lesson engine: a visible live speech transcript, a compact in-lesson difficulty selector, and clickable vocabulary cards with local pronunciation help. These features run entirely in the browser and do not call Gemini, OpenAI, or any paid backend.
+
 ## Adaptive difficulty
 
 Version 4.5 adds seven independent 1–10 skill levels, conservative evidence-based promotion, delayed review, temporary in-lesson support, a friendly placement check, and Hebrew parent controls. Both teacher modes use the same limits and per-child state. See [`ADAPTIVE_DIFFICULTY_HE.md`](ADAPTIVE_DIFFICULTY_HE.md) for the exact rules.
@@ -84,6 +86,7 @@ Without sign-in, all names, progress, mistakes, and activity stay on the learner
 - `firebase-sync.js` — authentication, merging, transactions, live snapshots, offline queue, and account UI
 - `teacher-ai.js` — free voice-teacher UI, state machine, local conversation intents, recognition recovery, reports, and parent controls
 - `teacher-providers.js` — shared `ConversationProvider` contract with production `FreeConversationProvider`, deterministic `MockAdvancedConversationProvider`, and disabled `AdvancedConversationProvider`
+- `classroom-tools.js` — live transcript, local pronunciation inspector, and in-lesson difficulty controls
 - `functions/ai-backend-core.js` — disabled backend interfaces, authentication/ownership validation helpers, restrictive abuse and cost limits, and privacy-safe usage records
 - `SECURE_AI_ARCHITECTURE.md` — trust boundaries, feature flags, future secret handling, privacy, limits, and fallback design
 - `AI_ACTIVATION_CHECKLIST.md` — mandatory manual approvals before any real provider work or deployment
