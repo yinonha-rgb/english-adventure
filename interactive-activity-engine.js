@@ -323,6 +323,7 @@
       const text=[prefix,item.teacherInstructionEn,item.teacherInstructionHe].filter(Boolean).join(' ');
       this.speakSegments(text,.82,()=>{
         if(this.current()!==item||this.paused)return;
+        if(item.type===TYPES.MEMORY){this.startMemoryPreview(item);return}
         this.answerLocked=false;
         this.modal.querySelector('#interactiveState').textContent=this.teacherText('אמילי מקשיבה לתשובה','אדם מקשיב לתשובה');
         this.modal.querySelector('.interactive-panel').dataset.focus='answer';
@@ -341,6 +342,26 @@
           },20000);
         }
       });
+    }
+    startMemoryPreview(item){
+      if(this.current()!==item||this.paused)return;
+      this.answerLocked=true;
+      const cards=[...this.modal.querySelectorAll('.memory .interactive-choice')];
+      cards.forEach(card=>{card.disabled=true;card.classList.remove('hidden-card');card.setAttribute('aria-label',`זכרו את המיקום של ${card.dataset.value}`)});
+      this.setInstruction('Look carefully and remember where each animal is.','הסתכלו היטב: החיות יוצגו במשך ארבע שניות. זכרו איפה כל חיה נמצאת.');
+      this.modal.querySelector('#interactiveFeedback').textContent='👀 הביטו וזכרו… 4 שניות';
+      this.modal.querySelector('#interactiveState').textContent=this.teacherText('אמילי נותנת זמן לזכור','אדם נותן זמן לזכור');
+      this.modal.querySelector('.interactive-panel').dataset.focus='answer';
+      this.setVisualState('speaking');
+      this.timer=setTimeout(()=>{
+        if(this.current()!==item||this.paused)return;
+        cards.forEach(card=>{card.textContent='❓';card.classList.add('hidden-card');card.disabled=false;card.setAttribute('aria-label','קלף חיה מוסתר — אפשר לבחור')});
+        this.answerLocked=false;
+        this.modal.querySelector('#interactiveFeedback').textContent='עכשיו בחרו איפה הייתה החיה.';
+        this.modal.querySelector('#interactiveState').textContent=this.teacherText('אמילי מקשיבה לתשובה','אדם מקשיב לתשובה');
+        this.setVisualState('waiting');
+        if(this.shouldAutoListen(item))setTimeout(()=>{if(this.current()===item&&!this.paused&&!this.answerLocked)this.listen({automatic:true})},500);
+      },4000);
     }
     speakSegments(text,rate=.85,onend=()=>{}){
       const Natural=root.EANaturalVoice;
@@ -449,9 +470,8 @@
         game.append(targets,words);host.append(game);
       }else if(item.type===TYPES.MEMORY){
         const grid=document.createElement('div');grid.className='interactive-options memory';
-        item.options.forEach(option=>{const card=this.button(option.label,option.value,(value,button)=>this.answer(value,button));card.dataset.value=option.value;grid.append(card)});
+        item.options.forEach(option=>{const card=this.button(option.label,option.value,(value,button)=>this.answer(value,button));card.dataset.value=option.value;card.disabled=true;grid.append(card)});
         host.append(grid);
-        setTimeout(()=>grid.querySelectorAll('button').forEach(card=>{card.textContent='❓';card.classList.add('hidden-card')}),1800);
       }else if(item.type===TYPES.MOVEMENT){
         const move=document.createElement('div');move.className='movement-demo';move.textContent='🐦  3… 2… 1…';
         host.append(move);controls.append(this.button('סיימתי! ⭐',item.correctAnswer,value=>this.answer(value)));
