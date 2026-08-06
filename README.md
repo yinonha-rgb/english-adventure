@@ -56,6 +56,8 @@ Version 4.49 makes the interactive lesson feel smoother and less repetitive. Cor
 
 Version 4.50 introduces a shared visual-polish layer for the home and lesson experience: consistent translucent surfaces, clearer elevation and button feedback, richer progress treatment, and a friendly branded camera-loading state instead of a harsh black tile. The layer preserves RTL, responsive breakpoints, keyboard focus, and reduced-motion behavior.
 
+Version 4.51 protects learning integrity in the standard lesson flow. Quiz choices are deterministically reordered per child and lesson, incorrect answers receive one real retry before a concise explanation, and pronunciation XP is awarded only after microphone speech passes validation. The mobile welcome screen now keeps its primary action above the video, makes the background inert while open, and restores focus without scrolling past the teacher experience.
+
 The **Free Guided Teacher** is the production teacher. It runs entirely with browser speech features and deterministic lesson logic and never calls a paid API. The repository retains a local mock provider for testing architecture, but the advanced provider is locked in the shipped build: `ADVANCED_AI_ENABLED` is `false`, its endpoint is empty, real pricing is unset, the backend transport is explicitly `implemented:false`, no OpenAI secret is bound, and backend deployment is intentionally blocked.
 
 Hebrew guides: [teacher-mode comparison](TEACHER_MODES_HE.md) and [free teacher](FREE_VOICE_TEACHER_HE.md).
