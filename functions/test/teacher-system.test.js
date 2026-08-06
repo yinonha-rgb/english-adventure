@@ -191,8 +191,8 @@ test('female and male previews apply matching voices and distinct fallback pitch
   try{
     await System.previewTeacher(System.byId('female-young'),'he');
     await System.previewTeacher(System.byId('male-young'),'he');
-    assert.ok(spoken[0].pitch>1.1);
-    assert.ok(spoken[1].pitch<.9);
+    assert.ok(spoken[0].pitch>1&&spoken[0].pitch<1.1);
+    assert.ok(spoken[1].pitch>.9&&spoken[1].pitch<1);
     assert.match(spoken[0].text,/אמילי/);
     assert.match(spoken[1].text,/אדם/);
   }finally{globalThis.EANaturalVoice=oldNatural;globalThis.speechSynthesis=oldSynth;globalThis.SpeechSynthesisUtterance=oldUtterance}
