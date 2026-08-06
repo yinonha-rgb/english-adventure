@@ -80,6 +80,8 @@ test('recognition alternates to Hebrew on a bounded retry when Hebrew answers ar
   assert.equal(Providers.recognitionLanguage({phase:'speaking',restartAttempt:0,expectedAnswers}),'en-US');
   assert.equal(Providers.recognitionLanguage({phase:'speaking',restartAttempt:1,expectedAnswers}),'he-IL');
   assert.equal(Providers.recognitionLanguage({phase:'speaking',restartAttempt:2,expectedAnswers}),'en-US');
-  assert.equal(Providers.recognitionLanguage({phase:'greeting',restartAttempt:0,expectedAnswers:['yes']}),'he-IL');
+  assert.equal(Providers.recognitionLanguage({phase:'greeting',restartAttempt:0,expectedAnswers:['yes']}),'en-US');
+  assert.equal(Providers.recognitionLanguage({phase:'greeting',restartAttempt:0,expectedAnswers:['yes','כן']}),'he-IL');
+  assert.equal(Providers.recognitionLanguage({phase:'greeting',restartAttempt:1,expectedAnswers:['yes','כן']}),'en-US');
   assert.equal(Providers.recognitionLanguage({phase:'speaking',restartAttempt:1,expectedAnswers:['dog']}),'en-US');
 });

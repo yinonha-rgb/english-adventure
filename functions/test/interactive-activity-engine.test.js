@@ -164,6 +164,9 @@ test('daily lesson greeting listens automatically and accepts spoken readiness',
   for(const answer of ['כן','אני מוכן','אני מוכנה','אפשר להתחיל','קדימה'])assert.equal(engine.validate(welcome,answer),true,answer);
   assert.equal(engine.supportsVoiceAnswer(welcome),true);
   assert.match(source,/EATeacherProviders\?\.recognitionLanguage/);
+  assert.match(source,/restartAttempt:retryAttempt/);
+  assert.doesNotMatch(source,/validateActivity\(/);
+  assert.match(source,/scoreAlternative:text=>validate\(item,text\)\?1:0/);
   assert.match(source,/camera did not prepare microphone/);
   assert.match(source,/error==='no-speech'&&retryAttempt<2/);
   assert.match(source,/recognition restart scheduled/);
@@ -220,8 +223,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.49\.0/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.49\.0/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.52\.1/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.52\.1/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });

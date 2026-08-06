@@ -27,7 +27,7 @@ test('the female teacher is Emily without changing persistent profile ids',()=>{
 });
 
 test('visible teacher copy no longer presents the old female name',()=>{
-  const copy=['index.html','app.js','landing-page.js','teacher-ai.js','teacher-visual.js','teacher-rig.js','teacher-noa-video.js']
+  const copy=['index.html','app.js','entry-video.js','teacher-ai.js','teacher-visual.js','teacher-rig.js','teacher-noa-video.js']
     .map(read).join('\n');
   for(const oldName of ['המורה נועה','נועה – מורה','אני נועה','נועה מדברת','נועה מקשיבה']){
     assert.doesNotMatch(copy,new RegExp(oldName));

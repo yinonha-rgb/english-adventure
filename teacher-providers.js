@@ -73,7 +73,7 @@
   }
   function recognitionLanguage({phase='',restartAttempt=0,expectedAnswers=[]}={}){
     const hasHebrew=expectedAnswers.some(answer=>/[\u0590-\u05ff]/.test(String(answer||'')));
-    if(phase==='greeting')return 'he-IL';
+    if(phase==='greeting')return hasHebrew&&restartAttempt%2===0?'he-IL':'en-US';
     return hasHebrew&&restartAttempt%2===1?'he-IL':'en-US';
   }
   function selectRecognitionAlternative(result,{scoreAlternative=()=>0}={}){
