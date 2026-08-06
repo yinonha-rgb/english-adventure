@@ -23,7 +23,7 @@ test('teacher gender uses explicit metadata and configurable preferences',()=>{
 });
 test('voice fallback is explicit when gender metadata is unavailable',()=>{
   const choice=Natural.chooseVoice([{name:'Unknown Local',lang:'he-IL',localService:true}],'he-IL','','female');
-  assert.equal(choice.fallbackReason,'gender-unknown-pitch-adjusted');
+  assert.equal(choice.fallbackReason,'gender-unknown-gentle-correction');
   assert.ok(Natural.genderPitch('female',choice.actualGender)>1);
   assert.ok(Natural.genderPitch('male',choice.actualGender)<1);
 });
@@ -47,22 +47,36 @@ test('central utterance identity applies the selected teacher voice to direct sp
   assert.ok(female.pitch>1);
   assert.ok(male.pitch<1);
 });
-test('an explicitly male-only fallback is strongly corrected for the female teacher',()=>{
+test('an explicitly male-only fallback is never assigned to the female teacher',()=>{
   const utterance={},choice=Natural.applyVoiceIdentity(utterance,{voices:[{name:'Microsoft Asaf',gender:'male',lang:'he-IL',voiceURI:'asaf'}],lang:'he-IL',gender:'female'});
-  assert.equal(choice.actualGender,'male');
-  assert.ok(utterance.pitch>=1.2);
+  assert.equal(choice.voice,null);
+  assert.equal(choice.fallbackReason,'opposite-gender-rejected');
+  assert.equal(utterance.voice,undefined);
+  assert.ok(utterance.pitch>1&&utterance.pitch<1.1);
 });
 test('speech queue keeps female and male voices audibly distinct when browser gender is unknown',async()=>{
   const utterances=[],synth={cancel(){},speak(u){utterances.push(u);queueMicrotask(()=>u.onend())}},U=function(text){this.text=text};
   const speakFor=async teacherVoiceGender=>{const q=new Natural.SpeechQueue({synth,Utterance:U,pause:()=>Promise.resolve(),getSettings:()=>({teacherVoiceGender})});q.setVoices([{name:'Hebrew Local',lang:'he-IL',voiceURI:'he',localService:true}]);await q.speak([{text:'שלום',lang:'he-IL'}]);return utterances.at(-1)};
   const female=await speakFor('female'),male=await speakFor('male');
-  assert.ok(female.pitch>1.1);
-  assert.ok(male.pitch<.9);
+  assert.ok(female.pitch>1&&female.pitch<1.1);
+  assert.ok(male.pitch>.9&&male.pitch<1);
   assert.equal(female.voice.voiceURI,'he');
   assert.equal(male.voice.voiceURI,'he');
 });
 test('preferred device voice persists when still available',()=>assert.equal(Natural.chooseVoice(voices,'en-US','basic').voice.voiceURI,'basic'));
 test('phrase splitting creates natural short utterances',()=>assert.deepEqual(Natural.splitPhrases("Hi, Ori! Today we're learning colors. What color is it?"),['Hi, Ori!',"Today we're learning colors.",'What color is it?']));
+test('long teacher explanations are split at natural breath points',()=>{
+  const phrases=Natural.splitPhrases('Look at the picture carefully, and think about the animal that we met yesterday before you answer the question.','en-US');
+  assert.ok(phrases.length>=2);
+  assert.ok(phrases.every(phrase=>phrase.split(/\s+/).length<=16));
+});
+test('natural and neural female voices outrank basic desktop voices',()=>{
+  const candidates=[
+    {name:'Microsoft Zira Desktop',lang:'en-US',voiceURI:'desktop',localService:true},
+    {name:'Microsoft Aria Online Natural',lang:'en-US',voiceURI:'natural',localService:false}
+  ];
+  assert.equal(Natural.chooseVoice(candidates,'en-US','','female').voice.voiceURI,'natural');
+});
 test('pronunciation metadata uses defined chunks and recognition variants',()=>{const m=Natural.pronunciationMeta('Wonderful.',{pronunciationChunks:['Won','der','ful'],commonRecognitionVariants:['wonder full']});assert.deepEqual(m.pronunciationChunks,['Won','der','ful']);assert.deepEqual(m.commonRecognitionVariants,['wonder full'])});
 test('turn guard prevents overlap and duplicate answers',()=>{const g=Natural.createTurnGuard(),id=g.beginSpeech();assert.equal(g.beginListening(),false);assert.equal(g.endSpeech(id),true);assert.equal(g.beginListening(),true);assert.equal(g.handleAnswer(),true);assert.equal(g.handleAnswer(),false)});
 test('stale synthesis completion cannot start a turn',()=>{const g=Natural.createTurnGuard(),old=g.beginSpeech();g.beginSpeech();assert.equal(g.endSpeech(old),false);assert.equal(g.snapshot().speaking,true)});
@@ -80,8 +94,9 @@ test('noise or an interim result without detected speech is never treated as an 
   assert.deepEqual(Natural.finalizeRecognitionResult({interimTranscript:'background noise',heardSpeech:false,interimConfidence:.8}),{text:'',confidence:0,fallback:false});
 });
 test('response variation is deterministic and never praises wrong answers',()=>{const a=Natural.responseStyle({category:'correct',index:0}),b=Natural.responseStyle({category:'correct',index:1}),wrong=Natural.responseStyle({category:'completely-unrelated',index:0});assert.notEqual(a.text,b.text);assert.equal(wrong.state,'correcting');assert.doesNotMatch(wrong.text,/right|exactly|great job/i)});
-test('praise matches streak and success after difficulty',()=>{assert.match(Natural.responseStyle({category:'correct',correctStreak:3}).text,/getting really good/);assert.match(Natural.responseStyle({category:'correct',hadDifficulty:true}).text,/worked it out/)});
-test('silence and uncertain recognition remain gentle',()=>{assert.match(Natural.responseStyle({category:'didnt-answer'}).text,/Take your time/);assert.match(Natural.responseStyle({category:'speech-recognition-uncertain'}).text,/heard/)});
+test('praise matches streak and success after difficulty',()=>{assert.match(Natural.responseStyle({category:'correct',correctStreak:3}).text,/on a roll|three in a row/);assert.match(Natural.responseStyle({category:'correct',hadDifficulty:true}).text,/worked it out|kept trying/)});
+test('silence and uncertain recognition remain gentle',()=>{assert.match(Natural.responseStyle({category:'didnt-answer'}).text,/No rush|Take your time/);assert.match(Natural.responseStyle({category:'speech-recognition-uncertain'}).text,/catch|heard/)});
+test('teacher phrasing uses natural contractions without changing meaning',()=>{assert.equal(Natural.humanizeTeacherText('Let us try again. I am listening.','en-US'),"Let's try again. I'm listening.");assert.equal(Natural.humanizeTeacherText('That is right!','en-US'),"That's right!")});
 test('speech queue never overlaps and slower replay is temporary',async()=>{const utterances=[],synth={cancel(){},speak(u){utterances.push(u);queueMicrotask(()=>u.onend())}},U=function(text){this.text=text},q=new Natural.SpeechQueue({synth,Utterance:U,pause:()=>Promise.resolve(),getSettings:()=>({speechSpeed:'normal'})});await q.speak([{text:'Hello. Ready?',lang:'en-US',tone:'greeting'}]);const original=utterances.map(x=>x.rate);await q.repeatSlower();assert.ok(utterances.slice(original.length).every((x,i)=>x.rate<original[i]));assert.equal(q.active,false)});
 test('pause, background, resume, device changes and duplicate events use idempotent cancellation',()=>{const q=new Natural.SpeechQueue({synth:{cancel(){}},Utterance:function(){}});q.cancel();q.cancel();assert.equal(q.active,false)});
 test('voice settings migrate and persist without enabling paid mode',()=>{const s=Core.migrateSettings({englishVoice:'aria',hebrewVoice:'hebrew',voiceTeacherId:'female-young',speechSpeed:'slow',speechVolume:.7,voiceCalibrated:true});assert.equal(s.englishVoice,'aria');assert.equal(s.voiceTeacherId,'female-young');assert.equal(s.speechSpeed,'slow');assert.equal(s.speechVolume,.7);assert.equal(s.allowedAdvanced,false)});
