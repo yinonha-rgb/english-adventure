@@ -30,8 +30,24 @@ test('the intro traps focus, closes reliably with Escape and locks background sc
   assert.doesNotMatch(entry,/document\.addEventListener\('keydown'[^\n]+once:true/);
 });
 
+test('the intro makes the background inert and restores its previous accessibility state',()=>{
+  assert.match(entry,/!\['SCRIPT','STYLE','LINK','TEMPLATE'\]\.includes\(element\.tagName\)/);
+  assert.match(entry,/element\.setAttribute\('inert',''\)/);
+  assert.match(entry,/element\.setAttribute\('aria-hidden','true'\)/);
+  assert.match(entry,/restoreBackground\(\)/);
+  assert.match(entry,/if\(inert\)element\.setAttribute\('inert',''\);else element\.removeAttribute\('inert'\)/);
+});
+
+test('the mobile primary action appears before media and closing returns to the top safely',()=>{
+  assert.match(entry,/\.ea-video-entry-actions\{order:0\}/);
+  assert.match(entry,/\.ea-video-entry-media\{order:1;min-height:180px\}/);
+  assert.doesNotMatch(entry,/\.ea-video-entry-media\{order:-1/);
+  assert.match(entry,/scrollTo\(0,0\)/);
+  assert.match(entry,/focus\?\.\(\{preventScroll:true\}\)/);
+});
+
 test('the navigation fix is served by the new application cache',()=>{
-  assert.match(html,/entry-video\.js\?v=4\.47\.1/);
-  assert.match(sw,/english-adventure-4\.50\.0/);
-  assert.match(sw,/entry-video\.js\?v=4\.47\.1/);
+  assert.match(html,/entry-video\.js\?v=4\.51\.0/);
+  assert.match(sw,/english-adventure-4\.51\.0/);
+  assert.match(sw,/entry-video\.js\?v=4\.51\.0/);
 });
