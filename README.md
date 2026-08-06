@@ -10,6 +10,8 @@ The application is being split incrementally so existing progress and deployed f
 
 ## Highlights
 
+Version 4.52 improves the free browser voice with natural/neural voice prioritization, strict teacher-gender matching, gentle pitch correction, child-friendly pacing, and natural breath points for longer explanations.
+
 - Hebrew-first parent-facing interface with an English switch and complete RTL support
 - Multiple editable child profiles with separate progress stored in `localStorage`
 - 22 practical lessons across greetings, family, colors, numbers, food, home, school, animals, body, clothing, weather, emotions, shopping, café, directions, and travel
