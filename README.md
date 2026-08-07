@@ -10,7 +10,7 @@ The application is being split incrementally so existing progress and deployed f
 
 ## Highlights
 
-Version 4.52.2 keeps Hebrew as a comprehension safety net while coaching children to answer lesson questions in English before advancing.
+Version 4.52.3 switches the teacher's animated and static full-body layers atomically, preventing ghosted duplicate limbs during animation state changes.
 
 - Hebrew-first parent-facing interface with an English switch and complete RTL support
 - Multiple editable child profiles with separate progress stored in `localStorage`

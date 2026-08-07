@@ -82,6 +82,15 @@ test('each teacher has a calibrated lip anchor and speaking never stacks a secon
   assert.match(rigCss,/\.teacher-presence-rig\.mouth-active \.rig-expression\{display:none!important\}/);
 });
 
+test('animated and static full-body layers switch atomically so extra limbs never appear',()=>{
+  const rigCss=fs.readFileSync(path.join(root,'teacher-rig.css'),'utf8');
+  assert.match(rigCss,/\.rig-body-loop\{[^}]*visibility:visible/);
+  assert.match(rigCss,/\.rig-body-static\{[^}]*visibility:hidden/);
+  assert.match(rigCss,/\.mouth-active \.rig-body-loop\{opacity:0;visibility:hidden\}/);
+  assert.match(rigCss,/\.mouth-active \.rig-body-static\{opacity:1;visibility:visible\}/);
+  assert.doesNotMatch(rigCss,/\.rig-body-(?:loop|static)\{[^}]*transition:opacity/);
+});
+
 test('rig assets are shipped, cached offline and loaded before the teacher system',()=>{
   for(const file of ['teacher-noa-body-v2.png','teacher-adam-body-v2.png']){
     assert.ok(fs.statSync(path.join(root,'assets',file)).size>100000,file);
@@ -108,7 +117,7 @@ test('both teachers have local seamless idle video loops with safe fallbacks',()
   assert.match(female,/rig-body-loop[^>]+teacher-noa-idle-loop-v1\.webp/);
   assert.match(male,/rig-body-loop[^>]+teacher-adam-idle-loop-v1\.webp/);
   const css=fs.readFileSync(path.join(root,'teacher-rig.css'),'utf8');
-  assert.match(css,/mouth-active \.rig-body-loop\{opacity:0\}/);
+  assert.match(css,/mouth-active \.rig-body-loop\{opacity:0;visibility:hidden\}/);
   assert.match(css,/prefers-reduced-motion:reduce[\s\S]+\.rig-body-loop/);
 });
 
