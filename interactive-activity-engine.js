@@ -126,6 +126,9 @@
   const normalize=value=>String(value??'').toLowerCase().trim().replace(/[.!?,]/g,'').replace(/\s+/g,' ');
   const containsHebrew=value=>/[\u0590-\u05ff]/.test(String(value||''));
   const englishAnswer=item=>String(Array.isArray(item?.correctAnswer)?item.correctAnswer[0]:item?.correctAnswer||'').trim();
+  function requiresEnglishPractice(activity,response){
+    return Boolean(activity&&activity.type!==TYPES.WELCOME&&containsHebrew(response)&&englishAnswer(activity)&&validate(activity,response));
+  }
   function probableSpeechEcho(heard,spoken,elapsedMs=Infinity,onsetDelayMs=Infinity){
     if(elapsedMs>3200)return false;
     const answer=normalize(heard),teacher=normalize(spoken);
@@ -169,6 +172,7 @@
       this.teacherProfile=root.EATeacherSystem?.byId?.(this.teacherId);
       this.teacherGender=this.teacherProfile?.gender||'female';
       this.state={index:0,attempts:0,results:[],...(progress?.load?.(lesson.id)||{})};
+      this.englishPromptAttempts={};
       this.timer=null;
       this.lessonTimerId=null;
       this.lessonRemainingSeconds=Number(this.state.lessonRemainingSeconds)||600;
@@ -584,12 +588,30 @@
       if(this.paused||this.answerLocked)return;
       this.answerLocked=true;
       clearTimeout(this.timer);
-      const item=this.current(),correct=validate(item,value);
-      this.state.results.push({activityId:item.id,correct,response:String(value),at:new Date().toISOString()});
+      const item=this.current();
+      let correct=validate(item,value);
+      if(correct&&requiresEnglishPractice(item,value)){
+        const promptCount=(this.englishPromptAttempts[item.id]||0)+1;
+        this.englishPromptAttempts[item.id]=promptCount;
+        const expected=englishAnswer(item),autoRetry=promptCount<=2;
+        const prompt=autoRetry?`מעולה, הבנת נכון. עכשיו נסו לענות באנגלית. Say: ${expected}.`:`הבנת נכון. כדי להמשיך, אמרו ${expected} באנגלית או לחצו על הכפתור ${expected}.`;
+        this.state.results.push({activityId:item.id,correct:false,understood:true,englishPracticeRequired:true,response:String(value),at:new Date().toISOString()});
+        this.feedback(prompt,false,{speak:false});
+        this.save();
+        this.speakSegments(prompt,.82,()=>{
+          if(this.current()!==item||this.paused||!this.modal.classList.contains('open'))return;
+          this.answerLocked=false;
+          this.modal.querySelector('#interactiveState').textContent=this.teacherText('אמילי מחכה לתשובה באנגלית','אדם מחכה לתשובה באנגלית');
+          this.setVisualState('waiting');
+          if(autoRetry&&this.shouldAutoListen(item))setTimeout(()=>{if(this.current()===item&&!this.paused&&!this.answerLocked)this.listen({automatic:true})},650);
+        });
+        return;
+      }
+      this.state.results.push({activityId:item.id,correct,response:String(value),englishCoached:correct&&item.type!==TYPES.WELCOME&&containsHebrew(value),at:new Date().toISOString()});
       this.state=transition(this.state,value,correct);
       if(correct){
         button?.classList.add('correct');
-        const bridge=containsHebrew(value)&&englishAnswer(item)?`Correct! In English, we say: ${englishAnswer(item)}.`:'';
+        const bridge=item.type!==TYPES.WELCOME&&containsHebrew(value)&&englishAnswer(item)?`You understood it. In English, we say: ${englishAnswer(item)}.`:'';
         const successText=bridge||successMessage(this.state.index-1);
         this.feedback(successText,true,{speak:false});
         this.save();
@@ -680,5 +702,5 @@
     return teacher;
   }
 
-  root.EAInteractiveTeacher={TYPES,VOICE_ANSWER_TYPES,supportsVoiceAnswer,SUCCESS_MESSAGES,successMessage,COMPONENTS,createAnimalsLesson,animalPicture,validate,transition,probableSpeechEcho,startAnimals};
+  root.EAInteractiveTeacher={TYPES,VOICE_ANSWER_TYPES,supportsVoiceAnswer,SUCCESS_MESSAGES,successMessage,COMPONENTS,createAnimalsLesson,animalPicture,validate,requiresEnglishPractice,transition,probableSpeechEcho,startAnimals};
 })(typeof window!=='undefined'?window:globalThis);

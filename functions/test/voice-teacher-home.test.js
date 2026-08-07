@@ -85,6 +85,17 @@ test('daily voice startup makes zero OpenAI calls',()=>{
   assert.doesNotMatch(dailyStart,/fetch\(|openai|backend/i);
 });
 
+test('daily voice teacher coaches understood Hebrew answers into English',()=>{
+  assert.match(teacher,/Say one word from this lesson in English\./);
+  assert.match(teacher,/Answer in English:/);
+  assert.doesNotMatch(teacher,/Answer in English or Hebrew:/);
+  assert.match(teacher,/verdict\.valid&&phase!==0&&Core\.containsHebrew\(heard\)/);
+  assert.match(teacher,/I understood you\. Now answer in English\. Say/);
+  assert.match(teacher,/englishCoachAttempts\[key\]/);
+  assert.match(teacher,/attempt<=2\?listen\(i\):showAnswers/);
+  assert.match(teacher,/אם תענו בעברית, אני אבין ואעזור לכם לומר את אותה תשובה באנגלית/);
+});
+
 test('Emily keeps a long continuous child turn and answers contextual questions',()=>{
   assert.match(teacher,/r\.continuous=true;r\.maxAlternatives=5/);
   assert.match(teacher,/\},20000\)\}/);

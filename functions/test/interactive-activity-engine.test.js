@@ -83,8 +83,17 @@ test('every spoken animal answer accepts the matching Hebrew or English meaning'
   assert.equal(engine.validate(sentence,'פיצה'),false);
 });
 
-test('Hebrew participation is reinforced with the expected English answer',()=>{
-  assert.match(source,/Correct! In English, we say:/);
+test('Hebrew understanding is acknowledged but English is requested before advancing',()=>{
+  const picture=lesson.activities.find(item=>item.id==='animals-dog');
+  const welcome=lesson.activities.find(item=>item.type==='welcome');
+  assert.equal(engine.requiresEnglishPractice(picture,'כלב'),true);
+  assert.equal(engine.requiresEnglishPractice(picture,'dog'),false);
+  assert.equal(engine.requiresEnglishPractice(welcome,'כן'),false);
+  assert.match(source,/עכשיו נסו לענות באנגלית\. Say:/);
+  assert.match(source,/autoRetry=promptCount<=2/);
+  assert.match(source,/כדי להמשיך, אמרו/);
+  assert.match(source,/englishPracticeRequired:true/);
+  assert.match(source,/You understood it\. In English, we say:/);
   assert.match(source,/Let's try in English\. Say:/);
   assert.match(source,/containsHebrew\(value\)/);
 });
@@ -223,8 +232,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.52\.1/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.52\.1/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.52\.2/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.52\.2/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
