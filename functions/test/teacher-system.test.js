@@ -38,6 +38,8 @@ test('layered sprite rigs use distinct isolated atlases, expressions and mouth s
   assert.match(female,/teacher-noa-body-v2\.png/);
   assert.match(male,/teacher-adam-body-v2\.png/);
   for(const markup of [female,male]){
+    assert.equal((markup.match(/class="rig-part /g)||[]).length,15);
+    assert.match(markup,/class="rig-puppet"/);
     assert.match(markup,/class="[^"]*\brig-body\b[^"]*"[^>]*src=/);
     assert.match(markup,/rig-expression[^>]*src=[^>]* hidden/);
     assert.match(markup,/rig-mouth-shape[^>]*src=[^>]* hidden/);
@@ -92,13 +94,13 @@ test('human micro-motion varies naturally without repeating the same pose',()=>{
   assert.match(css,/var\(--motion-intensity,1\)/);
 });
 
-test('animated and static full-body layers switch atomically so extra limbs never appear',()=>{
-  const rigCss=fs.readFileSync(path.join(root,'teacher-rig.css'),'utf8');
-  assert.match(rigCss,/\.rig-body-loop\{[^}]*visibility:visible/);
-  assert.match(rigCss,/\.rig-body-static\{[^}]*visibility:hidden/);
-  assert.match(rigCss,/\.mouth-active \.rig-body-loop\{opacity:0;visibility:hidden\}/);
-  assert.match(rigCss,/\.mouth-active \.rig-body-static\{opacity:1;visibility:visible\}/);
-  assert.doesNotMatch(rigCss,/\.rig-body-(?:loop|static)\{[^}]*transition:opacity/);
+test('puppet uses exactly one pair of arms, hands and legs with a single fallback body',()=>{
+  assert.equal(Rig.puppetParts.filter(part=>part.startsWith('arm-')).length,4);
+  assert.deepEqual(Rig.puppetParts.filter(part=>part.startsWith('hand-')).sort(),['hand-left','hand-right']);
+  assert.equal(Rig.puppetParts.filter(part=>part.startsWith('leg-')).length,4);
+  const markup=Rig.rigMarkup('female-young');
+  assert.equal((markup.match(/rig-body-fallback/g)||[]).length,1);
+  assert.doesNotMatch(markup,/rig-body-loop/);
 });
 
 test('rig assets are shipped, cached offline and loaded before the teacher system',()=>{
@@ -115,20 +117,19 @@ test('rig assets are shipped, cached offline and loaded before the teacher syste
   assert.match(html,/teacher-visual\.js\?v=\d+\.\d+\.\d+[\s\S]*teacher-rig\.js\?v=\d+\.\d+\.\d+[\s\S]*teacher-system\.js\?v=\d+\.\d+\.\d+/);
 });
 
-test('both teachers have local seamless idle video loops with safe fallbacks',()=>{
-  for(const teacher of ['noa','adam']){
-    const file=`teacher-${teacher}-idle-loop-v1.webp`,bytes=fs.readFileSync(path.join(root,'assets',file));
-    assert.equal(bytes.subarray(0,4).toString(),'RIFF');
-    assert.equal(bytes.subarray(8,12).toString(),'WEBP');
-    assert.ok(bytes.includes(Buffer.from('ANIM')),`${teacher} loop is animated`);
-    assert.match(sw,new RegExp(`assets/${file.replace('.','\\.')}`));
+test('both teachers ship complete transparent puppet parts with safe fallbacks',()=>{
+  for(const teacher of ['emily','adam'])for(const part of Rig.puppetParts){
+    const file=path.join(root,'assets','rigs',teacher,`${part}.png`);
+    assert.ok(fs.statSync(file).size>500,`${teacher}/${part}`);
   }
+  assert.match(sw,/RIG_PARTS=\[[^\]]*'head'/);
+  assert.match(sw,/assets\/rigs\/\$\{teacher\}\/\$\{part\}\.png/);
   const female=Rig.rigMarkup('female-young'),male=Rig.rigMarkup('male-young');
-  assert.match(female,/rig-body-loop[^>]+teacher-noa-idle-loop-v1\.webp/);
-  assert.match(male,/rig-body-loop[^>]+teacher-adam-idle-loop-v1\.webp/);
+  assert.match(female,/assets\/rigs\/emily\/head\.png/);
+  assert.match(male,/assets\/rigs\/adam\/head\.png/);
   const css=fs.readFileSync(path.join(root,'teacher-rig.css'),'utf8');
-  assert.match(css,/mouth-active \.rig-body-loop\{opacity:0;visibility:hidden\}/);
-  assert.match(css,/prefers-reduced-motion:reduce[\s\S]+\.rig-body-loop/);
+  assert.match(css,/puppet-unavailable \.rig-puppet\{display:none\}/);
+  assert.match(css,/puppet-unavailable \.rig-body-static\{opacity:1;visibility:visible\}/);
 });
 
 test('female and male teachers use distinct dedicated artwork',()=>{

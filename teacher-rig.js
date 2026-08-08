@@ -11,12 +11,14 @@
   const GESTURES=Object.freeze(['none','wave','point-left','point-right','thumbs-up','open-hands','heart-hands','clap','thinking-pose']);
   const STATE_ALIASES=Object.freeze({speaking:'speak',greeting:'wave',waving:'wave',listening:'listen',waiting:'listen',thinking:'think',pointing:'point',praising:'celebrate',celebrating:'celebrate',happy:'celebrate',encouraging:'encouraging',correcting:'encouraging',paused:'idle'});
   const asset=(key,group,name)=>`assets/teacher-${key}-${group}-${name}-v2.png`;
+  const puppetParts=['hair-back','neck','torso','hips','leg-left-upper','leg-left-lower','leg-right-upper','leg-right-lower','arm-left-upper','arm-left-lower','hand-left','arm-right-upper','arm-right-lower','hand-right','head'];
+  const puppetMarkup=(gender)=>{const folder=gender==='female'?'emily':'adam';return `<span class="rig-puppet" aria-hidden="true">${puppetParts.map(part=>`<img class="rig-part rig-${part}" src="assets/rigs/${folder}/${part}.png" alt="" decoding="async">`).join('')}</span>`};
   const randomBetween=(min,max)=>Math.round(min+Math.random()*(max-min));
   function rigMarkup(character){
     const g=GEOMETRY[character]||GEOMETRY['female-young'],gender=character==='male-young'?'male':'female',name=labels[gender],box=(prefix,values)=>values.map((value,index)=>`--${prefix}-${['x','y','w','h'][index]}:${value}%`).join(';');
     const faces=expressions.map(state=>`<img class="rig-expression rig-expression-${state}" src="${asset(g.key,'expression',state)}" alt="" hidden aria-hidden="true">`).join('');
     const lips=mouths.map(shape=>`<img class="rig-mouth-shape rig-mouth-${shape}" src="${asset(g.key,'mouth',shape)}" alt="" hidden aria-hidden="true">`).join('');
-    return `<span class="teacher-rig" style="${box('expr',g.expressionBox)};${box('lip',g.mouthBox)}" data-rig-gender="${gender}" data-motion="still" data-gesture="none" role="img" aria-label="${name}, מורה צעיר${gender==='female'?'ה':''} וידידותי${gender==='female'?'ת':''}"><span class="teacher-rig-canvas"><img class="rig-body rig-body-static" src="${g.body}" alt=""><img class="rig-body rig-body-loop" src="${g.idleLoop}" alt="" decoding="async" aria-hidden="true">${faces}${lips}</span><i class="teacher-rig-blink" aria-hidden="true"></i><span class="teacher-rig-stars" aria-hidden="true">✦ ★ ✧</span><span class="teacher-gesture-trail" aria-hidden="true"></span></span>`;
+    return `<span class="teacher-rig" style="${box('expr',g.expressionBox)};${box('lip',g.mouthBox)}" data-rig-gender="${gender}" data-motion="still" data-gesture="none" role="img" aria-label="${name}, מורה צעיר${gender==='female'?'ה':''} וידידותי${gender==='female'?'ת':''}"><span class="teacher-rig-canvas">${puppetMarkup(gender)}<img class="rig-body rig-body-static rig-body-fallback" src="${g.body}" alt="">${faces}${lips}</span><i class="teacher-rig-blink" aria-hidden="true"></i><span class="teacher-rig-stars" aria-hidden="true">✦ ★ ✧</span><span class="teacher-gesture-trail" aria-hidden="true"></span></span>`;
   }
   class TeacherController{
     constructor(rootEl,{character='female-young',reducedMotion=false,subtitles='all'}={}){
@@ -30,8 +32,8 @@
     mount(){
       const gender=this.character==='male-young'?'male':'female',name=labels[gender];this.name=name;
       this.rootEl.innerHTML=`<section class="teacher-presence teacher-presence-rig" data-state="idle" data-controller-state="idle" data-character="${this.character}" data-mouth="rest" aria-live="polite"><button class="teacher-character" type="button" aria-label="לחצו על ${name} כדי לשמוע שוב">${rigMarkup(this.character)}<span class="teacher-ear" aria-hidden="true">👂</span></button><div class="teacher-bubbles"><p class="speech-bubble en" lang="en"></p><p class="speech-bubble he" lang="he" dir="rtl"></p></div><span class="sr-only teacher-gesture">${name} מוכן${gender==='female'?'ה':''}</span></section>`;
-      this.presence=this.rootEl.querySelector('.teacher-presence');this.rig=this.rootEl.querySelector('.teacher-rig');this.en=this.rootEl.querySelector('.speech-bubble.en');this.he=this.rootEl.querySelector('.speech-bubble.he');this.gestureLabel=this.rootEl.querySelector('.teacher-gesture');this.faceNodes=[...this.rootEl.querySelectorAll('.rig-expression')];this.mouthNodes=[...this.rootEl.querySelectorAll('.rig-mouth-shape')];this.loopNode=this.rootEl.querySelector('.rig-body-loop');
-      this.loopNode?.addEventListener('error',()=>this.presence.classList.add('loop-unavailable'),{once:true});
+      this.presence=this.rootEl.querySelector('.teacher-presence');this.rig=this.rootEl.querySelector('.teacher-rig');this.en=this.rootEl.querySelector('.speech-bubble.en');this.he=this.rootEl.querySelector('.speech-bubble.he');this.gestureLabel=this.rootEl.querySelector('.teacher-gesture');this.faceNodes=[...this.rootEl.querySelectorAll('.rig-expression')];this.mouthNodes=[...this.rootEl.querySelectorAll('.rig-mouth-shape')];this.partNodes=[...this.rootEl.querySelectorAll('.rig-part')];
+      let failed=false;this.partNodes.forEach(part=>part.addEventListener('error',()=>{if(failed)return;failed=true;this.presence.classList.add('puppet-unavailable')},{once:true}));
       this.rootEl.querySelector('.teacher-character').onclick=()=>{this.reveal();this.replay(this.lastSpeech)};
       if(typeof document!=='undefined')document.addEventListener('visibilitychange',this.onVisibility);
       this.visible=typeof document==='undefined'||!document.hidden;this.startFrameMonitor();this.scheduleMotion(320);
@@ -98,5 +100,5 @@
     destroy(){clearTimeout(this.motionTimer);clearTimeout(this.mouthTimer);clearTimeout(this.gestureTimer);if(this.frameHandle&&typeof cancelAnimationFrame==='function')cancelAnimationFrame(this.frameHandle);if(typeof document!=='undefined')document.removeEventListener('visibilitychange',this.onVisibility);this.stopMouth()}
   }
   function createController(rootEl,options){return new TeacherController(rootEl,options)}
-  return{GEOMETRY,STATES,GESTURES,TeacherController,rigMarkup,createController};
+  return{GEOMETRY,STATES,GESTURES,puppetParts,TeacherController,rigMarkup,createController};
 });

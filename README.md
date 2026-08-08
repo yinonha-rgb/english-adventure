@@ -10,7 +10,7 @@ The application is being split incrementally so existing progress and deployed f
 
 ## Highlights
 
-Version 4.52.4 gives the teacher varied, subtle human micro-movements with non-repeating breathing, gaze, head, shoulder and weight-shift timing.
+Version 4.53.0 replaces flat teacher motion with 15-part articulated puppets for Emily and Adam, including independently animated heads, torsos, arms, hands and legs.
 
 - Hebrew-first parent-facing interface with an English switch and complete RTL support
 - Multiple editable child profiles with separate progress stored in `localStorage`
