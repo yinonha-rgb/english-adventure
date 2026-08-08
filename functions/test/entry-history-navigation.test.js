@@ -48,6 +48,6 @@ test('the mobile primary action appears before media and closing returns to the 
 
 test('the navigation fix is served by the new application cache',()=>{
   assert.match(html,/entry-video\.js\?v=4\.51\.0/);
-  assert.match(sw,/english-adventure-4\.52\.3/);
+  assert.match(sw,/english-adventure-4\.52\.4/);
   assert.match(sw,/entry-video\.js\?v=4\.51\.0/);
 });

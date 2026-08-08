@@ -82,6 +82,16 @@ test('each teacher has a calibrated lip anchor and speaking never stacks a secon
   assert.match(rigCss,/\.teacher-presence-rig\.mouth-active \.rig-expression\{display:none!important\}/);
 });
 
+test('human micro-motion varies naturally without repeating the same pose',()=>{
+  const source=fs.readFileSync(path.join(root,'teacher-rig.js'),'utf8');
+  const css=fs.readFileSync(path.join(root,'teacher-rig.css'),'utf8');
+  assert.match(source,/this\.lastMotion='still'/);
+  assert.match(source,/filter\(choice=>choice!==this\.lastMotion\)/);
+  assert.match(source,/--motion-intensity/);
+  assert.match(source,/motion==='breathe'\?randomBetween\(1300,2100\)/);
+  assert.match(css,/var\(--motion-intensity,1\)/);
+});
+
 test('animated and static full-body layers switch atomically so extra limbs never appear',()=>{
   const rigCss=fs.readFileSync(path.join(root,'teacher-rig.css'),'utf8');
   assert.match(rigCss,/\.rig-body-loop\{[^}]*visibility:visible/);

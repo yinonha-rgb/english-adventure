@@ -22,7 +22,7 @@
     constructor(rootEl,{character='female-young',reducedMotion=false,subtitles='all'}={}){
       this.rootEl=rootEl;this.character=character;this.reducedMotion=reducedMotion;this.subtitles=subtitles;
       this.state='idle';this.gestureName='none';this.lastSpeech={text:'',lang:'en-US'};this.replay=()=>{};
-      this.motionTimer=0;this.mouthTimer=0;this.gestureTimer=0;this.frameHandle=0;this.visible=true;
+      this.motionTimer=0;this.mouthTimer=0;this.gestureTimer=0;this.frameHandle=0;this.visible=true;this.lastMotion='still';
       this.metrics={fps:0,frames:0,updatedAt:0};this.frameSample={started:0,count:0};
       this.onVisibility=()=>this.handleVisibility();
       this.mount();
@@ -59,18 +59,20 @@
       if(!action)return this.setState(event);this.setState(action[0]);this.gesture(action[1],event==='correct'?1800:1400);return this.state;
     }
     motionChoices(){
-      if(this.state==='speak')return['talk-left','talk-right','brow','gaze-left','gaze-right','shoulder'];
-      if(this.state==='listen')return['listen-nod','gaze-center','blink','head-left','head-right'];
-      if(this.state==='think')return['gaze-up','head-right','blink','brow'];
-      if(this.state==='celebrate')return['happy-bounce','blink','shoulder'];
-      return['breathe','blink','gaze-left','gaze-right','head-left','head-right','shoulder','weight-left','weight-right'];
+      if(this.state==='speak')return['talk-left','talk-right','brow','gaze-left','gaze-right','shoulder','breathe'];
+      if(this.state==='listen')return['listen-nod','gaze-center','blink','head-left','head-right','breathe'];
+      if(this.state==='think')return['gaze-up','head-right','blink','brow','breathe'];
+      if(this.state==='celebrate')return['happy-bounce','blink','shoulder','breathe'];
+      return['breathe','breathe','blink','gaze-left','gaze-right','head-left','head-right','shoulder','weight-left','weight-right'];
     }
+    chooseMotion(){const choices=this.motionChoices(),fresh=choices.filter(choice=>choice!==this.lastMotion),pool=fresh.length?fresh:choices;return pool[Math.floor(Math.random()*pool.length)]}
+    tuneMotion(motion){const direction=motion.endsWith('left')?-1:1,intensity=(0.72+Math.random()*.48).toFixed(2);this.rig.style.setProperty('--motion-direction',String(direction));this.rig.style.setProperty('--motion-intensity',intensity)}
     scheduleMotion(delay=randomBetween(900,2400)){
       clearTimeout(this.motionTimer);if(this.reducedMotion||!this.visible)return;
       this.motionTimer=setTimeout(()=>{
-        const choices=this.motionChoices(),motion=choices[Math.floor(Math.random()*choices.length)];this.rig.dataset.motion=motion;
-        const activeFor=motion==='blink'?170:randomBetween(520,1050);
-        this.motionTimer=setTimeout(()=>{this.rig.dataset.motion='still';this.scheduleMotion(randomBetween(this.state==='speak'?420:900,this.state==='speak'?1050:2700))},activeFor);
+        const motion=this.chooseMotion();this.lastMotion=motion;this.tuneMotion(motion);this.rig.dataset.motion=motion;
+        const activeFor=motion==='blink'?randomBetween(110,180):motion==='breathe'?randomBetween(1300,2100):randomBetween(620,1180);
+        this.motionTimer=setTimeout(()=>{this.rig.dataset.motion='still';this.scheduleMotion(randomBetween(this.state==='speak'?520:1100,this.state==='speak'?1250:3100))},activeFor);
       },delay);
     }
     showMouth(shape){this.presence.dataset.mouth=shape;this.show(`.rig-mouth-${shape}`,this.mouthNodes)}

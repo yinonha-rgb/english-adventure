@@ -10,7 +10,7 @@ The application is being split incrementally so existing progress and deployed f
 
 ## Highlights
 
-Version 4.52.3 switches the teacher's animated and static full-body layers atomically, preventing ghosted duplicate limbs during animation state changes.
+Version 4.52.4 gives the teacher varied, subtle human micro-movements with non-repeating breathing, gaze, head, shoulder and weight-shift timing.
 
 - Hebrew-first parent-facing interface with an English switch and complete RTL support
 - Multiple editable child profiles with separate progress stored in `localStorage`
