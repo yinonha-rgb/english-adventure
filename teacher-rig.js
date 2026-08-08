@@ -12,7 +12,7 @@
   const STATE_ALIASES=Object.freeze({speaking:'speak',greeting:'wave',waving:'wave',listening:'listen',waiting:'listen',thinking:'think',pointing:'point',praising:'celebrate',celebrating:'celebrate',happy:'celebrate',encouraging:'encouraging',correcting:'encouraging',paused:'idle'});
   const asset=(key,group,name)=>`assets/teacher-${key}-${group}-${name}-v2.png`;
   const puppetParts=['hair-back','neck','torso','hips','leg-left-upper','leg-left-lower','leg-right-upper','leg-right-lower','arm-left-upper','arm-left-lower','hand-left','arm-right-upper','arm-right-lower','hand-right','head'];
-  const puppetMarkup=(gender)=>{const folder=gender==='female'?'emily':'adam';return `<span class="rig-puppet" aria-hidden="true">${puppetParts.map(part=>`<img class="rig-part rig-${part}" src="assets/rigs/${folder}/${part}.png" alt="" decoding="async">`).join('')}</span>`};
+  const puppetMarkup=(gender)=>{const profile=GEOMETRY[gender==='female'?'female-young':'male-young'];return `<span class="rig-puppet" aria-hidden="true">${puppetParts.map(part=>`<img class="rig-part rig-${part}" src="${profile.body}" alt="" decoding="async">`).join('')}</span>`};
   const randomBetween=(min,max)=>Math.round(min+Math.random()*(max-min));
   function rigMarkup(character){
     const g=GEOMETRY[character]||GEOMETRY['female-young'],gender=character==='male-young'?'male':'female',name=labels[gender],box=(prefix,values)=>values.map((value,index)=>`--${prefix}-${['x','y','w','h'][index]}:${value}%`).join(';');

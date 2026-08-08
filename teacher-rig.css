@@ -3,20 +3,30 @@
 .teacher-rig{position:relative;display:block;width:100%;height:100%;overflow:visible;transform-origin:50% 92%;isolation:isolate;transition:transform .68s cubic-bezier(.2,.7,.25,1),filter .45s ease;will-change:transform}
 .teacher-rig-canvas{position:relative;display:block;width:auto;height:100%;aspect-ratio:35/100;margin-inline:auto;overflow:hidden;transform-origin:50% 88%;transition:transform .72s cubic-bezier(.2,.7,.2,1)}
 .rig-body{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 12px 10px #244c6a2f);transform-origin:50% 82%;transition:transform .62s cubic-bezier(.2,.72,.22,1),filter .4s ease;will-change:transform}
-.rig-puppet{position:absolute;inset:0;display:block;filter:drop-shadow(0 12px 10px #244c6a2f);transform-origin:50% 58%;transition:transform .7s cubic-bezier(.2,.72,.22,1)}
-.rig-part{position:absolute;display:block;object-fit:contain;transition:transform .7s cubic-bezier(.2,.72,.22,1);will-change:transform;pointer-events:none}
-.rig-hair-back,.rig-neck{display:none}.rig-torso{z-index:4;left:23%;top:23%;width:54%;height:25%}.rig-hips{z-index:5;left:28%;top:44%;width:44%;height:14%}
-.rig-head{z-index:9;left:25%;top:1.5%;width:50%;height:24%;transform-origin:50% 82%}
-.rig-arm-left-upper,.rig-arm-right-upper{z-index:3;top:26%;width:19%;height:20%;transform-origin:50% 8%}.rig-arm-left-upper{left:18%}.rig-arm-right-upper{right:18%}
-.rig-arm-left-lower,.rig-arm-right-lower{z-index:3;top:36%;width:15%;height:20%;transform-origin:50% 8%}.rig-arm-left-lower{left:15%}.rig-arm-right-lower{right:15%}
-.rig-hand-left,.rig-hand-right{z-index:6;top:47%;width:11%;height:13%;transform-origin:50% 5%}.rig-hand-left{left:16%}.rig-hand-right{right:16%}
-.rig-leg-left-upper,.rig-leg-right-upper{z-index:3;top:50%;width:22%;height:22%;transform-origin:50% 5%}.rig-leg-left-upper{left:27%}.rig-leg-right-upper{right:27%}
-.rig-leg-left-lower,.rig-leg-right-lower{z-index:2;top:65%;width:22%;height:33%;transform-origin:50% 4%}.rig-leg-left-lower{left:25%}.rig-leg-right-lower{right:25%}
-.rig-body-static{opacity:0;visibility:hidden;position:absolute;inset:0}.teacher-presence-rig.puppet-unavailable .rig-puppet{display:none}.teacher-presence-rig.puppet-unavailable .rig-body-static{opacity:1;visibility:visible}
+.rig-puppet{position:absolute;inset:0;display:none;filter:drop-shadow(0 12px 10px #244c6a2f);transform-origin:50% 58%;transition:transform .7s cubic-bezier(.2,.72,.22,1)}
+.rig-part{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;transition:transform .7s cubic-bezier(.2,.72,.22,1);will-change:transform;pointer-events:none}
+/* Every moving layer is clipped from the same complete portrait. The pixels on
+   both sides of every joint are therefore identical in the neutral pose: no
+   gaps, extra hands or mismatched proportions can be introduced by cropping. */
+.rig-hair-back,.rig-neck{display:none}
+.rig-head{z-index:9;clip-path:polygon(8% 0,92% 0,92% 29%,8% 29%);transform-origin:50% 24%}
+.rig-torso{z-index:4;clip-path:polygon(27% 24%,73% 24%,82% 32%,72% 57%,28% 57%,18% 32%);transform-origin:50% 35%}
+.rig-hips{z-index:5;clip-path:polygon(18% 51%,82% 51%,82% 66%,18% 66%);transform-origin:50% 58%}
+.rig-arm-left-upper{z-index:3;clip-path:polygon(0 25%,36% 25%,36% 48%,0 48%);transform-origin:27% 29%}
+.rig-arm-right-upper{z-index:3;clip-path:polygon(64% 25%,100% 25%,100% 48%,64% 48%);transform-origin:73% 29%}
+.rig-arm-left-lower{z-index:3;clip-path:polygon(0 42%,34% 42%,34% 59%,0 59%);transform-origin:22% 44%}
+.rig-arm-right-lower{z-index:3;clip-path:polygon(66% 42%,100% 42%,100% 59%,66% 59%);transform-origin:78% 44%}
+.rig-hand-left{z-index:6;clip-path:polygon(0 53%,32% 53%,32% 68%,0 68%);transform-origin:20% 55%}
+.rig-hand-right{z-index:6;clip-path:polygon(68% 53%,100% 53%,100% 68%,68% 68%);transform-origin:80% 55%}
+.rig-leg-left-upper{z-index:3;clip-path:polygon(16% 58%,52% 58%,52% 80%,16% 80%);transform-origin:38% 61%}
+.rig-leg-right-upper{z-index:3;clip-path:polygon(48% 58%,84% 58%,84% 80%,48% 80%);transform-origin:62% 61%}
+.rig-leg-left-lower{z-index:2;clip-path:polygon(10% 73%,52% 73%,52% 100%,10% 100%);transform-origin:38% 76%}
+.rig-leg-right-lower{z-index:2;clip-path:polygon(48% 73%,90% 73%,90% 100%,48% 100%);transform-origin:62% 76%}
+.rig-body-static{opacity:1;visibility:visible;position:absolute;inset:0}.teacher-presence-rig.puppet-unavailable .rig-puppet{display:none}.teacher-presence-rig.puppet-unavailable .rig-body-static{opacity:1;visibility:visible}
 /* The animated WebP is the silent offline idle/listening video loop. Interactive
    states use the calibrated static rig so mouth and gesture layers stay aligned. */
 .rig-expression,.rig-mouth-shape{position:absolute;z-index:3;object-fit:contain;pointer-events:none;transform-origin:center;transition:transform .36s ease,filter .36s ease}
-.rig-expression{left:var(--expr-x);top:var(--expr-y);width:var(--expr-w);height:var(--expr-h);mask-image:linear-gradient(#000 0 78%,transparent 100%)}
+.rig-expression{display:none!important;left:var(--expr-x);top:var(--expr-y);width:var(--expr-w);height:var(--expr-h);mask-image:linear-gradient(#000 0 78%,transparent 100%)}
 .rig-mouth-shape{z-index:4;left:var(--lip-x);top:var(--lip-y);width:var(--lip-w);height:var(--lip-h)}
 .rig-expression[hidden],.rig-mouth-shape[hidden]{display:none!important}
 .teacher-presence-rig:not(.mouth-active) .rig-mouth-shape{display:none!important}
@@ -34,7 +44,7 @@
 .teacher-rig[data-motion="gaze-up"] .rig-expression{transform:translateY(-1px) rotate(.2deg)}
 .teacher-rig[data-motion="head-left"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-left"] .teacher-rig-canvas{transform:rotate(calc(-.38deg * var(--motion-intensity,1))) translateX(calc(-.5px * var(--motion-intensity,1)))}
 .teacher-rig[data-motion="head-right"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-right"] .teacher-rig-canvas{transform:rotate(calc(.38deg * var(--motion-intensity,1))) translateX(calc(.5px * var(--motion-intensity,1)))}
-.teacher-rig[data-motion="shoulder"] .rig-torso{transform:translateY(calc(-1px * var(--motion-intensity,1))) scaleX(calc(1 + .004 * var(--motion-intensity,1)))}
+.teacher-rig[data-motion="shoulder"]{transform:translateY(calc(-.8px * var(--motion-intensity,1))) scaleX(calc(1 + .0015 * var(--motion-intensity,1)))}
 .teacher-rig[data-motion="weight-left"] .rig-puppet{transform:translateX(calc(-1.15px * var(--motion-intensity,1))) rotate(calc(-.1deg * var(--motion-intensity,1)))}
 .teacher-rig[data-motion="weight-right"] .rig-puppet{transform:translateX(calc(1.15px * var(--motion-intensity,1))) rotate(calc(.1deg * var(--motion-intensity,1)))}
 .teacher-rig[data-motion="listen-nod"] .teacher-rig-canvas{transform:translateY(calc(1.15px * var(--motion-intensity,1))) rotate(calc(-.22deg * var(--motion-intensity,1)))}
@@ -42,13 +52,13 @@
 .teacher-rig[data-motion="happy-bounce"]{transform:translateY(-4px) scale(1.008)}
 
 /* Deliberate gestures remain small enough to feel human, never puppet-like. */
-.teacher-rig[data-gesture="wave"] .rig-arm-right-upper{transform:rotate(-28deg)}.teacher-rig[data-gesture="wave"] .rig-arm-right-lower,.teacher-rig[data-gesture="wave"] .rig-hand-right{animation:rigWave 1.05s cubic-bezier(.34,.05,.22,1) 1}
-.teacher-rig[data-gesture="point-left"] .rig-arm-left-upper{transform:rotate(48deg)}.teacher-rig[data-gesture="point-left"] .rig-arm-left-lower{transform:rotate(62deg)}
-.teacher-rig[data-gesture="point-right"] .rig-arm-right-upper{transform:rotate(-48deg)}.teacher-rig[data-gesture="point-right"] .rig-arm-right-lower{transform:rotate(-62deg)}
+.teacher-rig[data-gesture="wave"]{animation:rigWaveBody 1.05s cubic-bezier(.34,.05,.22,1) 1}
+.teacher-rig[data-gesture="point-left"]{transform:translateX(-2px) rotate(-.2deg)}
+.teacher-rig[data-gesture="point-right"]{transform:translateX(2px) rotate(.2deg)}
 .teacher-rig[data-gesture="thumbs-up"]{filter:drop-shadow(0 0 10px #ffe27188);transform:translateY(-2px) scale(1.008)}
-.teacher-rig[data-gesture="open-hands"] .rig-arm-left-upper{transform:rotate(13deg)}.teacher-rig[data-gesture="open-hands"] .rig-arm-right-upper{transform:rotate(-13deg)}
+.teacher-rig[data-gesture="open-hands"]{transform:translateY(-1px) scale(1.004)}
 .teacher-rig[data-gesture="heart-hands"]{filter:drop-shadow(0 0 12px #ff8fb287);transform:scale(1.008)}
-.teacher-rig[data-gesture="clap"] .rig-arm-left-upper,.teacher-rig[data-gesture="clap"] .rig-arm-right-upper{animation:rigClap .48s cubic-bezier(.3,.1,.2,1) 3}
+.teacher-rig[data-gesture="clap"]{animation:rigClap .48s cubic-bezier(.3,.1,.2,1) 3}
 .teacher-rig[data-gesture="thinking-pose"] .rig-body{transform:translateX(1.5px) rotate(.28deg)}
 .teacher-rig[data-gesture="wave"] .teacher-gesture-trail,.teacher-rig[data-gesture="clap"] .teacher-gesture-trail{border-top-color:#ffe17299;animation:rigTrail .75s ease-out 2}
 .teacher-presence-rig[data-controller-state="listen"] .rig-body{filter:drop-shadow(0 12px 10px #244c6a2f) saturate(1.02)}
@@ -62,6 +72,7 @@
 .teacher-presence-rig[data-controller-state="celebrate"] .rig-puppet{animation:rigCelebrate 1.15s cubic-bezier(.2,.8,.2,1) 1}
 
 @keyframes rigWave{0%,100%{transform:rotate(0) translateY(0)}28%{transform:rotate(-.55deg) translateY(-1.5px)}58%{transform:rotate(.45deg) translateY(-.7px)}82%{transform:rotate(-.22deg)}}
+@keyframes rigWaveBody{0%,100%{transform:rotate(0) translateY(0)}28%{transform:rotate(-.35deg) translateY(-2px)}58%{transform:rotate(.25deg) translateY(-1px)}82%{transform:rotate(-.15deg)}}
 @keyframes rigClap{0%,100%{transform:scaleX(1) translateY(0)}50%{transform:scaleX(.988) translateY(-2px)}}
 @keyframes rigCelebrate{0%,100%{transform:translateY(0) scale(1)}38%{transform:translateY(-5px) scale(1.01)}68%{transform:translateY(-1px) scale(1.004)}}
 @keyframes rigMouth{from{transform:scale(.95,.92)}to{transform:scale(1,1.035)}}
