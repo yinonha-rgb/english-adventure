@@ -141,6 +141,15 @@ test('unsafe independent limb rotations stay disabled and sprite debris is remov
   assert.match(buildScript,/keep = set\(max\(components, key=len\)\)/);
 });
 
+test('the seamless full-body teacher stays visibly alive in every lesson state',()=>{
+  const css=fs.readFileSync(path.join(root,'teacher-rig.css'),'utf8');
+  assert.match(css,/\.rig-body-static\{[^}]*animation:rigAlive/);
+  for(const pair of [['speak','rigSpeaking'],['listen','rigListening'],['think','rigThinking'],['celebrate','rigBodyCelebrate']]){
+    assert.match(css,new RegExp(`data-controller-state="${pair[0]}"[^}]+animation:${pair[1]}`));
+    assert.match(css,new RegExp(`@keyframes ${pair[1]}`));
+  }
+});
+
 test('female and male teachers use distinct dedicated artwork',()=>{
   const first=Visual.characterSvg('female-young');
   const second=Visual.characterSvg('female-young');

@@ -22,7 +22,7 @@
 .rig-leg-right-upper{z-index:3;clip-path:polygon(48% 58%,84% 58%,84% 80%,48% 80%);transform-origin:62% 61%}
 .rig-leg-left-lower{z-index:2;clip-path:polygon(10% 73%,52% 73%,52% 100%,10% 100%);transform-origin:38% 76%}
 .rig-leg-right-lower{z-index:2;clip-path:polygon(48% 73%,90% 73%,90% 100%,48% 100%);transform-origin:62% 76%}
-.rig-body-static{opacity:1;visibility:visible;position:absolute;inset:0}.teacher-presence-rig.puppet-unavailable .rig-puppet{display:none}.teacher-presence-rig.puppet-unavailable .rig-body-static{opacity:1;visibility:visible}
+.rig-body-static{opacity:1;visibility:visible;position:absolute;inset:0;transform-origin:50% 82%;animation:rigAlive 4.8s cubic-bezier(.45,.05,.55,.95) infinite}.teacher-presence-rig.puppet-unavailable .rig-puppet{display:none}.teacher-presence-rig.puppet-unavailable .rig-body-static{opacity:1;visibility:visible}
 /* The animated WebP is the silent offline idle/listening video loop. Interactive
    states use the calibrated static rig so mouth and gesture layers stay aligned. */
 .rig-expression,.rig-mouth-shape{position:absolute;z-index:3;object-fit:contain;pointer-events:none;transform-origin:center;transition:transform .36s ease,filter .36s ease}
@@ -68,6 +68,10 @@
 .teacher-presence-rig[data-state="encouraging"] .rig-expression{filter:saturate(1.04)}
 .teacher-presence-rig[data-state="celebrating"] .rig-expression{filter:saturate(1.08)}
 .teacher-presence-rig[data-controller-state="encouraging"] .teacher-rig{filter:drop-shadow(0 0 9px #7ed1b255)}
+.teacher-presence-rig[data-controller-state="speak"] .rig-body-static{animation:rigSpeaking 1.15s ease-in-out infinite}
+.teacher-presence-rig[data-controller-state="listen"] .rig-body-static{animation:rigListening 2.35s ease-in-out infinite}
+.teacher-presence-rig[data-controller-state="think"] .rig-body-static{animation:rigThinking 3s ease-in-out infinite}
+.teacher-presence-rig[data-controller-state="celebrate"] .rig-body-static{animation:rigBodyCelebrate .82s cubic-bezier(.2,.8,.2,1) 2}
 .teacher-presence-rig[data-controller-state="celebrate"] .teacher-rig-stars{opacity:1;animation:rigStars .72s ease-out 2 alternate}
 .teacher-presence-rig[data-controller-state="celebrate"] .rig-puppet{animation:rigCelebrate 1.15s cubic-bezier(.2,.8,.2,1) 1}
 
@@ -78,6 +82,11 @@
 @keyframes rigMouth{from{transform:scale(.95,.92)}to{transform:scale(1,1.035)}}
 @keyframes rigTrail{from{opacity:.7;transform:scale(.8) rotate(-6deg)}to{opacity:0;transform:scale(1.08) rotate(7deg)}}
 @keyframes rigStars{to{transform:translateY(-8px) scale(1.14);filter:drop-shadow(0 3px 3px #704d19aa)}}
+@keyframes rigAlive{0%,100%{transform:translateY(0) rotate(0) scale(1)}35%{transform:translateY(-2px) rotate(-.18deg) scale(1.002)}68%{transform:translateY(-1px) rotate(.16deg) scale(1.001)}}
+@keyframes rigSpeaking{0%,100%{transform:translateY(0) rotate(-.12deg)}45%{transform:translateY(-2.5px) rotate(.22deg)}72%{transform:translateY(-1px) rotate(-.08deg)}}
+@keyframes rigListening{0%,100%{transform:translateY(0) rotate(0)}42%{transform:translateY(1.5px) rotate(.28deg)}58%{transform:translateY(0) rotate(.12deg)}}
+@keyframes rigThinking{0%,100%{transform:translateX(0) rotate(0)}50%{transform:translateX(1.5px) rotate(.3deg)}}
+@keyframes rigBodyCelebrate{0%,100%{transform:translateY(0) scale(1)}45%{transform:translateY(-7px) scale(1.012)}72%{transform:translateY(-2px) scale(1.006)}}
 
 @media(max-width:900px){.teacher-rig-canvas{aspect-ratio:38/100}}
 @media(max-width:600px){.teacher-rig-canvas{width:100%;height:100%;aspect-ratio:auto;transform:none;transform-origin:50% 45%}.teacher-rig[data-motion="head-left"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-left"] .teacher-rig-canvas{transform:rotate(-.35deg)}.teacher-rig[data-motion="head-right"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-right"] .teacher-rig-canvas{transform:rotate(.35deg)}}
