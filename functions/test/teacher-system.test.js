@@ -132,6 +132,15 @@ test('both teachers ship complete transparent puppet parts with safe fallbacks',
   assert.match(css,/puppet-unavailable \.rig-body-static\{opacity:1;visibility:visible\}/);
 });
 
+test('articulated joints overlap cleanly and detached sprite debris is removed',()=>{
+  const css=fs.readFileSync(path.join(root,'teacher-rig.css'),'utf8');
+  assert.match(css,/\.rig-hair-back,\.rig-neck\{display:none\}/);
+  assert.match(css,/\.rig-arm-left-lower,\.rig-arm-right-lower\{[^}]*top:36%/);
+  assert.match(css,/\.rig-leg-left-upper,\.rig-leg-right-upper\{[^}]*top:50%/);
+  const buildScript=fs.readFileSync(path.join(root,'scripts','build-rig-parts.py'),'utf8');
+  assert.match(buildScript,/keep = set\(max\(components, key=len\)\)/);
+});
+
 test('female and male teachers use distinct dedicated artwork',()=>{
   const first=Visual.characterSvg('female-young');
   const second=Visual.characterSvg('female-young');

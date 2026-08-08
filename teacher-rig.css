@@ -5,13 +5,13 @@
 .rig-body{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 12px 10px #244c6a2f);transform-origin:50% 82%;transition:transform .62s cubic-bezier(.2,.72,.22,1),filter .4s ease;will-change:transform}
 .rig-puppet{position:absolute;inset:0;display:block;filter:drop-shadow(0 12px 10px #244c6a2f);transform-origin:50% 58%;transition:transform .7s cubic-bezier(.2,.72,.22,1)}
 .rig-part{position:absolute;display:block;object-fit:contain;transition:transform .7s cubic-bezier(.2,.72,.22,1);will-change:transform;pointer-events:none}
-.rig-hair-back{display:none}.rig-neck{z-index:3;display:block;left:35%;top:20%;width:30%;height:18%}.rig-torso{z-index:4;left:23%;top:25%;width:54%;height:24%}.rig-hips{z-index:5;left:28%;top:46%;width:44%;height:13%}
-.rig-head{z-index:9;left:22%;top:2%;width:56%;height:25%;transform-origin:50% 82%}
-.rig-arm-left-upper,.rig-arm-right-upper{z-index:3;top:28%;width:19%;height:19%;transform-origin:50% 8%}.rig-arm-left-upper{left:10%}.rig-arm-right-upper{right:10%}
-.rig-arm-left-lower,.rig-arm-right-lower{z-index:3;top:41%;width:14%;height:17%;transform-origin:50% 8%}.rig-arm-left-lower{left:7%}.rig-arm-right-lower{right:7%}
-.rig-hand-left,.rig-hand-right{z-index:6;top:52%;width:11%;height:12%;transform-origin:50% 5%}.rig-hand-left{left:8%}.rig-hand-right{right:8%}
-.rig-leg-left-upper,.rig-leg-right-upper{z-index:3;top:55%;width:22%;height:20%;transform-origin:50% 5%}.rig-leg-left-upper{left:27%}.rig-leg-right-upper{right:27%}
-.rig-leg-left-lower,.rig-leg-right-lower{z-index:2;top:70%;width:22%;height:29%;transform-origin:50% 4%}.rig-leg-left-lower{left:25%}.rig-leg-right-lower{right:25%}
+.rig-hair-back,.rig-neck{display:none}.rig-torso{z-index:4;left:23%;top:23%;width:54%;height:25%}.rig-hips{z-index:5;left:28%;top:44%;width:44%;height:14%}
+.rig-head{z-index:9;left:25%;top:1.5%;width:50%;height:24%;transform-origin:50% 82%}
+.rig-arm-left-upper,.rig-arm-right-upper{z-index:3;top:26%;width:19%;height:20%;transform-origin:50% 8%}.rig-arm-left-upper{left:18%}.rig-arm-right-upper{right:18%}
+.rig-arm-left-lower,.rig-arm-right-lower{z-index:3;top:36%;width:15%;height:20%;transform-origin:50% 8%}.rig-arm-left-lower{left:15%}.rig-arm-right-lower{right:15%}
+.rig-hand-left,.rig-hand-right{z-index:6;top:47%;width:11%;height:13%;transform-origin:50% 5%}.rig-hand-left{left:16%}.rig-hand-right{right:16%}
+.rig-leg-left-upper,.rig-leg-right-upper{z-index:3;top:50%;width:22%;height:22%;transform-origin:50% 5%}.rig-leg-left-upper{left:27%}.rig-leg-right-upper{right:27%}
+.rig-leg-left-lower,.rig-leg-right-lower{z-index:2;top:65%;width:22%;height:33%;transform-origin:50% 4%}.rig-leg-left-lower{left:25%}.rig-leg-right-lower{right:25%}
 .rig-body-static{opacity:0;visibility:hidden;position:absolute;inset:0}.teacher-presence-rig.puppet-unavailable .rig-puppet{display:none}.teacher-presence-rig.puppet-unavailable .rig-body-static{opacity:1;visibility:visible}
 /* The animated WebP is the silent offline idle/listening video loop. Interactive
    states use the calibrated static rig so mouth and gesture layers stay aligned. */
