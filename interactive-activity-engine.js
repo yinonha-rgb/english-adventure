@@ -34,7 +34,7 @@
   const activity=(id,type,value)=>({
     id,type,difficulty:'easy',skill:'vocabulary',xp:5,
     successFeedback:'Wonderful! Great trying!',
-    retryFeedback:'Good try. Look carefully and try once more.',
+    retryFeedback:'Not quite yet. Look carefully and try once more.',
     ...value
   });
 
@@ -141,7 +141,7 @@
     const teacherSet=new Set(teacherTokens),overlap=answerTokens.filter(token=>teacherSet.has(token)).length;
     return overlap/answerTokens.length>=.75;
   }
-  function validate(activity,response){
+  function validateLegacy(activity,response){
     if(activity.type===TYPES.WELCOME){
       const heard=normalize(response),accepted=(activity.acceptedAnswers||[activity.correctAnswer]).map(normalize);
       return accepted.includes(heard);
@@ -155,6 +155,33 @@
     const heard=normalize(response);
     return accepted.includes(heard)||accepted.some(value=>heard===`i like ${value}`)||accepted.some(value=>heard===`אני אוהב ${value}`||heard===`אני אוהבת ${value}`);
   }
+  function validationSpecFor(activity){
+    const expected=(Array.isArray(activity.correctAnswer)?activity.correctAnswer:[activity.correctAnswer]).filter(Boolean);
+    return{
+      lessonId:'daily-animals-interactive-v1',exerciseId:activity.id,
+      kind:activity.type===TYPES.SENTENCE?'sentence':'single-word',difficulty:activity.difficulty||'easy',
+      expectedAnswers:expected,acceptedSynonyms:activity.acceptedAnswers||[],
+      pronunciationVariations:activity.pronunciationVariations||[],recognitionAlternatives:activity.recognitionAlternatives||[],
+      requiredKeywords:expected,keywordMode:activity.keywordMode||(expected.length>1?'any':'all'),
+      minimumThreshold:activity.minimumThreshold||.78,question:activity.teacherInstructionEn||activity.prompt||'',
+      hints:activity.hint?[activity.hint]:[]
+    };
+  }
+  function validationResult(activity,response){
+    if(activity.type===TYPES.WELCOME||activity.type===TYPES.DRAG_MATCH){
+      const valid=validateLegacy(activity,response);
+      return{valid,reason:valid?'approved':'unrelated'};
+    }
+    const valid=validateLegacy(activity,response);
+    if(valid)return{valid:true,reason:'approved'};
+    const centralized=root.EATeacherCore?.validateAnswer?.(response,validationSpecFor(activity));
+    if(centralized?.valid)return centralized;
+    const accepted=[...(Array.isArray(activity.correctAnswer)?activity.correctAnswer:[activity.correctAnswer]),...(activity.acceptedAnswers||[])].map(normalize);
+    const heard=normalize(response),safeWords=new Set(['a','an','the','it','is','its','this','that','answer','word']);
+    const wrapped=accepted.some(value=>{const wanted=value.split(' ').filter(Boolean),heardWords=heard.split(' ').filter(Boolean);return wanted.length===1&&heardWords.includes(value)&&heardWords.every(word=>word===value||safeWords.has(word))});
+    return wrapped?{valid:true,reason:'approved'}:(centralized||{valid:false,reason:'unrelated'});
+  }
+  function validate(activity,response){return validationResult(activity,response).valid}
   function transition(state,response,correct){
     const attempts=(state.attempts||0)+1;
     if(correct)return{...state,attempts:0,index:state.index+1,lastResult:'correct'};
@@ -702,5 +729,5 @@
     return teacher;
   }
 
-  root.EAInteractiveTeacher={TYPES,VOICE_ANSWER_TYPES,supportsVoiceAnswer,SUCCESS_MESSAGES,successMessage,COMPONENTS,createAnimalsLesson,animalPicture,validate,requiresEnglishPractice,transition,probableSpeechEcho,startAnimals};
+  root.EAInteractiveTeacher={TYPES,VOICE_ANSWER_TYPES,supportsVoiceAnswer,SUCCESS_MESSAGES,successMessage,COMPONENTS,createAnimalsLesson,animalPicture,validate,validationResult,requiresEnglishPractice,transition,probableSpeechEcho,startAnimals};
 })(typeof window!=='undefined'?window:globalThis);

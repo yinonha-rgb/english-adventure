@@ -6,11 +6,13 @@ const vm=require('node:vm');
 
 const root=path.resolve(__dirname,'../..');
 const source=fs.readFileSync(path.join(root,'interactive-activity-engine.js'),'utf8');
+const validationCore=fs.readFileSync(path.join(root,'teacher-modes-core.js'),'utf8');
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
 const teacher=fs.readFileSync(path.join(root,'teacher-ai.js'),'utf8');
 const context={globalThis:{}};
+vm.runInNewContext(validationCore,context);
 vm.runInNewContext(source,context);
 const engine=context.globalThis.EAInteractiveTeacher;
 const lesson=engine.createAnimalsLesson('אורי');
@@ -96,6 +98,14 @@ test('Hebrew understanding is acknowledged but English is requested before advan
   assert.match(source,/You understood it\. In English, we say:/);
   assert.match(source,/Let's try in English\. Say:/);
   assert.match(source,/containsHebrew\(value\)/);
+});
+
+test('natural correct speech is accepted instead of receiving retry feedback',()=>{
+  const picture=lesson.activities.find(item=>item.id==='animals-dog');
+  for(const answer of ['dog','the dog','it is a dog'])assert.equal(engine.validate(picture,answer),true,answer);
+  for(const answer of ['banana','the banana','pizza'])assert.equal(engine.validate(picture,answer),false,answer);
+  assert.equal(engine.validationResult(picture,'the dog').reason,'approved');
+  assert.doesNotMatch(picture.retryFeedback,/good try/i);
 });
 
 test('interactive completion speaks and focuses an explicit Finish action',()=>{
@@ -232,8 +242,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.52\.2/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.52\.2/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.53\.5/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.53\.5/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
