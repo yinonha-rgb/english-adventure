@@ -29,7 +29,10 @@
   function difficultyForChild(child={},saved){
     if(Object.hasOwn(LEVELS,saved))return saved;
     const level=Number(child.level)||1;
-    return level>=6?'hard':level>=3?'medium':'easy';
+    const mistakes=Number(child.progress?.unresolvedMistakes)||0,retries=Number(child.progress?.averageRetries)||0,completed=Number(child.progress?.completedMissions)||0;
+    if(mistakes>=5||retries>=2.2)return'easy';
+    if(level>=6&&completed>=8&&mistakes<=2&&retries<1.4)return'hard';
+    return level>=3||completed>=4?'medium':'easy';
   }
   function ensureStyles(document){
     if(!document||document.querySelector('#eaClassroomToolsStyles'))return;

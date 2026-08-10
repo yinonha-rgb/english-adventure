@@ -40,6 +40,11 @@
     const value=String(seed),score=[...value].reduce((sum,char)=>((sum*31)+char.charCodeAt(0))>>>0,7);
     return QUESTS[score%QUESTS.length];
   }
+  function speechPlan(difficulty,index,item,attempts=0){
+    const level=['easy','medium','hard'].includes(difficulty)?difficulty:'easy',welcome=item?.type===TYPES.WELCOME;
+    const includeHebrew=welcome||level==='easy'||attempts>0||(level==='medium'&&index<3);
+    return includeHebrew?[item?.teacherInstructionHe,item?.teacherInstructionEn].filter(Boolean):[item?.teacherInstructionEn].filter(Boolean);
+  }
 
   const activity=(id,type,value)=>({
     id,type,difficulty:'easy',skill:'vocabulary',xp:5,
@@ -375,7 +380,7 @@
       this.autoListeningActivityId=null;
       this.modal.querySelector('.interactive-panel').dataset.focus='speaking';
       this.setVisualState('speaking');
-      const text=[prefix,item.teacherInstructionEn,item.teacherInstructionHe].filter(Boolean).join(' ');
+      const text=[prefix,...speechPlan(this.difficulty,this.state.index,item,this.state.attempts)].filter(Boolean).join(' ');
       this.speakSegments(text,.82,()=>{
         if(this.current()!==item||this.paused)return;
         if(item.type===TYPES.MEMORY){this.startMemoryPreview(item);return}
@@ -747,5 +752,5 @@
     return teacher;
   }
 
-  root.EAInteractiveTeacher={TYPES,VOICE_ANSWER_TYPES,supportsVoiceAnswer,SUCCESS_MESSAGES,successMessage,QUESTS,questFor,COMPONENTS,createAnimalsLesson,animalPicture,validate,validationResult,requiresEnglishPractice,transition,probableSpeechEcho,startAnimals};
+  root.EAInteractiveTeacher={TYPES,VOICE_ANSWER_TYPES,supportsVoiceAnswer,SUCCESS_MESSAGES,successMessage,QUESTS,questFor,speechPlan,COMPONENTS,createAnimalsLesson,animalPicture,validate,validationResult,requiresEnglishPractice,transition,probableSpeechEcho,startAnimals};
 })(typeof window!=='undefined'?window:globalThis);

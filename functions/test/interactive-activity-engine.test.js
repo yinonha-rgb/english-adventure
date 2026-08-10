@@ -111,6 +111,19 @@ test('daily learning is framed as a changing child adventure, not a school lesso
   assert.match(source,/data-quest/);
 });
 
+test('spoken support starts in Hebrew and fades safely as progress grows',()=>{
+  const welcome=lesson.activities[0],question=lesson.activities[1];
+  assert.deepEqual(Array.from(engine.speechPlan('easy',1,question)),[question.teacherInstructionHe,question.teacherInstructionEn]);
+  assert.deepEqual(Array.from(engine.speechPlan('medium',1,question)),[question.teacherInstructionHe,question.teacherInstructionEn]);
+  assert.deepEqual(Array.from(engine.speechPlan('medium',5,question)),[question.teacherInstructionEn]);
+  assert.deepEqual(Array.from(engine.speechPlan('hard',5,question)),[question.teacherInstructionEn]);
+  assert.deepEqual(Array.from(engine.speechPlan('hard',0,welcome)),[welcome.teacherInstructionHe,welcome.teacherInstructionEn]);
+  assert.deepEqual(Array.from(engine.speechPlan('hard',5,question,1)),[question.teacherInstructionHe,question.teacherInstructionEn]);
+  assert.match(app,/interactiveChildContext\(child\)/);
+  assert.match(app,/unresolvedMistakes/);
+  assert.match(app,/averageRetries/);
+});
+
 test('natural correct speech is accepted instead of receiving retry feedback',()=>{
   const picture=lesson.activities.find(item=>item.id==='animals-dog');
   for(const answer of ['dog','the dog','it is a dog'])assert.equal(engine.validate(picture,answer),true,answer);
@@ -253,8 +266,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.54\.0/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.54\.0/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.54\.1/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.54\.1/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });

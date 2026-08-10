@@ -16,7 +16,10 @@ test('provides local pronunciation help without a backend',()=>{
 test('selects and normalizes child-friendly difficulty levels',()=>{
   assert.equal(tools.difficultyForChild({level:1}),'easy');
   assert.equal(tools.difficultyForChild({level:4}),'medium');
-  assert.equal(tools.difficultyForChild({level:8}),'hard');
+  assert.equal(tools.difficultyForChild({level:8,progress:{completedMissions:10,unresolvedMistakes:1,averageRetries:.5}}),'hard');
+  assert.equal(tools.difficultyForChild({level:8,progress:{completedMissions:10,unresolvedMistakes:6,averageRetries:.5}}),'easy');
+  assert.equal(tools.difficultyForChild({level:8,progress:{completedMissions:10,unresolvedMistakes:1,averageRetries:2.5}}),'easy');
+  assert.equal(tools.difficultyForChild({level:2,progress:{completedMissions:5}}),'medium');
   assert.equal(tools.difficultyForChild({level:8},'easy'),'easy');
   assert.equal(tools.normalizeDifficulty('invalid'),'easy');
 });
