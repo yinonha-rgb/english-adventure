@@ -111,6 +111,17 @@ test('daily learning is framed as a changing child adventure, not a school lesso
   assert.match(source,/data-quest/);
 });
 
+test('every correct answer visibly advances the mission and one surprise is finite',()=>{
+  assert.match(source,/className='mission-crystal'/);
+  assert.match(source,/celebrateMissionBeat\(this\.state\.index\)/);
+  assert.match(source,/progress===4&&!this\.state\.surpriseFound/);
+  assert.match(source,/this\.state\.surpriseFound=true/);
+  assert.match(source,/תיבת הפתעה/);
+  assert.match(source,/setTimeout\(\(\)=>burst\.remove\(\),1600\)/);
+  assert.match(source,/@keyframes missionReward/);
+  assert.doesNotMatch(source,/celebrateMissionBeat\([^)]*\)[\s\S]{0,80}else\{/);
+});
+
 test('spoken support starts in Hebrew and fades safely as progress grows',()=>{
   const welcome=lesson.activities[0],question=lesson.activities[1];
   assert.deepEqual(Array.from(engine.speechPlan('easy',1,question)),[question.teacherInstructionHe,question.teacherInstructionEn]);
@@ -266,8 +277,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.54\.1/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.54\.1/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.55\.0/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.55\.0/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });

@@ -36,6 +36,11 @@
     {id:'treasure',icon:'🏴‍☠️',titleHe:'מסע אל אי האוצר',titleEn:'Treasure Island Quest',welcomeHe:'מפת האוצר ננעלה! רק שלוש מילות חיות באנגלית יפתחו אותה. מוכנים לצאת לדרך?',welcomeEn:'The treasure map is locked! Three English animal words will open it. Are you ready to sail?',completeHe:'האוצר נמצא! המילים שלכם פתחו את התיבה הסודית!',completeEn:'Treasure found! Your words opened the secret chest!'},
     {id:'space',icon:'🚀',titleHe:'מבצע חילוץ בחלל',titleEn:'Space Rescue Mission',welcomeHe:'שלוש חיות אסטרונאוטיות צריכות עזרה לחזור לחללית. האנגלית שלכם תפעיל את קרן החילוץ. מוכנים?',welcomeEn:'Three animal astronauts need help returning to their ship. Your English powers the rescue beam. Are you ready?',completeHe:'משימת החלל הושלמה! כל האסטרונאוטים בטוחים!',completeEn:'Space mission complete! Every astronaut is safe!'}
   ];
+  const MISSION_BEATS={
+    forest:['השביל מתחיל לזהור!','מצאנו עקבות קסומים!','פיפ רואה חבר בין העצים!','הקריסטל הראשון התעורר!','דלת סודית נפתחה!','כמעט הגענו הביתה!'],
+    treasure:['המפה גילתה חץ חדש!','מצאנו עקבות בחול!','הספינה מתקרבת לאי!','מפתח מוזהב הופיע!','תיבת האוצר רועדת!','האוצר ממש קרוב!'],
+    space:['מנוע החללית נדלק!','מצאנו אות מהחלל!','קרן החילוץ מתחזקת!','אסטרונאוט אחד ניצל!','שער הכוכבים נפתח!','החללית בדרך הביתה!']
+  };
   function questFor(seed='friend'){
     const value=String(seed),score=[...value].reduce((sum,char)=>((sum*31)+char.charCodeAt(0))>>>0,7);
     return QUESTS[score%QUESTS.length];
@@ -65,7 +70,7 @@
     const style=document.createElement('style');
     style.id='interactiveMatchStyles';
     style.textContent=`.interactive-top{grid-template-columns:auto minmax(90px,auto) minmax(100px,1fr) auto auto auto auto}.interactive-timer{white-space:nowrap;padding:5px 9px;border-radius:999px;background:#fff3c7;color:#725300;font-weight:900;font-variant-numeric:tabular-nums}.match-game{width:100%;display:grid;gap:clamp(10px,2vh,18px);align-content:center}.match-targets,.match-words{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(6px,1.4vw,14px);width:100%}.match-targets .interactive-choice,.match-words .interactive-choice{min-width:0;width:100%;margin:0}.match-targets .interactive-choice{min-height:clamp(82px,18vh,150px);padding:6px}.match-picture{display:grid;place-items:center;width:100%;height:clamp(62px,14vh,118px)}.match-animal-svg{display:block;width:100%;height:100%;max-width:150px;overflow:visible;filter:drop-shadow(0 5px 5px #244c6a28)}.match-picture-label{font-size:clamp(.72rem,1.7vw,.95rem);color:#34495e}.match-word{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.match-word.dragging{z-index:20;cursor:grabbing;animation:none!important;box-shadow:0 18px 35px #223c5980;transition:none}.match-word.matched{opacity:.48;text-decoration:line-through}.match-targets .interactive-choice.drop-ready{outline:5px solid #ffe16b;transform:scale(1.04)}@media(max-width:700px){.interactive-top{grid-template-columns:minmax(54px,auto) minmax(36px,1fr) auto auto auto auto}.interactive-teacher-mini{display:none}.interactive-timer{padding:4px 6px;font-size:.72rem}.match-game{gap:8px}.match-targets,.match-words{gap:5px}.match-targets .interactive-choice{min-height:76px}.match-picture{height:58px}.match-picture-label{font-size:.68rem}.match-words .interactive-choice{min-height:44px;padding:6px;font-size:.85rem}}`;
-    style.textContent+=`.quest-banner{position:absolute;z-index:8;top:10px;left:50%;translate:-50% 0;max-width:min(70%,560px);padding:7px 16px;border:2px solid #fff9;border-radius:999px;background:#263b70d9;color:#fff;font-weight:900;text-align:center;box-shadow:0 7px 18px #14244c35;pointer-events:none}.adventure-stage[data-quest="treasure"]{background:linear-gradient(180deg,#75d9ff 0 55%,#f7d887 55% 70%,#58b9ce 70%)}.adventure-stage[data-quest="space"]{background:radial-gradient(circle at 70% 20%,#786be8 0,#22275e 48%,#111631 100%)}.adventure-stage[data-quest="space"] .stage-hill{background:#8074a8}.adventure-stage[data-quest="space"] .stage-sun{filter:hue-rotate(180deg)}@media(max-width:700px){.quest-banner{top:5px;max-width:72%;padding:5px 9px;font-size:.72rem}}`;
+    style.textContent+=`.quest-banner{position:absolute;z-index:8;top:10px;left:50%;translate:-50% 0;width:min(70%,560px);padding:7px 16px;border:2px solid #fff9;border-radius:18px;background:#263b70e8;color:#fff;font-weight:900;text-align:center;box-shadow:0 7px 18px #14244c35;pointer-events:none}.mission-trail{display:flex;justify-content:center;gap:5px;margin-top:5px}.mission-crystal{width:11px;height:11px;rotate:45deg;border:1px solid #fff9;border-radius:2px;background:#ffffff35;transition:.35s}.mission-crystal.found{background:#ffe765;box-shadow:0 0 10px #fff49b;scale:1.18}.mission-burst{position:absolute;z-index:12;left:50%;top:42%;translate:-50% -50%;padding:13px 20px;border-radius:20px;background:#fff9d8;color:#563d00;font-size:clamp(1rem,3vw,1.5rem);font-weight:1000;box-shadow:0 16px 38px #17203b44;animation:missionReward 1.45s ease-out forwards;pointer-events:none}.mission-burst.surprise{background:linear-gradient(135deg,#fff3a4,#ffb95d);font-size:clamp(1.2rem,4vw,1.8rem)}.adventure-stage[data-quest="treasure"]{background:linear-gradient(180deg,#75d9ff 0 55%,#f7d887 55% 70%,#58b9ce 70%)}.adventure-stage[data-quest="space"]{background:radial-gradient(circle at 70% 20%,#786be8 0,#22275e 48%,#111631 100%)}.adventure-stage[data-quest="space"] .stage-hill{background:#8074a8}.adventure-stage[data-quest="space"] .stage-sun{filter:hue-rotate(180deg)}@keyframes missionReward{0%{opacity:0;scale:.35;rotate:-8deg}25%{opacity:1;scale:1.12;rotate:3deg}75%{opacity:1;scale:1}100%{opacity:0;translate:-50% -120%;scale:.9}}@media(max-width:700px){.quest-banner{top:5px;width:72%;padding:5px 9px;font-size:.72rem}.mission-crystal{width:8px;height:8px}}@media(prefers-reduced-motion:reduce){.mission-burst{animation:none;opacity:1}}`;
     document.head.append(style);
   }
 
@@ -307,7 +312,7 @@
       this.startAnimationMonitor();
       this.modal.querySelector('#interactiveChildName').textContent=this.child?.name||'חבר/ה';
       const quest=this.lesson.quest||questFor(this.child?.name||'friend'),questBanner=this.modal.querySelector('#interactiveQuestBanner'),stage=this.modal.querySelector('.adventure-stage');
-      if(questBanner)questBanner.textContent=`${quest.icon} ${document.documentElement.lang==='en'?quest.titleEn:quest.titleHe}`;
+      if(questBanner){const title=document.createElement('span');title.textContent=`${quest.icon} ${document.documentElement.lang==='en'?quest.titleEn:quest.titleHe}`;const trail=document.createElement('span');trail.className='mission-trail';trail.setAttribute('aria-label','קריסטלים שנמצאו');for(let index=0;index<this.lesson.activities.length;index++){const crystal=document.createElement('i');crystal.className='mission-crystal';crystal.setAttribute('aria-hidden','true');trail.append(crystal)}questBanner.replaceChildren(title,trail)};
       if(stage)stage.dataset.quest=quest.id;
       this.modal.classList.add('open');
       document.body.style.overflow='hidden';
@@ -358,6 +363,7 @@
       this.selectedWord=null;
       this.autoListeningActivityId=null;
       this.modal.querySelector('.interactive-progress span').style.width=`${Math.round(this.state.index/this.lesson.activities.length*100)}%`;
+      this.modal.querySelectorAll('.mission-crystal').forEach((crystal,index)=>crystal.classList.toggle('found',index<this.state.index));
       this.setInstruction(item.teacherInstructionEn,item.teacherInstructionHe);
       this.modal.querySelector('#interactiveFeedback').textContent='';
       const asksQuestion=/\?/.test(`${item.teacherInstructionEn||''} ${item.teacherInstructionHe||''}`);
@@ -480,6 +486,14 @@
       stage.classList.remove('cue');
       void stage.offsetWidth;
       stage.classList.add('cue');
+    }
+    celebrateMissionBeat(progress){
+      const stage=this.modal?.querySelector('.adventure-stage');if(!stage)return;
+      const quest=this.lesson.quest||QUESTS[0],beats=MISSION_BEATS[quest.id]||MISSION_BEATS.forest,surprise=progress===4&&!this.state.surpriseFound;
+      if(surprise)this.state.surpriseFound=true;
+      const burst=document.createElement('div');burst.className=`mission-burst${surprise?' surprise':''}`;burst.setAttribute('role','status');burst.textContent=surprise?'🎁 תיבת הפתעה! מצאתם מדבקת כוכב!':`✨ ${beats[(progress-1)%beats.length]}`;stage.append(burst);
+      const crystals=this.modal.querySelectorAll('.mission-crystal');crystals.forEach((crystal,index)=>crystal.classList.toggle('found',index<progress));
+      setTimeout(()=>burst.remove(),1600);
     }
     setInstruction(english,hebrew=''){
       const box=this.modal.querySelector('#interactiveInstruction');
@@ -659,6 +673,7 @@
       this.state=transition(this.state,value,correct);
       if(correct){
         button?.classList.add('correct');
+        this.celebrateMissionBeat(this.state.index);
         const bridge=item.type!==TYPES.WELCOME&&containsHebrew(value)&&englishAnswer(item)?`You understood it. In English, we say: ${englishAnswer(item)}.`:'';
         const successText=bridge||successMessage(this.state.index-1);
         this.feedback(successText,true,{speak:false});
