@@ -31,6 +31,16 @@
   ];
   const successMessage=index=>SUCCESS_MESSAGES[Math.abs(Number(index)||0)%SUCCESS_MESSAGES.length];
 
+  const QUESTS=[
+    {id:'forest',icon:'🌲',titleHe:'משימת היער הקסום',titleEn:'Magic Forest Mission',welcomeHe:'פיפ צריך את עזרתך! שלושה חברים מהיער איבדו את הדרך. נשתמש במילים באנגלית כדי למצוא אותם. מוכנים?',welcomeEn:'Pip needs your help! Three forest friends are lost. We can find them with English magic words. Are you ready?',completeHe:'הצלחנו! כל חברי היער חזרו הביתה והקריסטל זוהר!',completeEn:'We did it! Every forest friend is home and the crystal is glowing!'},
+    {id:'treasure',icon:'🏴‍☠️',titleHe:'מסע אל אי האוצר',titleEn:'Treasure Island Quest',welcomeHe:'מפת האוצר ננעלה! רק שלוש מילות חיות באנגלית יפתחו אותה. מוכנים לצאת לדרך?',welcomeEn:'The treasure map is locked! Three English animal words will open it. Are you ready to sail?',completeHe:'האוצר נמצא! המילים שלכם פתחו את התיבה הסודית!',completeEn:'Treasure found! Your words opened the secret chest!'},
+    {id:'space',icon:'🚀',titleHe:'מבצע חילוץ בחלל',titleEn:'Space Rescue Mission',welcomeHe:'שלוש חיות אסטרונאוטיות צריכות עזרה לחזור לחללית. האנגלית שלכם תפעיל את קרן החילוץ. מוכנים?',welcomeEn:'Three animal astronauts need help returning to their ship. Your English powers the rescue beam. Are you ready?',completeHe:'משימת החלל הושלמה! כל האסטרונאוטים בטוחים!',completeEn:'Space mission complete! Every astronaut is safe!'}
+  ];
+  function questFor(seed='friend'){
+    const value=String(seed),score=[...value].reduce((sum,char)=>((sum*31)+char.charCodeAt(0))>>>0,7);
+    return QUESTS[score%QUESTS.length];
+  }
+
   const activity=(id,type,value)=>({
     id,type,difficulty:'easy',skill:'vocabulary',xp:5,
     successFeedback:'Wonderful! Great trying!',
@@ -50,19 +60,22 @@
     const style=document.createElement('style');
     style.id='interactiveMatchStyles';
     style.textContent=`.interactive-top{grid-template-columns:auto minmax(90px,auto) minmax(100px,1fr) auto auto auto auto}.interactive-timer{white-space:nowrap;padding:5px 9px;border-radius:999px;background:#fff3c7;color:#725300;font-weight:900;font-variant-numeric:tabular-nums}.match-game{width:100%;display:grid;gap:clamp(10px,2vh,18px);align-content:center}.match-targets,.match-words{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(6px,1.4vw,14px);width:100%}.match-targets .interactive-choice,.match-words .interactive-choice{min-width:0;width:100%;margin:0}.match-targets .interactive-choice{min-height:clamp(82px,18vh,150px);padding:6px}.match-picture{display:grid;place-items:center;width:100%;height:clamp(62px,14vh,118px)}.match-animal-svg{display:block;width:100%;height:100%;max-width:150px;overflow:visible;filter:drop-shadow(0 5px 5px #244c6a28)}.match-picture-label{font-size:clamp(.72rem,1.7vw,.95rem);color:#34495e}.match-word{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.match-word.dragging{z-index:20;cursor:grabbing;animation:none!important;box-shadow:0 18px 35px #223c5980;transition:none}.match-word.matched{opacity:.48;text-decoration:line-through}.match-targets .interactive-choice.drop-ready{outline:5px solid #ffe16b;transform:scale(1.04)}@media(max-width:700px){.interactive-top{grid-template-columns:minmax(54px,auto) minmax(36px,1fr) auto auto auto auto}.interactive-teacher-mini{display:none}.interactive-timer{padding:4px 6px;font-size:.72rem}.match-game{gap:8px}.match-targets,.match-words{gap:5px}.match-targets .interactive-choice{min-height:76px}.match-picture{height:58px}.match-picture-label{font-size:.68rem}.match-words .interactive-choice{min-height:44px;padding:6px;font-size:.85rem}}`;
+    style.textContent+=`.quest-banner{position:absolute;z-index:8;top:10px;left:50%;translate:-50% 0;max-width:min(70%,560px);padding:7px 16px;border:2px solid #fff9;border-radius:999px;background:#263b70d9;color:#fff;font-weight:900;text-align:center;box-shadow:0 7px 18px #14244c35;pointer-events:none}.adventure-stage[data-quest="treasure"]{background:linear-gradient(180deg,#75d9ff 0 55%,#f7d887 55% 70%,#58b9ce 70%)}.adventure-stage[data-quest="space"]{background:radial-gradient(circle at 70% 20%,#786be8 0,#22275e 48%,#111631 100%)}.adventure-stage[data-quest="space"] .stage-hill{background:#8074a8}.adventure-stage[data-quest="space"] .stage-sun{filter:hue-rotate(180deg)}@media(max-width:700px){.quest-banner{top:5px;max-width:72%;padding:5px 9px;font-size:.72rem}}`;
     document.head.append(style);
   }
 
-  function createAnimalsLesson(childName='Friend'){
+  function createAnimalsLesson(childName='Friend',day=new Date().toISOString().slice(0,10)){
+    const quest=questFor(`${childName}:${day}`);
     return{
       id:'daily-animals-interactive-v1',
       title:'Animals',
       titleHe:'חיות',
+      quest,
       words:['dog','cat','bird'],
       activities:[
         activity('animals-welcome',TYPES.WELCOME,{
-          teacherInstructionHe:`שלום ${childName}! היום נלמד שמות של חיות. מוכנים?`,
-          teacherInstructionEn:`Hello ${childName}! Today we will learn animals. Are you ready?`,
+          teacherInstructionHe:`שלום ${childName}! ${quest.welcomeHe}`,
+          teacherInstructionEn:`Hello ${childName}! ${quest.welcomeEn}`,
           prompt:'כן, מתחילים',options:['כן, מתחילים'],correctAnswer:'כן, מתחילים',
           acceptedAnswers:['yes','ready','I am ready',"I'm ready","let's start","let's go",'okay','ok','כן','בטח','מוכן','מוכנה','מוכנים','מוכנות','אני מוכן','אני מוכנה','אפשר להתחיל','מתחילים','קדימה','יאללה'],xp:0
         }),
@@ -259,7 +272,7 @@
         modal.setAttribute('role','dialog');
         modal.setAttribute('aria-modal','true');
         modal.setAttribute('aria-labelledby','interactiveTeacherTitle');
-        modal.innerHTML=`<article class="panel interactive-panel" data-focus="speaking" data-teacher-state="speaking"><header class="interactive-top"><div class="interactive-teacher-mini" aria-hidden="true">✨</div><div class="interactive-child"><strong id="interactiveChildName"></strong><small id="interactiveState" aria-live="polite">המורה מדברת</small></div><div class="interactive-progress" aria-label="התקדמות בשיעור"><span></span></div><div id="interactiveDifficultyHost"></div><output class="interactive-timer" id="interactiveTimer" aria-live="off">⏳ 10:00</output><button class="btn interactive-camera" id="interactiveCameraToggle" type="button" aria-label="הפעלת מצלמת הילד" aria-pressed="false">📷</button><button class="btn interactive-pause" id="interactivePause" type="button" aria-label="השהיית השיעור">⏸️</button><button class="close" type="button" data-close aria-label="סגירת החלון">×</button></header><main class="interactive-center" aria-label="אזור הפעילות"><section class="adventure-stage" aria-label="במת משחק מונפשת"><div class="stage-sky" aria-hidden="true"><i></i><i></i><i></i></div><div class="stage-scenery" aria-hidden="true"><span class="stage-sun">☀️</span><span class="stage-hill hill-a"></span><span class="stage-hill hill-b"></span><span class="stage-sparkles">✦ · ✧</span></div><aside class="stage-teacher" id="interactiveTeacherVisual" aria-label="המורה המלווה"></aside><div class="stage-activity" id="interactiveActivity"></div><div class="child-camera-host" id="interactiveChildCamera"></div><figure class="lesson-dragon" id="interactiveDragon" data-state="watching" aria-label="הדרקון החבר"><img src="assets/baby-dragon.svg" alt=""><span aria-hidden="true">✦</span></figure><output class="interactive-live-transcript" id="interactiveLiveTranscript" aria-live="polite" hidden></output><div class="lesson-celebration" id="interactiveCelebration" aria-hidden="true"><i>★</i><i>✦</i><i>●</i><i>★</i><i>✧</i><i>●</i></div><output class="animation-fps" id="interactiveFps" hidden aria-label="קצב אנימציה"></output></section></main><footer class="interactive-bottom"><div class="interactive-speech" id="interactiveInstruction" aria-live="polite"></div><div class="interactive-vocabulary" id="interactiveVocabulary" aria-label="מילות השיעור"></div><div class="interactive-answer-controls" id="interactiveAnswerControls"></div><p class="interactive-feedback" id="interactiveFeedback" role="status"></p><div class="interactive-tools"><button class="btn" id="interactiveReplay">🔊 שוב</button><button class="btn" id="interactiveHint">💡 רמז</button><button class="danger" id="interactiveEnd">סיום</button></div></footer><pre class="teacher-debug" id="interactiveSpeechDebug" hidden aria-label="מצב צינור זיהוי הדיבור"></pre></article>`;
+        modal.innerHTML=`<article class="panel interactive-panel" data-focus="speaking" data-teacher-state="speaking"><header class="interactive-top"><div class="interactive-teacher-mini" aria-hidden="true">✨</div><div class="interactive-child"><strong id="interactiveChildName"></strong><small id="interactiveState" aria-live="polite">המורה מדברת</small></div><div class="interactive-progress" aria-label="התקדמות בשיעור"><span></span></div><div id="interactiveDifficultyHost"></div><output class="interactive-timer" id="interactiveTimer" aria-live="off">⏳ 10:00</output><button class="btn interactive-camera" id="interactiveCameraToggle" type="button" aria-label="הפעלת מצלמת הילד" aria-pressed="false">📷</button><button class="btn interactive-pause" id="interactivePause" type="button" aria-label="השהיית השיעור">⏸️</button><button class="close" type="button" data-close aria-label="סגירת החלון">×</button></header><main class="interactive-center" aria-label="אזור הפעילות"><section class="adventure-stage" aria-label="במת משחק מונפשת"><div class="quest-banner" id="interactiveQuestBanner" role="status"></div><div class="stage-sky" aria-hidden="true"><i></i><i></i><i></i></div><div class="stage-scenery" aria-hidden="true"><span class="stage-sun">☀️</span><span class="stage-hill hill-a"></span><span class="stage-hill hill-b"></span><span class="stage-sparkles">✦ · ✧</span></div><aside class="stage-teacher" id="interactiveTeacherVisual" aria-label="המורה המלווה"></aside><div class="stage-activity" id="interactiveActivity"></div><div class="child-camera-host" id="interactiveChildCamera"></div><figure class="lesson-dragon" id="interactiveDragon" data-state="watching" aria-label="הדרקון החבר"><img src="assets/baby-dragon.svg" alt=""><span aria-hidden="true">✦</span></figure><output class="interactive-live-transcript" id="interactiveLiveTranscript" aria-live="polite" hidden></output><div class="lesson-celebration" id="interactiveCelebration" aria-hidden="true"><i>★</i><i>✦</i><i>●</i><i>★</i><i>✧</i><i>●</i></div><output class="animation-fps" id="interactiveFps" hidden aria-label="קצב אנימציה"></output></section></main><footer class="interactive-bottom"><div class="interactive-speech" id="interactiveInstruction" aria-live="polite"></div><div class="interactive-vocabulary" id="interactiveVocabulary" aria-label="מילות השיעור"></div><div class="interactive-answer-controls" id="interactiveAnswerControls"></div><p class="interactive-feedback" id="interactiveFeedback" role="status"></p><div class="interactive-tools"><button class="btn" id="interactiveReplay">🔊 שוב</button><button class="btn" id="interactiveHint">💡 רמז</button><button class="danger" id="interactiveEnd">סיום</button></div></footer><pre class="teacher-debug" id="interactiveSpeechDebug" hidden aria-label="מצב צינור זיהוי הדיבור"></pre></article>`;
         document.body.append(modal);
         modal.querySelector('.close').onclick=()=>this.end();
         modal.querySelector('#interactiveReplay').onclick=()=>this.speakCurrent();
@@ -288,6 +301,9 @@
       }
       this.startAnimationMonitor();
       this.modal.querySelector('#interactiveChildName').textContent=this.child?.name||'חבר/ה';
+      const quest=this.lesson.quest||questFor(this.child?.name||'friend'),questBanner=this.modal.querySelector('#interactiveQuestBanner'),stage=this.modal.querySelector('.adventure-stage');
+      if(questBanner)questBanner.textContent=`${quest.icon} ${document.documentElement.lang==='en'?quest.titleEn:quest.titleHe}`;
+      if(stage)stage.dataset.quest=quest.id;
       this.modal.classList.add('open');
       document.body.style.overflow='hidden';
     }
@@ -685,12 +701,14 @@
       this.progress?.complete?.(this.lesson.id,earned);
       const host=this.modal.querySelector('#interactiveActivity');
       host.innerHTML=`<div class="interactive-complete"><div>🏆✨</div><h2>כל הכבוד! סיימתם את השיעור היומי עם המורה</h2><p>למדנו: dog, cat and bird</p><p class="xp-reward" role="status" aria-label="קיבלתם ${earned} נקודות ניסיון">+${earned} XP</p><button class="primary" id="interactiveHome" aria-label="סיום השיעור וחזרה למסך הבית">סיום ✓</button></div>`;
-      this.modal.querySelector('#interactiveInstruction').textContent='Great work! Today you learned dog, cat and bird.';
+      const quest=this.lesson.quest;
+      if(quest)host.querySelector('h2').textContent=document.documentElement.lang==='en'?quest.completeEn:quest.completeHe;
+      this.modal.querySelector('#interactiveInstruction').textContent=`${quest?.completeEn||'Mission complete!'} Magic words collected: dog, cat and bird.`;
       this.modal.querySelector('#interactiveState').textContent='המורה חוגגת';
       this.setVisualState('success');
-      this.speakSegments(`כל הכבוד ${this.child.name}! Today you learned dog, cat and bird.`,.82);
-      this.setInstruction('השיעור הסתיים. לחצו על סיום.');
-      this.speakSegments('השיעור הסתיים. לחצו על סיום.',.9);
+      this.speakSegments(`כל הכבוד ${this.child.name}! ${quest?.completeEn||'Mission complete!'} Magic words: dog, cat and bird.`,.82);
+      this.setInstruction('המשימה הושלמה. לחצו על סיום.');
+      this.speakSegments('המשימה הושלמה. לחצו על סיום.',.9);
       host.querySelector('#interactiveHome').onclick=()=>this.close();
       host.querySelector('#interactiveHome').focus();
       this.onComplete?.();
@@ -729,5 +747,5 @@
     return teacher;
   }
 
-  root.EAInteractiveTeacher={TYPES,VOICE_ANSWER_TYPES,supportsVoiceAnswer,SUCCESS_MESSAGES,successMessage,COMPONENTS,createAnimalsLesson,animalPicture,validate,validationResult,requiresEnglishPractice,transition,probableSpeechEcho,startAnimals};
+  root.EAInteractiveTeacher={TYPES,VOICE_ANSWER_TYPES,supportsVoiceAnswer,SUCCESS_MESSAGES,successMessage,QUESTS,questFor,COMPONENTS,createAnimalsLesson,animalPicture,validate,validationResult,requiresEnglishPractice,transition,probableSpeechEcho,startAnimals};
 })(typeof window!=='undefined'?window:globalThis);

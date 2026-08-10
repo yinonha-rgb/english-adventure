@@ -100,6 +100,17 @@ test('Hebrew understanding is acknowledged but English is requested before advan
   assert.match(source,/containsHebrew\(value\)/);
 });
 
+test('daily learning is framed as a changing child adventure, not a school lesson',()=>{
+  const forest=engine.createAnimalsLesson('A','2026-08-10'),later=engine.createAnimalsLesson('A','2026-08-11');
+  assert.ok(engine.QUESTS.length>=3);
+  assert.ok(forest.quest?.titleHe&&forest.quest?.welcomeEn&&forest.quest?.completeHe);
+  assert.doesNotMatch(forest.activities[0].teacherInstructionEn,/today we will learn/i);
+  assert.match(forest.activities[0].teacherInstructionEn,/help|mission|treasure|rescue|magic/i);
+  assert.notEqual(forest.quest.id,later.quest.id);
+  assert.match(source,/id="interactiveQuestBanner"/);
+  assert.match(source,/data-quest/);
+});
+
 test('natural correct speech is accepted instead of receiving retry feedback',()=>{
   const picture=lesson.activities.find(item=>item.id==='animals-dog');
   for(const answer of ['dog','the dog','it is a dog'])assert.equal(engine.validate(picture,answer),true,answer);
@@ -109,9 +120,9 @@ test('natural correct speech is accepted instead of receiving retry feedback',()
 });
 
 test('interactive completion speaks and focuses an explicit Finish action',()=>{
-  assert.match(source,/השיעור הסתיים\. לחצו על סיום\./);
+  assert.match(source,/המשימה הושלמה\. לחצו על סיום\./);
   assert.match(source,/id="interactiveHome" aria-label="סיום השיעור וחזרה למסך הבית">סיום ✓/);
-  assert.match(source,/speakSegments\('השיעור הסתיים\. לחצו על סיום\.'/);
+  assert.match(source,/speakSegments\('המשימה הושלמה\. לחצו על סיום\.'/);
   assert.match(source,/querySelector\('#interactiveHome'\)\.focus\(\)/);
 });
 
@@ -242,8 +253,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.53\.5/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.53\.5/);
+  assert.match(html,/interactive-activity-engine\.js\?v=4\.54\.0/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=4\.54\.0/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
