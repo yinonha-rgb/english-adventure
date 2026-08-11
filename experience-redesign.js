@@ -1,6 +1,17 @@
 (function(root){
   'use strict';
   const feature=(icon,he,en)=>{const item=document.createElement('span');item.className='mentor-benefit';item.innerHTML=`<b aria-hidden="true">${icon}</b><span class="copy-he" lang="he">${he}</span><span class="copy-en" lang="en">${en}</span>`;return item};
+  const bilingual=(className,he,en)=>`<span class="${className} copy-he" lang="he">${he}</span><span class="${className} copy-en" lang="en">${en}</span>`;
+  function learningJourney(){
+    const section=document.createElement('section');section.className='emily-learning-journey';section.setAttribute('aria-labelledby','emilyJourneyTitle');
+    section.innerHTML=`<header><span class="eyebrow">${bilingual('','מה קורה בשיעור?','Inside every lesson')}</span><h2 id="emilyJourneyTitle">${bilingual('','מפגש קצר, אישי ומלא השתתפות','A short, personal and active session')}</h2><p>${bilingual('','אמילי מסבירה בלי לחץ, מקשיבה לתשובה ומתקדמת רק כשהילד באמת משתתף.','Emily explains without pressure, listens to each answer and moves on only after real participation.')}</p></header><ol><li><b aria-hidden="true">👋</b>${bilingual('','שלום אישי','Personal hello')}</li><li><b aria-hidden="true">🎮</b>${bilingual('','משחק ומשימה','Game mission')}</li><li><b aria-hidden="true">🎙️</b>${bilingual('','דיבור והקשבה','Talk and listen')}</li><li><b aria-hidden="true">⭐</b>${bilingual('','סיכום והתקדמות','Reward and review')}</li></ol>`;
+    return section;
+  }
+  function confidenceStrip(){
+    const section=document.createElement('section');section.className='emily-confidence';section.setAttribute('aria-label','מידע חשוב להורים');
+    section.innerHTML=`<div>🫶 ${bilingual('','סבלנית וללא שיפוטיות','Patient and judgment-free')}</div><div>🌍 ${bilingual('','עברית ואנגלית','Hebrew and English')}</div><div>🛡️ ${bilingual('','ללא פרסומות או מעקב','No ads or tracking')}</div><div>☁️ ${bilingual('','עובדת גם במצב לא מקוון','Works offline too')}</div>`;
+    return section;
+  }
   function install(){
     const home=document.querySelector('.teacher-home'),art=home?.querySelector('.teacher-home-art'),copy=home?.querySelector('.teacher-home-copy');
     if(!home||!art||!copy||home.dataset.experienceV2)return false;
@@ -13,6 +24,9 @@
     document.querySelector('.daily')?.classList.add('compact-dashboard','goal-dashboard');
     document.querySelector('.reviewcard')?.classList.add('mission-review-card');
     document.querySelector('#lessonGrid')?.classList.add('activity-shelf');
+    const hero=document.querySelector('.hero'),supporting=document.querySelector('.supporting-label');
+    if(hero&&!document.querySelector('.emily-confidence'))hero.after(confidenceStrip());
+    if(supporting&&!document.querySelector('.emily-learning-journey'))supporting.before(learningJourney());
     return true;
   }
   root.EAExperienceRedesign={install};
