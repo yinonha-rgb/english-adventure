@@ -1,0 +1,34 @@
+/* Original Emily mentor-studio experience. Inspired by clear private-tutor UX,
+   without copying third-party artwork, text, branding or layouts. */
+:root{--studio-blue:#6257e8;--studio-navy:#24294c;--studio-mint:#6ee0c1;--studio-cream:#fff8e9}
+html[lang="he"] .copy-en,html[lang="en"] .copy-he{display:none!important}
+body{background:linear-gradient(180deg,#f8ffff 0,#fffaf1 48%,#f7f4ff 100%)}
+.shell{width:min(1220px,calc(100% - 28px))}
+.profilebar{margin-top:10px;border-radius:18px;box-shadow:0 10px 30px #26305d10}
+.hero{grid-template-columns:minmax(0,1fr) minmax(250px,.34fr);gap:16px;align-items:stretch}
+.teacher-home.mentor-studio{position:relative;grid-column:1/2;grid-row:1/3;display:grid;grid-template-columns:minmax(310px,.93fr) minmax(330px,1.07fr);gap:0;min-height:570px;padding:22px;border:1px solid #dfe9ec;border-radius:34px;background:linear-gradient(145deg,#efffff 0,#fffdf7 55%,#f0edff 100%);box-shadow:0 28px 80px #34456b1b;overflow:hidden}
+.mentor-studio .teacher-home-art{min-height:520px;border:1px solid #cbd8e8;border-radius:27px;background:linear-gradient(180deg,#eafcff 0 68%,#d8f2dc 68%);box-shadow:inset 0 0 0 10px #ffffffb5,0 18px 42px #34456b1b;overflow:hidden}
+.mentor-studio .teacher-home-art:before{content:"";position:absolute;z-index:0;inset:45px 10px 10px;border-radius:20px;background:linear-gradient(120deg,transparent 20%,#fff7 50%,transparent 80%);translate:-120% 0;animation:studioLight 8s ease-in-out infinite}
+.mentor-studio .teacher-home-avatar{z-index:3;width:min(82%,330px)!important;height:88%!important;max-height:470px;border:0!important;border-radius:18px!important;background:transparent!important;box-shadow:none!important;align-self:end}
+.mentor-studio .teacher-home-avatar .teacher-photo{object-position:50% 14%}
+.mentor-studio .world-sky,.mentor-studio .world-hills,.mentor-studio .world-tree{opacity:.45}
+.mentor-studio .world-trail{display:none}
+.mentor-studio .dragon-companion{z-index:5;inset-inline-end:5%;bottom:4%;width:100px;height:100px;filter:drop-shadow(0 10px 10px #26305d35)}
+.mentor-studio .dragon-message{z-index:6;inset-inline-end:3%;bottom:24%;max-width:180px}
+.mentor-studio-bar{position:absolute;z-index:8;top:15px;left:20px;right:20px;height:34px;display:flex;align-items:center;gap:7px;padding:0 12px;border-radius:13px;background:#ffffffdc;color:#4b5271;font:800 .7rem/1 system-ui;letter-spacing:.1em;box-shadow:0 6px 18px #26305d12}
+.mentor-studio-bar i{width:9px;height:9px;border-radius:50%;background:#ff7b73}.mentor-studio-bar i:nth-child(2){background:#ffd164}.mentor-studio-bar i:nth-child(3){background:#70dca5}.mentor-studio-bar span{margin-inline-start:auto}
+.mentor-live-state{position:absolute;z-index:8;left:30px;bottom:25px;display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:999px;background:#202846dd;color:#fff;font-size:.76rem;font-weight:850}.mentor-live-state i{width:9px;height:9px;border-radius:50%;background:#53e49b;box-shadow:0 0 0 5px #53e49b24;animation:livePulse 1.7s infinite}
+.mentor-studio .teacher-home-copy{position:relative;z-index:4;padding:clamp(25px,4vw,54px);display:flex;flex-direction:column;justify-content:center;align-items:stretch;text-align:start}
+.mentor-studio .teacher-home-copy>.eyebrow{align-self:flex-start;background:#e7f8f3;color:#187d67}
+.mentor-studio .teacher-home-copy>h1{font-size:clamp(2.25rem,4vw,4.4rem);line-height:1.04;color:var(--studio-navy);letter-spacing:-.035em}
+.mentor-studio .teacher-home-copy>p{max-width:530px;font-size:clamp(1rem,1.7vw,1.22rem);line-height:1.55}
+.mentor-studio .daily-mission{padding:14px 16px;border:1px solid #dedcf8;border-radius:18px;background:#ffffffbf;box-shadow:0 8px 24px #3e397b0c}
+.mentor-benefits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0 18px}.mentor-benefit{display:grid;place-items:center;gap:4px;min-height:76px;padding:8px;border:1px solid #e2e5ef;border-radius:15px;background:#fff;color:#3e4567;text-align:center;font-size:.76rem;font-weight:800}.mentor-benefit b{font-size:1.3rem}
+.mentor-studio .daily-start{min-height:76px;margin-top:0;border-radius:17px;background:linear-gradient(100deg,#6757ed,#826ef4 55%,#6c5bea);box-shadow:0 15px 30px #6557e84a;font-size:clamp(1.1rem,2vw,1.35rem)}
+.compact-dashboard{border-radius:24px!important;background:#ffffffec!important;box-shadow:0 15px 40px #34456b12!important}.progress-card.compact-dashboard{grid-column:2;grid-row:1}.goal-dashboard{grid-column:2;grid-row:2}.compact-dashboard .stats{grid-template-columns:repeat(2,1fr)}.compact-dashboard .stat{min-height:80px;display:grid;place-items:center;align-content:center}.goal-dashboard h2{font-size:1.25rem}
+.supporting-label{margin-top:34px;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}.mission-review-card{border-radius:24px;background:linear-gradient(110deg,#fff8df,#fff 45%,#eefcf9)}
+.activity-shelf{grid-template-columns:repeat(4,minmax(210px,1fr));gap:16px}.activity-shelf .lesson{min-height:220px;border-radius:24px}.activity-shelf .lesson .emoji{font-size:3rem}.activity-shelf .lesson h3{font-size:1.1rem}
+@keyframes studioLight{0%,55%{translate:-120% 0}75%,100%{translate:120% 0}}@keyframes livePulse{50%{opacity:.45;scale:.8}}
+@media(max-width:980px){.hero{grid-template-columns:1fr 1fr}.teacher-home.mentor-studio{grid-column:1/-1;grid-row:auto;min-height:520px}.progress-card.compact-dashboard,.goal-dashboard{grid-column:auto;grid-row:auto}.mentor-studio .teacher-home-art{min-height:470px}}
+@media(max-width:720px){.hero{grid-template-columns:1fr}.teacher-home.mentor-studio{grid-template-columns:1fr;min-height:0;padding:12px}.mentor-studio .teacher-home-art{min-height:320px}.mentor-studio .teacher-home-copy{padding:24px 14px 16px;text-align:center}.mentor-studio .teacher-home-copy>.eyebrow{align-self:center}.mentor-benefits{grid-template-columns:repeat(3,1fr)}.mentor-benefit{font-size:.68rem}.progress-card.compact-dashboard,.goal-dashboard{grid-column:1}.activity-shelf{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding:5px 3px 18px}.activity-shelf .lesson{flex:0 0 78vw;scroll-snap-align:center}.mentor-live-state{left:20px;bottom:15px}}
+@media(prefers-reduced-motion:reduce){.mentor-studio .teacher-home-art:before,.mentor-live-state i{animation:none}}
