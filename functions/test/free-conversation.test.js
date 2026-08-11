@@ -55,11 +55,12 @@ test('free provider emits intent events and never performs a network request',()
 
 test('recognition restart policy is bounded and only recovers an early empty stop',()=>{
   assert.equal(Providers.shouldRestartRecognition({elapsedMs:900,restartCount:0}),true);
-  assert.equal(Providers.shouldRestartRecognition({elapsedMs:5000,restartCount:0}),false);
+  assert.equal(Providers.shouldRestartRecognition({elapsedMs:5000,restartCount:0}),true);
   assert.equal(Providers.shouldRestartRecognition({elapsedMs:900,heardSpeech:true,restartCount:0}),false);
   assert.equal(Providers.shouldRestartRecognition({elapsedMs:900,finalTranscript:'dog',restartCount:0}),false);
   assert.equal(Providers.shouldRestartRecognition({elapsedMs:900,error:'network',restartCount:0}),false);
-  assert.equal(Providers.shouldRestartRecognition({elapsedMs:900,restartCount:2}),false);
+  assert.equal(Providers.shouldRestartRecognition({elapsedMs:900,restartCount:4}),false);
+  assert.equal(Providers.shouldRestartRecognition({elapsedMs:900,error:'no-speech',heardSpeech:true,restartCount:2}),true);
 });
 
 test('recognition selects the most lesson-relevant browser alternative without accepting it automatically',()=>{

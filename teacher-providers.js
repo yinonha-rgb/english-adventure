@@ -68,8 +68,8 @@
     if(has([/^(can i answer in hebrew|can i answer in english|in hebrew|in english)$/,/^(אפשר לענות בעברית|אפשר לענות באנגלית|אפשר בעברית|אפשר באנגלית)$/]))return{intent:CONVERSATION_INTENTS.LANGUAGE_CHOICE,normalized,confidence:.98};
     return{intent:CONVERSATION_INTENTS.ANSWER,normalized,confidence:1};
   }
-  function shouldRestartRecognition({elapsedMs=0,heardSpeech=false,finalTranscript='',error='',restartCount=0,maxRestarts=2}={}){
-    return !error&&!finalTranscript&&restartCount<maxRestarts&&elapsedMs<4500&&!heardSpeech;
+  function shouldRestartRecognition({elapsedMs=0,heardSpeech=false,finalTranscript='',error='',restartCount=0,maxRestarts=4}={}){
+    return !finalTranscript&&restartCount<maxRestarts&&(!error||error==='no-speech')&&(!heardSpeech||error==='no-speech')&&elapsedMs<12000;
   }
   function recognitionLanguage({phase='',restartAttempt=0,expectedAnswers=[]}={}){
     const hasHebrew=expectedAnswers.some(answer=>/[\u0590-\u05ff]/.test(String(answer||'')));

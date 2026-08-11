@@ -61,11 +61,11 @@
       if(!action)return this.setState(event);this.setState(action[0]);this.gesture(action[1],event==='correct'?1800:1400);return this.state;
     }
     motionChoices(){
-      if(this.state==='speak')return['talk-left','talk-right','brow','gaze-left','gaze-right','shoulder','breathe'];
-      if(this.state==='listen')return['listen-nod','gaze-center','blink','head-left','head-right','breathe'];
+      if(this.state==='speak')return['talk-left','talk-right','head-left','head-right','shoulder','breathe','weight-left','weight-right'];
+      if(this.state==='listen')return['listen-nod','blink','head-left','head-right','breathe','weight-left','weight-right'];
       if(this.state==='think')return['gaze-up','head-right','blink','brow','breathe'];
       if(this.state==='celebrate')return['happy-bounce','blink','shoulder','breathe'];
-      return['breathe','breathe','blink','gaze-left','gaze-right','head-left','head-right','shoulder','weight-left','weight-right'];
+      return['breathe','breathe','blink','head-left','head-right','shoulder','weight-left','weight-right'];
     }
     chooseMotion(){const choices=this.motionChoices(),fresh=choices.filter(choice=>choice!==this.lastMotion),pool=fresh.length?fresh:choices;return pool[Math.floor(Math.random()*pool.length)]}
     tuneMotion(motion){const direction=motion.endsWith('left')?-1:1,intensity=(0.72+Math.random()*.48).toFixed(2);this.rig.style.setProperty('--motion-direction',String(direction));this.rig.style.setProperty('--motion-intensity',intensity)}
@@ -73,8 +73,8 @@
       clearTimeout(this.motionTimer);if(this.reducedMotion||!this.visible)return;
       this.motionTimer=setTimeout(()=>{
         const motion=this.chooseMotion();this.lastMotion=motion;this.tuneMotion(motion);this.rig.dataset.motion=motion;
-        const activeFor=motion==='blink'?randomBetween(110,180):motion==='breathe'?randomBetween(1300,2100):randomBetween(620,1180);
-        this.motionTimer=setTimeout(()=>{this.rig.dataset.motion='still';this.scheduleMotion(randomBetween(this.state==='speak'?520:1100,this.state==='speak'?1250:3100))},activeFor);
+        const activeFor=motion==='blink'?randomBetween(110,180):motion==='breathe'?randomBetween(1600,2600):randomBetween(850,1550);
+        this.motionTimer=setTimeout(()=>{this.rig.dataset.motion='still';this.scheduleMotion(randomBetween(this.state==='speak'?420:900,this.state==='speak'?1100:2600))},activeFor);
       },delay);
     }
     showMouth(shape){this.presence.dataset.mouth=shape;this.show(`.rig-mouth-${shape}`,this.mouthNodes)}

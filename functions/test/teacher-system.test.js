@@ -90,7 +90,7 @@ test('human micro-motion varies naturally without repeating the same pose',()=>{
   assert.match(source,/this\.lastMotion='still'/);
   assert.match(source,/filter\(choice=>choice!==this\.lastMotion\)/);
   assert.match(source,/--motion-intensity/);
-  assert.match(source,/motion==='breathe'\?randomBetween\(1300,2100\)/);
+  assert.match(source,/motion==='breathe'\?randomBetween\(1600,2600\)/);
   assert.match(css,/var\(--motion-intensity,1\)/);
 });
 

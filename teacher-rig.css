@@ -45,8 +45,8 @@
 .teacher-rig[data-motion="head-left"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-left"] .teacher-rig-canvas{transform:rotate(calc(-.38deg * var(--motion-intensity,1))) translateX(calc(-.5px * var(--motion-intensity,1)))}
 .teacher-rig[data-motion="head-right"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-right"] .teacher-rig-canvas{transform:rotate(calc(.38deg * var(--motion-intensity,1))) translateX(calc(.5px * var(--motion-intensity,1)))}
 .teacher-rig[data-motion="shoulder"]{transform:translateY(calc(-.8px * var(--motion-intensity,1))) scaleX(calc(1 + .0015 * var(--motion-intensity,1)))}
-.teacher-rig[data-motion="weight-left"] .rig-puppet{transform:translateX(calc(-1.15px * var(--motion-intensity,1))) rotate(calc(-.1deg * var(--motion-intensity,1)))}
-.teacher-rig[data-motion="weight-right"] .rig-puppet{transform:translateX(calc(1.15px * var(--motion-intensity,1))) rotate(calc(.1deg * var(--motion-intensity,1)))}
+.teacher-rig[data-motion="weight-left"] .teacher-rig-canvas{transform:translateX(calc(-1.4px * var(--motion-intensity,1))) rotate(calc(-.22deg * var(--motion-intensity,1)))}
+.teacher-rig[data-motion="weight-right"] .teacher-rig-canvas{transform:translateX(calc(1.4px * var(--motion-intensity,1))) rotate(calc(.22deg * var(--motion-intensity,1)))}
 .teacher-rig[data-motion="listen-nod"] .teacher-rig-canvas{transform:translateY(calc(1.15px * var(--motion-intensity,1))) rotate(calc(-.22deg * var(--motion-intensity,1)))}
 .teacher-rig[data-motion="brow"] .rig-expression{transform:translateY(-.8px) scaleY(1.008)}
 .teacher-rig[data-motion="happy-bounce"]{transform:translateY(-4px) scale(1.008)}

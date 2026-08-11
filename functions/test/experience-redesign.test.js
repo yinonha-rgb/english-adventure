@@ -25,9 +25,9 @@ test('home hierarchy stays bilingual, responsive and motion safe',()=>{
 });
 
 test('redesign is original, local, offline and does not introduce paid AI',()=>{
-  assert.match(html,/experience-redesign\.css\?v=5\.0\.0/);
-  assert.match(html,/experience-redesign\.js\?v=5\.0\.0/);
-  assert.match(sw,/experience-redesign\.css\?v=5\.0\.0/);
-  assert.match(sw,/experience-redesign\.js\?v=5\.0\.0/);
+  assert.match(html,/experience-redesign\.css\?v=5\.1\.0/);
+  assert.match(html,/experience-redesign\.js\?v=5\.1\.0/);
+  assert.match(sw,/experience-redesign\.css\?v=5\.1\.0/);
+  assert.match(sw,/experience-redesign\.js\?v=5\.1\.0/);
   assert.doesNotMatch(`${js}\n${css}`,/lexiteach|fetch\s*\(|openai|api[_-]?key/i);
 });

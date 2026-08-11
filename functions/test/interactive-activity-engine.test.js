@@ -222,7 +222,9 @@ test('daily lesson greeting listens automatically and accepts spoken readiness',
   assert.doesNotMatch(source,/validateActivity\(/);
   assert.match(source,/scoreAlternative:text=>validate\(item,text\)\?1:0/);
   assert.match(source,/camera did not prepare microphone/);
-  assert.match(source,/error==='no-speech'&&retryAttempt<2/);
+  assert.match(source,/error==='no-speech'&&retryAttempt<4/);
+  assert.match(source,/alternating language/);
+  assert.match(source,/handleConversation\(value,item\)/);
   assert.match(source,/recognition restart scheduled/);
   assert.match(source,/this\.autoListeningActivityId=null;[\s\S]*automatic listening scheduled/);
   assert.match(source,/automatic listening scheduled/);
@@ -277,8 +279,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=4\.55\.0/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=4\.55\.0/);
+  assert.match(html,/interactive-activity-engine\.js\?v=5\.1\.0/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=5\.1\.0/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
