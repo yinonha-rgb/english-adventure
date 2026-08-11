@@ -78,6 +78,11 @@
       },delay);
     }
     showMouth(shape){this.presence.dataset.mouth=shape;this.show(`.rig-mouth-${shape}`,this.mouthNodes)}
+    syncMouth(shape='rest'){
+      if(this.reducedMotion||this.state!=='speak')return;
+      clearTimeout(this.mouthTimer);this.showMouth(mouths.includes(shape)?shape:'rest');
+      this.mouthTimer=setTimeout(()=>this.scheduleMouth(),150);
+    }
     scheduleMouth(){
       clearTimeout(this.mouthTimer);if(this.reducedMotion||this.state!=='speak'||!this.visible)return;
       const shapes=['a','e','rest','o','a','smile','e'],shape=shapes[Math.floor(Math.random()*shapes.length)];this.showMouth(shape);

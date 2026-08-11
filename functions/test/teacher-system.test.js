@@ -10,6 +10,7 @@ const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
 const sync=fs.readFileSync(path.join(root,'firebase-sync.js'),'utf8');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
+const rigSource=fs.readFileSync(path.join(root,'teacher-rig.js'),'utf8');
 
 test('initial catalog includes warm female and male private tutors',()=>{
   assert.deepEqual(System.CATALOG.map(x=>x.id),['female-young','male-young']);
@@ -92,6 +93,12 @@ test('human micro-motion varies naturally without repeating the same pose',()=>{
   assert.match(source,/--motion-intensity/);
   assert.match(source,/motion==='breathe'\?randomBetween\(1600,2600\)/);
   assert.match(css,/var\(--motion-intensity,1\)/);
+});
+
+test('rig accepts speech-boundary mouth cues without creating another face',()=>{
+  assert.match(rigSource,/syncMouth\(shape='rest'\)/);
+  assert.match(rigSource,/clearTimeout\(this\.mouthTimer\);this\.showMouth/);
+  assert.equal((Rig.rigMarkup('female-young').match(/teacher-rig-canvas/g)||[]).length,1);
 });
 
 test('puppet uses exactly one pair of arms, hands and legs with a single fallback body',()=>{

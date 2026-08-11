@@ -279,8 +279,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=5\.2\.0/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=5\.2\.0/);
+  assert.match(html,/interactive-activity-engine\.js\?v=5\.3\.0/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=5\.3\.0/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
@@ -350,4 +350,14 @@ test('interactive speech replaces content and stays at two visible lines',()=>{
   assert.match(html,/interactive-speech strong\[lang="en"\]\{direction:ltr/);
   assert.match(html,/interactive-speech small\[lang="he"\]\{direction:rtl/);
   assert.match(html,/-webkit-line-clamp:1/);
+});
+
+test('spoken words drive calibrated mouth shapes and one visible message channel',()=>{
+  assert.equal(engine.speechMouthShape('open',0),'o');
+  assert.equal(engine.speechMouthShape('eat',0),'e');
+  assert.equal(engine.speechMouthShape('apple',0),'a');
+  assert.equal(engine.speechMouthShape('sky',0),'rest');
+  assert.match(source,/utterance\.onboundary=event=>this\.visual\?\.syncMouth/);
+  assert.match(source,/box\.hidden=true/);
+  assert.match(source,/querySelector\('#interactiveFeedback'\)\.hidden=true/);
 });

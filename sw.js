@@ -1,4 +1,4 @@
-const VERSION='english-adventure-5.2.0';
+const VERSION='english-adventure-5.3.0';
 const CACHE_PREFIX='english-adventure-';
 const CORE=['./','./index.html','./teacher-rig.css?v=4.38.0','./adventure-home.css?v=4.38.0','./translations.js?v=4.38.0','./ui-controls.js?v=4.38.0','./answer-playback.js?v=4.38.0','./natural-voice.js?v=4.38.0','./teacher-visual.js?v=4.38.0','./teacher-rig.js?v=4.38.0','./teacher-system.js?v=4.38.0','./adventure-home.js?v=4.38.0','./adaptive-learning.js?v=4.38.0','./daily-lesson-core.js?v=4.38.0','./interactive-activity-engine.js?v=4.38.0','./advanced-ai-config.js?v=4.38.0','./pricing-config.js?v=4.38.0','./advanced-ai-policy.js?v=4.38.0','./teacher-providers.js?v=4.38.0','./app.js?v=4.38.0','./teacher-modes-core.js?v=4.38.0','./firebase-sync.js?v=4.38.0','./teacher-ai.js?v=4.38.0','./firebase-config.js','./content.json','./manifest.json','./update-manifest.json','./icon.svg','./icon-maskable.svg','./assets/baby-dragon.svg','./assets/teacher-adam.png','./assets/teacher-noa.png','./assets/teacher-adam-body-v2.png','./assets/teacher-adam-expression-celebrating-v2.png','./assets/teacher-adam-expression-encouraging-v2.png','./assets/teacher-adam-expression-happy-v2.png','./assets/teacher-adam-expression-listening-v2.png','./assets/teacher-adam-expression-neutral-v2.png','./assets/teacher-adam-expression-thinking-v2.png','./assets/teacher-adam-mouth-a-v2.png','./assets/teacher-adam-mouth-e-v2.png','./assets/teacher-adam-mouth-o-v2.png','./assets/teacher-adam-mouth-rest-v2.png','./assets/teacher-adam-mouth-smile-v2.png','./assets/teacher-noa-body-v2.png','./assets/teacher-noa-expression-celebrating-v2.png','./assets/teacher-noa-expression-encouraging-v2.png','./assets/teacher-noa-expression-happy-v2.png','./assets/teacher-noa-expression-listening-v2.png','./assets/teacher-noa-expression-neutral-v2.png','./assets/teacher-noa-expression-thinking-v2.png','./assets/teacher-noa-mouth-a-v2.png','./assets/teacher-noa-mouth-e-v2.png','./assets/teacher-noa-mouth-o-v2.png','./assets/teacher-noa-mouth-rest-v2.png','./assets/teacher-noa-mouth-smile-v2.png'];
 
@@ -28,19 +28,19 @@ CORE.push('./app.js?v=4.48.0','./teacher-providers.js?v=4.48.0','./teacher-ai.js
 CORE.push('./app.js?v=4.49.0','./interactive-activity-engine.js?v=4.49.0');
 CORE.push('./app.js?v=4.50.0','./visual-polish.css?v=4.50.0');
 CORE.push('./entry-video.js?v=4.51.0','./lesson-quiz-core.js?v=4.51.0','./natural-voice.js?v=4.52.0','./app.js?v=4.52.0');
-CORE.push('./interactive-activity-engine.js?v=5.2.0','./teacher-providers.js?v=5.2.0','./teacher-modes-core.js?v=5.2.0','./app.js?v=5.2.0');
+CORE.push('./interactive-activity-engine.js?v=5.3.0','./teacher-providers.js?v=5.3.0','./teacher-modes-core.js?v=5.3.0','./app.js?v=5.3.0');
 CORE.push('./interactive-activity-engine.js?v=4.52.2','./teacher-ai.js?v=4.52.2','./app.js?v=4.52.2');
 CORE.push('./teacher-rig.css?v=4.52.3','./app.js?v=4.52.3');
 CORE.push('./teacher-rig.css?v=4.52.4','./teacher-rig.js?v=4.52.4','./app.js?v=4.52.4');
 const RIG_PARTS=['hair-back','neck','torso','hips','leg-left-upper','leg-left-lower','leg-right-upper','leg-right-lower','arm-left-upper','arm-left-lower','hand-left','arm-right-upper','arm-right-lower','hand-right','head'];
 for(const teacher of ['emily','adam'])for(const part of RIG_PARTS)CORE.push(`./assets/rigs/${teacher}/${part}.png`);
 CORE.push('./teacher-rig.css?v=4.53.0','./teacher-rig.js?v=4.53.0','./app.js?v=4.53.0');
-CORE.push('./teacher-rig.css?v=5.2.0','./teacher-rig.js?v=5.2.0','./app.js?v=5.2.0');
-CORE.push('./interactive-activity-engine.js?v=4.53.5','./teacher-modes-core.js?v=5.2.0','./app.js?v=4.53.5');
+CORE.push('./teacher-rig.css?v=5.3.0','./teacher-rig.js?v=5.3.0','./app.js?v=5.3.0');
+CORE.push('./interactive-activity-engine.js?v=4.53.5','./teacher-modes-core.js?v=5.3.0','./app.js?v=4.53.5');
 CORE.push('./interactive-activity-engine.js?v=4.54.0','./app.js?v=4.54.0');
 CORE.push('./classroom-tools.js?v=4.54.1','./interactive-activity-engine.js?v=4.54.1','./app.js?v=4.54.1');
-CORE.push('./interactive-activity-engine.js?v=5.2.0','./app.js?v=5.2.0');
-CORE.push('./experience-redesign.css?v=5.2.0','./experience-redesign.js?v=5.2.0','./app.js?v=5.2.0');
+CORE.push('./interactive-activity-engine.js?v=5.3.0','./app.js?v=5.3.0');
+CORE.push('./experience-redesign.css?v=5.3.0','./experience-redesign.js?v=5.3.0','./app.js?v=5.3.0');
 CORE.push('./teacher-noa-video.js?v=4.42.2','./assets/teacher-noa-greeting.mp4','./entry-video.js?v=4.40.0','./assets/entry-welcome.mp4');
 CORE.push('./child-camera.css?v=4.38.0','./child-camera.js?v=4.38.0','./child-camera-fix.js?v=4.41.1','./child-camera.js?v=4.41.0','./home-teacher-restore.js?v=4.42.0');
 

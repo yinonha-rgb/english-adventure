@@ -50,6 +50,13 @@
     const includeHebrew=welcome||level==='easy'||attempts>0||(level==='medium'&&index<3);
     return includeHebrew?[item?.teacherInstructionHe,item?.teacherInstructionEn].filter(Boolean):[item?.teacherInstructionEn].filter(Boolean);
   }
+  function speechMouthShape(text,index=0){
+    const sound=String(text||'').slice(Math.max(0,index),Math.max(0,index)+3).toLowerCase();
+    if(/[ou]/.test(sound))return'o';
+    if(/[ei]/.test(sound))return'e';
+    if(/[a]/.test(sound))return'a';
+    return'rest';
+  }
 
   const activity=(id,type,value)=>({
     id,type,difficulty:'easy',skill:'vocabulary',xp:5,
@@ -366,6 +373,7 @@
       this.modal.querySelectorAll('.mission-crystal').forEach((crystal,index)=>crystal.classList.toggle('found',index<this.state.index));
       this.setInstruction(item.teacherInstructionEn,item.teacherInstructionHe);
       this.modal.querySelector('#interactiveFeedback').textContent='';
+      this.modal.querySelector('#interactiveFeedback').hidden=true;
       const asksQuestion=/\?/.test(`${item.teacherInstructionEn||''} ${item.teacherInstructionHe||''}`);
       this.modal.querySelector('#interactiveState').textContent=asksQuestion?this.teacherText('אמילי שואלת','אדם שואל'):this.teacherText('אמילי מדברת','אדם מדבר');
       const host=this.modal.querySelector('#interactiveActivity');
@@ -458,6 +466,7 @@
         if(settings.developerDebug||new URLSearchParams(location.search).get('speechDebug')==='1')console.debug(`[EA Interactive Voice] teacher=${this.teacherProfile?.id||'unknown'} requested=${this.teacherProfile?.voiceGender||this.teacherGender} lang=${segment.lang} voice=${choice?.voice?.name||'browser-default'} actual=${choice?.actualGender||'unknown'} pitch=${utterance.pitch} fallback=${choice?.fallbackReason||'none'}`);
         utterance.onend=()=>{this.visual?.stopMouth();next()};
         utterance.onerror=()=>{this.visual?.stopMouth();next()};
+        utterance.onboundary=event=>this.visual?.syncMouth?.(speechMouthShape(speechText,event.charIndex));
         root.speechSynthesis.speak(utterance);
       };
       next();
@@ -711,6 +720,7 @@
     feedback(text,positive,{speak=true}={}){
       const box=this.modal.querySelector('#interactiveFeedback');
       box.textContent=text;
+      box.hidden=true;
       box.dataset.kind=positive?'success':'retry';
       this.setInstruction(text);
       this.modal.querySelector('.interactive-panel').dataset.focus='feedback';
@@ -780,5 +790,5 @@
     return teacher;
   }
 
-  root.EAInteractiveTeacher={TYPES,VOICE_ANSWER_TYPES,supportsVoiceAnswer,SUCCESS_MESSAGES,successMessage,QUESTS,questFor,speechPlan,COMPONENTS,createAnimalsLesson,animalPicture,validate,validationResult,requiresEnglishPractice,transition,probableSpeechEcho,startAnimals};
+  root.EAInteractiveTeacher={TYPES,VOICE_ANSWER_TYPES,supportsVoiceAnswer,SUCCESS_MESSAGES,successMessage,QUESTS,questFor,speechPlan,speechMouthShape,COMPONENTS,createAnimalsLesson,animalPicture,validate,validationResult,requiresEnglishPractice,transition,probableSpeechEcho,startAnimals};
 })(typeof window!=='undefined'?window:globalThis);

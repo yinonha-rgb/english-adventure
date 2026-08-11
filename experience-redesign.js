@@ -27,6 +27,11 @@
     const hero=document.querySelector('.hero'),supporting=document.querySelector('.supporting-label');
     if(hero&&!document.querySelector('.emily-confidence'))hero.after(confidenceStrip());
     if(supporting&&!document.querySelector('.emily-learning-journey'))supporting.before(learningJourney());
+    const revealTargets=[...document.querySelectorAll('.emily-confidence,.emily-learning-journey,.reviewcard,.privacy')];
+    if('IntersectionObserver'in root&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+      const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('flow-visible');observer.unobserve(entry.target)}}),{threshold:.12});
+      revealTargets.forEach(target=>{target.classList.add('flow-observed');observer.observe(target)});
+    }else revealTargets.forEach(target=>target.classList.add('flow-visible'));
     return true;
   }
   root.EAExperienceRedesign={install};

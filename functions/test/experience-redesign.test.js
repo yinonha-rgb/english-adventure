@@ -32,10 +32,18 @@ test('home explains the lesson journey and parent confidence facts without fake 
   assert.doesNotMatch(js,/testimonial|parents.choice|certified|thousands of parents/i);
 });
 
+test('home sections flow into view and the teacher remains naturally alive',()=>{
+  assert.match(js,/IntersectionObserver/);
+  assert.match(js,/flow-visible/);
+  assert.match(css,/homeTeacherPresence/);
+  assert.match(css,/homeTeacherHello/);
+  assert.match(css,/\.flow-observed\.flow-visible/);
+});
+
 test('redesign is original, local, offline and does not introduce paid AI',()=>{
-  assert.match(html,/experience-redesign\.css\?v=5\.2\.0/);
-  assert.match(html,/experience-redesign\.js\?v=5\.2\.0/);
-  assert.match(sw,/experience-redesign\.css\?v=5\.2\.0/);
-  assert.match(sw,/experience-redesign\.js\?v=5\.2\.0/);
+  assert.match(html,/experience-redesign\.css\?v=5\.3\.0/);
+  assert.match(html,/experience-redesign\.js\?v=5\.3\.0/);
+  assert.match(sw,/experience-redesign\.css\?v=5\.3\.0/);
+  assert.match(sw,/experience-redesign\.js\?v=5\.3\.0/);
   assert.doesNotMatch(`${js}\n${css}`,/lexiteach|fetch\s*\(|openai|api[_-]?key/i);
 });
