@@ -53,7 +53,7 @@ test('late video playback callbacks cannot touch a closed intro',()=>{
 });
 
 test('the navigation fix is served by the new application cache',()=>{
-  assert.match(html,/entry-video\.js\?v=5\.3\.1/);
-  assert.match(sw,/english-adventure-5\.3\.1/);
-  assert.match(sw,/entry-video\.js\?v=5\.3\.1/);
+  assert.match(html,/entry-video\.js\?v=5\.3\.2/);
+  assert.match(sw,/english-adventure-5\.3\.2/);
+  assert.match(sw,/entry-video\.js\?v=5\.3\.2/);
 });

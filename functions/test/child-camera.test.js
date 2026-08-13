@@ -18,14 +18,16 @@ function fixture(){
   return{host,panel,video,status,button};
 }
 
-test('child camera opens with the lesson, is front-facing and requests microphone audio for live lessons',()=>{
+test('child camera opens with the lesson without blocking the learning flow',()=>{
   assert.equal(Camera.CAMERA_CONSTRAINTS.audio,true);
   assert.equal(Camera.CAMERA_CONSTRAINTS.video.facingMode,'user');
   assert.match(Camera.PRIVACY_TEXT,/אינם מוקלטים, נשמרים או נשלחים לענן/);
   assert.match(engine,/id="interactiveCameraToggle"[^>]+aria-pressed="false"/);
   assert.match(engine,/EAChildCamera\?\.create/);
   assert.match(engine,/this\.cameraStartPromise=Promise\.resolve\(this\.camera\?\.start\?\.\(\)\)/);
-  assert.match(engine,/await this\.prepareMicrophone\(\);[\s\S]*this\.render\(\)/);
+  assert.match(engine,/this\.render\(\);\s*void this\.prepareMicrophone\(\)/);
+  assert.doesNotMatch(engine,/await this\.prepareMicrophone\(\);[\s\S]*this\.render\(\)/);
+  assert.match(engine,/await this\.cameraStartPromise;\s*if\(this\.closed\)return/);
 });
 
 test('camera releases its audio track before speech recognition listens',async()=>{
