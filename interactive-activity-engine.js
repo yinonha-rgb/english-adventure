@@ -241,6 +241,7 @@
       this.recognitionGeneration=0;
       this.microphoneWarmupAttempted=false;
       this.cameraStartPromise=null;
+      this.closed=false;
       this.autoListeningActivityId=null;
       this.lastSpokenText='';
       this.lastSpeechEndedAt=0;
@@ -252,10 +253,14 @@
     }
     teacherText(female,male){return this.teacherGender==='male'?male:female}
     async start(){
+      this.closed=false;
       this.ensureUI();
       this.startLessonTimer();
-      await this.prepareMicrophone();
+      // A first-time getUserMedia request can stay pending until the family
+      // answers the browser prompt.  The camera is useful, but it must never
+      // hold the teacher, visible controls or text fallback hostage.
       this.render();
+      void this.prepareMicrophone();
     }
     async prepareMicrophone(){
       // Start the browser permission flow from the lesson-start gesture.  The
@@ -265,6 +270,7 @@
       try{
         if(this.cameraStartPromise){
           await this.cameraStartPromise;
+          if(this.closed)return;
           if(this.camera?.microphonePermissionPrepared){
             this.speechLog('microphone permission prepared by camera');
             return;
@@ -760,6 +766,7 @@
       if(confirm('לסיים את הפעילות ולחזור למסך הבית?'))this.close();
     }
     close(){
+      this.closed=true;
       clearTimeout(this.timer);
       this.stopLessonTimer();
       clearInterval(this.animationMonitor);
