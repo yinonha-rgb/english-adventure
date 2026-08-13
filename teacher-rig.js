@@ -10,6 +10,11 @@
   const STATES=Object.freeze(['idle','speak','listen','think','point','wave','celebrate','goodbye']);
   const GESTURES=Object.freeze(['none','wave','point-left','point-right','thumbs-up','open-hands','heart-hands','clap','thinking-pose']);
   const STATE_ALIASES=Object.freeze({speaking:'speak',greeting:'wave',waving:'wave',listening:'listen',waiting:'listen',thinking:'think',pointing:'point',praising:'celebrate',celebrating:'celebrate',happy:'celebrate',encouraging:'encouraging',correcting:'encouraging',paused:'idle'});
+  const STATE_LABELS=Object.freeze({
+    female:Object.freeze({idle:'אמילי מוכנה',speak:'אמילי מדברת',listen:'אמילי מקשיבה',think:'אמילי חושבת',point:'אמילי מצביעה על הפעילות',wave:'אמילי מנופפת לשלום',celebrate:'אמילי חוגגת איתך',encouraging:'אמילי מעודדת אותך',goodbye:'אמילי נפרדת לשלום'}),
+    male:Object.freeze({idle:'אדם מוכן',speak:'אדם מדבר',listen:'אדם מקשיב',think:'אדם חושב',point:'אדם מצביע על הפעילות',wave:'אדם מנופף לשלום',celebrate:'אדם חוגג איתך',encouraging:'אדם מעודד אותך',goodbye:'אדם נפרד לשלום'})
+  });
+  const stateLabel=(character,state='idle')=>{const gender=character==='male-young'?'male':'female',normalized=STATE_ALIASES[state]||state||'idle';return STATE_LABELS[gender][normalized]||STATE_LABELS[gender].idle};
   const asset=(key,group,name)=>`assets/teacher-${key}-${group}-${name}-v2.png`;
   const puppetParts=['hair-back','neck','torso','hips','leg-left-upper','leg-left-lower','leg-right-upper','leg-right-lower','arm-left-upper','arm-left-lower','hand-left','arm-right-upper','arm-right-lower','hand-right','head'];
   const puppetMarkup=(gender)=>{const profile=GEOMETRY[gender==='female'?'female-young':'male-young'];return `<span class="rig-puppet" aria-hidden="true">${puppetParts.map(part=>`<img class="rig-part rig-${part}" src="${profile.body}" alt="" decoding="async">`).join('')}</span>`};
@@ -31,7 +36,7 @@
     }
     mount(){
       const gender=this.character==='male-young'?'male':'female',name=labels[gender];this.name=name;
-      this.rootEl.innerHTML=`<section class="teacher-presence teacher-presence-rig" data-state="idle" data-controller-state="idle" data-character="${this.character}" data-mouth="rest" aria-live="polite"><button class="teacher-character" type="button" aria-label="לחצו על ${name} כדי לשמוע שוב">${rigMarkup(this.character)}<span class="teacher-ear" aria-hidden="true">👂</span></button><div class="teacher-bubbles"><p class="speech-bubble en" lang="en"></p><p class="speech-bubble he" lang="he" dir="rtl"></p></div><span class="sr-only teacher-gesture">${name} מוכן${gender==='female'?'ה':''}</span></section>`;
+      this.rootEl.innerHTML=`<section class="teacher-presence teacher-presence-rig" data-state="idle" data-controller-state="idle" data-character="${this.character}" data-mouth="rest" aria-live="polite"><button class="teacher-character" type="button" aria-label="לחצו על ${name} כדי לשמוע שוב">${rigMarkup(this.character)}<span class="teacher-ear" aria-hidden="true">👂</span></button><div class="teacher-bubbles"><p class="speech-bubble en" lang="en"></p><p class="speech-bubble he" lang="he" dir="rtl"></p></div><span class="sr-only teacher-gesture">${stateLabel(this.character,'idle')}</span></section>`;
       this.presence=this.rootEl.querySelector('.teacher-presence');this.rig=this.rootEl.querySelector('.teacher-rig');this.en=this.rootEl.querySelector('.speech-bubble.en');this.he=this.rootEl.querySelector('.speech-bubble.he');this.gestureLabel=this.rootEl.querySelector('.teacher-gesture');this.faceNodes=[...this.rootEl.querySelectorAll('.rig-expression')];this.mouthNodes=[...this.rootEl.querySelectorAll('.rig-mouth-shape')];this.partNodes=[...this.rootEl.querySelectorAll('.rig-part')];
       let failed=false;this.partNodes.forEach(part=>part.addEventListener('error',()=>{if(failed)return;failed=true;this.presence.classList.add('puppet-unavailable')},{once:true}));
       this.rootEl.querySelector('.teacher-character').onclick=()=>{this.reveal();this.replay(this.lastSpeech)};
@@ -45,7 +50,7 @@
     gestureFor(next){return{wave:'wave',point:'point-right',think:'thinking-pose',celebrate:'clap',encouraging:'open-hands',goodbye:'wave'}[next]||'none'}
     setState(next){
       const publicState=next||'idle',normalized=this.normalizeState(publicState);this.state=normalized;
-      this.presence.dataset.state=publicState;this.presence.dataset.controllerState=normalized;this.gestureLabel.textContent=`${this.name} ${normalized}`;
+      this.presence.dataset.state=publicState;this.presence.dataset.controllerState=normalized;this.gestureLabel.textContent=stateLabel(this.character,normalized);
       const face=this.expressionFor(normalized);this.hideAll(this.faceNodes);if(face)this.show(`.rig-expression-${face}`,this.faceNodes);
       if(normalized!=='speak')this.stopMouth();
       this.gesture(this.gestureFor(normalized),normalized==='celebrate'?1700:normalized==='wave'?1450:0);
@@ -88,7 +93,7 @@
       const shapes=['a','e','rest','o','a','smile','e'],shape=shapes[Math.floor(Math.random()*shapes.length)];this.showMouth(shape);
       this.mouthTimer=setTimeout(()=>this.scheduleMouth(),randomBetween(92,205));
     }
-    startMouth(){if(this.reducedMotion)return;this.state='speak';this.presence.dataset.controllerState='speak';this.presence.classList.add('mouth-active');this.scheduleMouth();this.scheduleMotion(40)}
+    startMouth(){if(this.reducedMotion)return;this.state='speak';this.presence.dataset.state='speaking';this.presence.dataset.controllerState='speak';this.gestureLabel.textContent=stateLabel(this.character,'speak');this.presence.classList.add('mouth-active');this.scheduleMouth();this.scheduleMotion(40)}
     stopMouth(){clearTimeout(this.mouthTimer);this.mouthTimer=0;this.presence.classList.remove('mouth-active');this.presence.dataset.mouth='rest';this.hideAll(this.mouthNodes)}
     showSpeech(text,lang='en-US'){this.lastSpeech={text,lang};const target=lang.startsWith('he')?this.he:this.en,other=target===this.en?this.he:this.en;target.textContent=text;target.hidden=this.subtitles==='replay'||(this.subtitles==='english-hidden'&&target===this.en);if(other.textContent&&this.subtitles!=='all')other.hidden=true}
     reveal(){(this.lastSpeech.lang.startsWith('he')?this.he:this.en).hidden=false}
@@ -105,5 +110,5 @@
     destroy(){clearTimeout(this.motionTimer);clearTimeout(this.mouthTimer);clearTimeout(this.gestureTimer);if(this.frameHandle&&typeof cancelAnimationFrame==='function')cancelAnimationFrame(this.frameHandle);if(typeof document!=='undefined')document.removeEventListener('visibilitychange',this.onVisibility);this.stopMouth()}
   }
   function createController(rootEl,options){return new TeacherController(rootEl,options)}
-  return{GEOMETRY,STATES,GESTURES,puppetParts,TeacherController,rigMarkup,createController};
+  return{GEOMETRY,STATES,GESTURES,STATE_LABELS,puppetParts,stateLabel,TeacherController,rigMarkup,createController};
 });

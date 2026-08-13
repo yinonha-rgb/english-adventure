@@ -12,6 +12,8 @@ The application is being split incrementally so existing progress and deployed f
 
 Version 4.53.0 replaces flat teacher motion with 15-part articulated puppets for Emily and Adam, including independently animated heads, torsos, arms, hands and legs.
 
+Version 5.3.1 keeps the selected teacher's identity consistent across the home and lesson experience. The live label, Hebrew grammar, journey copy and accessible animation announcements now switch together between Emily and Adam, with no raw technical state names exposed to screen readers.
+
 - Hebrew-first parent-facing interface with an English switch and complete RTL support
 - Multiple editable child profiles with separate progress stored in `localStorage`
 - 22 practical lessons across greetings, family, colors, numbers, food, home, school, animals, body, clothing, weather, emotions, shopping, café, directions, and travel

@@ -82,6 +82,7 @@
     if(!fromHistory)setEntryHistory();
     video.load();
     const unlockSound=()=>{
+      if(!page||!document.body.contains(page))return;
       video.muted=false;
       video.defaultMuted=false;
       video.volume=1;
@@ -90,6 +91,7 @@
       if(caption)caption.textContent='המורה מחכה לך כאן';
     };
     video.play().catch(()=>{
+      if(!page||!document.body.contains(page))return;
       video.muted=true;
       video.play().catch(()=>{});
       const caption=page.querySelector('.ea-video-entry-caption');
@@ -97,7 +99,7 @@
       page.addEventListener('pointerdown',unlockSound,{once:true,capture:true});
       page.addEventListener('keydown',unlockSound,{once:true,capture:true});
     });
-    page.querySelector('.ea-video-entry-start').focus();
+    page.querySelector('.ea-video-entry-start')?.focus();
   };
   addEventListener('popstate',event=>{
     if(event.state?.eaView===HOME_VIEW){
