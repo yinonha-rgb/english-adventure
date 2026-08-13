@@ -46,8 +46,14 @@ test('the mobile primary action appears before media and closing returns to the 
   assert.match(entry,/focus\?\.\(\{preventScroll:true\}\)/);
 });
 
+test('late video playback callbacks cannot touch a closed intro',()=>{
+  const guard=/if\(!page\|\|!document\.body\.contains\(page\)\)return/g;
+  assert.ok((entry.match(guard)||[]).length>=3);
+  assert.match(entry,/page\.querySelector\('\.ea-video-entry-start'\)\?\.focus\(\)/);
+});
+
 test('the navigation fix is served by the new application cache',()=>{
-  assert.match(html,/entry-video\.js\?v=4\.51\.0/);
-  assert.match(sw,/english-adventure-5\.3\.0/);
-  assert.match(sw,/entry-video\.js\?v=4\.51\.0/);
+  assert.match(html,/entry-video\.js\?v=5\.3\.1/);
+  assert.match(sw,/english-adventure-5\.3\.1/);
+  assert.match(sw,/entry-video\.js\?v=5\.3\.1/);
 });
