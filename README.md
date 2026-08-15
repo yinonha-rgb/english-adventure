@@ -14,7 +14,7 @@ Version 4.53.0 replaces flat teacher motion with 15-part articulated puppets for
 
 Version 5.3.1 keeps the selected teacher's identity consistent across the home and lesson experience. The live label, Hebrew grammar, journey copy and accessible animation announcements now switch together between Emily and Adam, with no raw technical state names exposed to screen readers.
 
-Version 5.3.2 makes camera and microphone permission preparation non-blocking. The daily lesson, teacher prompt and button fallback now appear immediately even while the browser is still waiting for a permission decision.
+Version 5.3.3 reduces the initial PWA install and update payload by removing unused legacy rig layers and idle-loop media from the precache. The active teacher body, expressions, mouth shapes, portraits, and lesson assets remain available offline; compatibility assets remain in the repository and can still load on demand.
 
 - Hebrew-first parent-facing interface with an English switch and complete RTL support
 - Multiple editable child profiles with separate progress stored in `localStorage`
