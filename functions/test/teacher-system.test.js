@@ -124,13 +124,11 @@ test('rig assets are shipped, cached offline and loaded before the teacher syste
   assert.match(html,/teacher-visual\.js\?v=\d+\.\d+\.\d+[\s\S]*teacher-rig\.js\?v=\d+\.\d+\.\d+[\s\S]*teacher-system\.js\?v=\d+\.\d+\.\d+/);
 });
 
-test('both teachers ship complete transparent puppet parts with safe full-body rendering',()=>{
+test('both teachers retain complete transparent puppet parts while using safe full-body rendering',()=>{
   for(const teacher of ['emily','adam'])for(const part of Rig.puppetParts){
     const file=path.join(root,'assets','rigs',teacher,`${part}.png`);
     assert.ok(fs.statSync(file).size>500,`${teacher}/${part}`);
   }
-  assert.match(sw,/RIG_PARTS=\[[^\]]*'head'/);
-  assert.match(sw,/assets\/rigs\/\$\{teacher\}\/\$\{part\}\.png/);
   const female=Rig.rigMarkup('female-young'),male=Rig.rigMarkup('male-young');
   assert.equal((female.match(/assets\/teacher-noa-body-v2\.png/g)||[]).length,16);
   assert.equal((male.match(/assets\/teacher-adam-body-v2\.png/g)||[]).length,16);

@@ -31,5 +31,5 @@ test('visual polish is responsive, motion-safe and available offline',()=>{
   assert.match(css,/@media\(max-width:700px\)/);
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
   assert.match(sw,/visual-polish\.css\?v=4\.50\.0/);
-  assert.match(sw,/english-adventure-5\.3\.2/);
+  assert.match(sw,/english-adventure-5\.3\.3/);
 });
