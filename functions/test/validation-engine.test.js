@@ -31,6 +31,14 @@ test('low recognition confidence never produces a correct result',()=>{const v=C
 test('meaning-equivalent sentence is accepted without exact wording',()=>assert.equal(Core.validateAnswer('nice to meet',sentenceSpec).valid,true));
 test('partial sentence missing an important keyword is rejected',()=>{const v=Core.validateAnswer('nice',sentenceSpec);assert.equal(v.valid,false);assert.equal(v.reason,'missing-required-keyword')});
 test('repeated wrong answers have a finite retry, hint, explanation, continue sequence',()=>assert.deepEqual([1,2,3,4].map(Core.retryAction),['retry','hint','explain-and-repeat','continue']));
+test('button fallback choices are deterministic without revealing one fixed answer position',()=>{
+  const source=['dog','cat','bird'],snapshot=[...source],first=Core.orderAnswerChoices(source,'child-a:animals:q1:0');
+  assert.deepEqual(Core.orderAnswerChoices(source,'child-a:animals:q1:0'),first);
+  assert.deepEqual(source,snapshot);
+  assert.deepEqual([...first].sort(),[...source].sort());
+  const positions=new Set(Array.from({length:12},(_,index)=>Core.orderAnswerChoices(source,`child-${index}:animals:q1:0`).indexOf('dog')));
+  assert.ok(positions.size>1,'the correct answer must not stay in one predictable position');
+});
 test('every spoken answer maps to exactly one teaching category',()=>{const cases=[['red',Core.CATEGORIES.CORRECT],['reed',Core.CATEGORIES.ALMOST_CORRECT],['green',Core.CATEGORIES.WRONG_RELATED],['pizza',Core.CATEGORIES.UNRELATED],['banana',Core.CATEGORIES.UNRELATED],['',Core.CATEGORIES.NO_ANSWER]];for(const [answer,category] of cases)assert.equal(Core.validateAnswer(answer,appleSpec).category,category,answer);assert.equal(Core.validateAnswer('red',appleSpec,{confidence:.1}).category,Core.CATEGORIES.UNCERTAIN)});
 test('human teaching responses explain related mistakes and never praise nonsense',()=>{const related=Core.teachingResponse(Core.validateAnswer('green',appleSpec),appleSpec,{[Core.CATEGORIES.WRONG_RELATED]:1});assert.match(related.message,/Apples can sometimes be green/);const unrelated=Core.teachingResponse(Core.validateAnswer('pizza',appleSpec),appleSpec,{[Core.CATEGORIES.UNRELATED]:1});assert.match(unrelated.message,/doesn't quite fit/);assert.equal(unrelated.action,'retry')});
 test('silence, uncertainty and every wrong category never receive success praise',()=>{const praise=/\b(great|excellent|correct|exactly|wonderful|you got it|that is right)\b/i,cases=[Core.validateAnswer('',appleSpec),Core.validateAnswer('red',appleSpec,{confidence:.1}),Core.validateAnswer('reed',appleSpec),Core.validateAnswer('green',appleSpec),Core.validateAnswer('pizza',appleSpec)];for(const verdict of cases){assert.equal(verdict.valid,false);assert.doesNotMatch(Core.teachingResponse(verdict,appleSpec,{[verdict.category]:1}).message,praise,verdict.category)}});

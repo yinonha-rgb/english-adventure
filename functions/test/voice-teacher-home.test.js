@@ -28,6 +28,8 @@ test('browser speech, microphone denial and button fallback remain complete',()=
   assert.match(teacher,/source:'button'/);
   assert.match(teacher,/id="teacherSkip"/);
   assert.match(teacher,/confirm\('לסיים את השיעור/);
+  assert.match(teacher,/Core\.orderAnswerChoices\(\[correctAnswer,\.\.\.distractors\]/);
+  assert.match(teacher,/context\?\.child\?\.id/);
 });
 
 test('daily voice teacher requests microphone access at lesson start and listens automatically',()=>{

@@ -16,6 +16,8 @@ Version 5.3.1 keeps the selected teacher's identity consistent across the home a
 
 Version 5.3.3 reduces the initial PWA install and update payload by removing unused legacy rig layers and idle-loop media from the precache. The active teacher body, expressions, mouth shapes, portraits, and lesson assets remain available offline; compatibility assets remain in the repository and can still load on demand.
 
+Version 5.3.4 removes a learning shortcut from the voice-teacher button fallback. When speech recognition is unavailable, answer choices are now deterministically reordered per child, lesson, exercise, and attempt instead of always placing the correct answer first. Validation standards, progress compatibility, offline use, and the free-teacher flow are unchanged.
+
 - Hebrew-first parent-facing interface with an English switch and complete RTL support
 - Multiple editable child profiles with separate progress stored in `localStorage`
 - 22 practical lessons across greetings, family, colors, numbers, food, home, school, animals, body, clothing, weather, emotions, shopping, café, directions, and travel
