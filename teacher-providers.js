@@ -133,6 +133,7 @@
   const MockAITeacherProvider=MockAdvancedConversationProvider;
   function createProvider(type,options={}){
     if(['mock-ai','mock-conversation','mock'].includes(type))return new MockAdvancedConversationProvider(options);
+    if(['google-gemini','firebase-ai-logic','gemini'].includes(type)&&root.EAGoogleAIProvider?.GoogleConversationProvider)return new root.EAGoogleAIProvider.GoogleConversationProvider(options);
     if(['openai-realtime','advanced-conversation','advanced'].includes(type))return new AdvancedConversationProvider(options);
     return new FreeConversationProvider(options);
   }

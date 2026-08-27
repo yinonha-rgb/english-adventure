@@ -16,5 +16,7 @@ export const firebaseConfig = {
 export const teacherAIConfig = {
   endpoint: "",
   demoMode: true,
-  appCheckSiteKey: ""
+  // Public reCAPTCHA Enterprise site key. It is safe to publish; App Check
+  // enforcement and the allowed-domain restriction provide the protection.
+  appCheckSiteKey: "6LeNjJstAAAAALiBigy8NA6bwYG6OkTNJCqK5VXw"
 };
