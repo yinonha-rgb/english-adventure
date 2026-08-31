@@ -1,0 +1,8 @@
+<!doctype html><html lang="he" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="../"><title>Emily video check</title>
+<link rel="stylesheet" href="teacher-video-motion.css"><style>body{margin:0;background:#f3eff8;font-family:sans-serif}#teacher{max-width:400px;margin:auto}.teacher-character{width:100%;height:70vh;border:0;background:none}.teacher-photo{width:100%;height:100%;object-fit:contain}.teacher-photo-wrap{display:block;height:100%}.teacher-ear{display:none}nav{text-align:center;padding:15px}button{padding:12px}</style>
+<div id="teacher"></div><nav><button id="wave">ברכה</button><button id="listen">הקשבה</button><button id="speak">דיבור</button><button id="pause">השהיה</button><button id="reduce">הפחתת תנועה</button></nav>
+<script src="teacher-visual.js"></script><script src="teacher-video-motion.js"></script><script>
+const host=document.getElementById('teacher');const controller=EATeacherVisual.createController(host,{imageAsset:'assets/teacher-noa.png'});EATeacherVideoMotion.attach(host,controller,{character:'female-young',preview:true});
+document.getElementById('listen').onclick=()=>{controller.stopMouth();controller.setState('listening')};document.getElementById('speak').onclick=()=>{controller.startMouth();controller.setState('speaking')};document.getElementById('pause').onclick=()=>controller.setState('paused');document.getElementById('reduce').onclick=()=>document.body.classList.toggle('ea-reduce-motion');
+document.getElementById('wave').onclick=()=>{controller.stopMouth();controller.setState('greeting')};
+</script></html>
