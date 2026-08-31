@@ -174,9 +174,11 @@ test('female and male teachers use distinct dedicated artwork',()=>{
   assert.match(male,/#d9a441/);
 });
 
-test('photo teachers animate as layered characters in every lesson state',()=>{
+test('photo teachers animate a single portrait without duplicate heads or arms',()=>{
   const source=fs.readFileSync(path.join(root,'teacher-visual.js'),'utf8');
-  for(const layer of ['teacher-photo-base','teacher-photo-head','teacher-photo-arm','teacher-photo-speech','teacher-photo-aura','teacher-photo-stars'])assert.match(source,new RegExp(layer));
+  for(const layer of ['teacher-photo-base','teacher-photo-speech','teacher-photo-aura','teacher-photo-stars'])assert.match(source,new RegExp(layer));
+  assert.doesNotMatch(source,/teacher-photo-(?:head|arm)/);
+  assert.equal((source.match(/<img class="teacher-photo /g)||[]).length,1);
   for(const animation of ['teacherPhotoBreath','teacherPhotoAliveHead','teacherPhotoTalkHead','teacherPhotoExplainHand','teacherPhotoWaveHand','teacherPhotoListen','teacherPhotoCelebrate','teacherPhotoMouth'])assert.match(html,new RegExp(animation));
   for(const state of ['speaking','listening','thinking','pointing','praising','celebrating','correcting'])assert.match(html,new RegExp(`data-state="${state}"`));
   assert.match(html,/prefers-reduced-motion:reduce/);
