@@ -38,9 +38,11 @@ test('preview can be disabled without touching the production teacher',()=>{
 });
 test('active video hides every static rig descendant that can override inherited visibility',()=>{
   const css=require('node:fs').readFileSync(require('node:path').resolve(__dirname,'../../teacher-video-motion.css'),'utf8');
+  assert.match(css,/teacher-rest-video-active>\.teacher-rig,.teacher-rest-video-active>\.teacher-photo-wrap\{display:none!important\}/);
   assert.match(css,/teacher-rest-video-active>\.teacher-rig \*/);
   assert.match(css,/teacher-rest-video-active>\.teacher-photo-wrap \*/);
   assert.match(css,/visibility:hidden!important/);
+  assert.match(css,/teacher-rest-video-active>\.teacher-rig,.teacher-rest-video-active>\.teacher-photo-wrap\{display:block!important\}/);
 });
 test('video blends into the lesson world and reacts to teaching states',()=>{
   const css=require('node:fs').readFileSync(require('node:path').resolve(__dirname,'../../teacher-video-motion.css'),'utf8');
