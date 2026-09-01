@@ -42,3 +42,10 @@ test('active video hides every static rig descendant that can override inherited
   assert.match(css,/teacher-rest-video-active>\.teacher-photo-wrap \*/);
   assert.match(css,/visibility:hidden!important/);
 });
+test('video blends into the lesson world and reacts to teaching states',()=>{
+  const css=require('node:fs').readFileSync(require('node:path').resolve(__dirname,'../../teacher-video-motion.css'),'utf8');
+  assert.match(css,/mask-image:radial-gradient/);
+  assert.match(css,/border:0;border-radius:0/);
+  for(const state of ['speaking','listening','thinking','pointing','encouraging','celebrating'])assert.match(css,new RegExp(`data-state="${state}"`),state);
+  for(const motion of ['teacher-video-speaking','teacher-video-listening','teacher-video-thinking','teacher-video-pointing','teacher-video-encouraging','teacher-video-celebrating'])assert.match(css,new RegExp(`@keyframes ${motion}`),motion);
+});
