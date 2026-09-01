@@ -1,11 +1,12 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const Motion=require('../../teacher-video-motion.js');
-test('Emily clip is only eligible for greeting and waving states',()=>{
+test('Emily clip is eligible for one greeting or the initial spoken introduction',()=>{
   const base={character:'female-young',state:'greeting',reducedMotion:false,hidden:false,speaking:false};
   for(const state of Motion.VIDEO_STATES)assert.equal(Motion.eligible({...base,state}),true);
   for(const state of ['idle','speaking','speak','listening','waiting','paused','celebrating','goodbye'])assert.equal(Motion.eligible({...base,state}),false);
-  for(const change of [{character:'male-young'},{reducedMotion:true},{hidden:true},{speaking:true}])assert.equal(Motion.eligible({...base,...change}),false);
+  assert.equal(Motion.eligible({...base,state:'idle',speaking:true,introSpeaking:true}),true);
+  for(const change of [{character:'male-young'},{reducedMotion:true},{hidden:true},{played:true}])assert.equal(Motion.eligible({...base,...change}),false);
 });
 test('video lifecycle is silent, recovers to existing artwork and stops on teardown',async()=>{
   const classes=new Set(),events={},attrs={};let plays=0,pauses=0,removed=false,disconnected=false,destroyed=false;
@@ -16,11 +17,11 @@ test('video lifecycle is silent, recovers to existing artwork and stops on teard
   const host={ownerDocument:doc,querySelector:()=>button};
   const controller={setState:s=>s,startMouth(){},stopMouth(){},destroy(){destroyed=true}};
   Motion.attach(host,controller,{character:'female-young',preview:true});await Promise.resolve();
-  assert.equal(video.muted,true);assert.equal(video.loop,true);assert.equal(video.hidden,true);assert.equal(plays,0);
-  controller.setState('greeting');await Promise.resolve();assert.equal(video.hidden,false);assert.equal(plays,1);
-  controller.startMouth();assert.equal(video.hidden,true);
-  controller.setState('speaking');controller.stopMouth();assert.equal(video.hidden,true);
-  controller.setState('greeting');await Promise.resolve();assert.equal(video.hidden,false);
+  assert.equal(video.muted,true);assert.equal(video.loop,false);assert.equal(video.hidden,true);assert.equal(plays,0);
+  controller.startMouth();await Promise.resolve();assert.equal(video.hidden,false);assert.equal(plays,1);
+  controller.setState('speaking');assert.equal(video.hidden,false);
+  controller.stopMouth();assert.equal(video.hidden,true);
+  controller.setState('greeting');await Promise.resolve();assert.equal(video.hidden,true);assert.equal(plays,1);
   events.error();assert.equal(video.hidden,true);assert.equal(classes.size,0);
   controller.destroy();assert.ok(removed&&disconnected&&destroyed&&pauses>0);
 });

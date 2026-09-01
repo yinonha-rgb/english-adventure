@@ -50,5 +50,5 @@ test('standard lessons award pronunciation XP only after validated microphone sp
 test('quiz integrity module loads before the app and is available offline',()=>{
   assert.match(html,/lesson-quiz-core\.js\?v=4\.51\.0[\s\S]*app\.js\?v=5\.3\.4/);
   assert.match(sw,/lesson-quiz-core\.js\?v=4\.51\.0/);
-  assert.match(sw,/english-adventure-5\.4\.2/);
+  assert.match(sw,/english-adventure-5\.4\.3/);
 });
