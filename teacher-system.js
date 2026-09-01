@@ -39,7 +39,7 @@
     constructor(host,{teacherId='female-young',reducedMotion=false,subtitles='replay'}={}){
       this.host=host;
       this.profile=byId(teacherId)||defaultProfile();
-      const controller=(this.profile.spriteAsset&&root.EARiggedTeacher?.createController?root.EARiggedTeacher.createController:root.EATeacherVisual?.createController)?.(host,{character:this.profile.character,imageAsset:this.profile.imageAsset,spriteAsset:this.profile.spriteAsset,reducedMotion,subtitles});
+      const controller=(this.profile.imageAsset&&root.EATeacherVisual?.createController?root.EATeacherVisual.createController:root.EARiggedTeacher?.createController)?.(host,{character:this.profile.character,imageAsset:this.profile.imageAsset,spriteAsset:this.profile.spriteAsset,reducedMotion,subtitles});
       // Optional video must never prevent the free lesson from starting.
       try{root.EATeacherVideoMotion?.attach?.(host,controller,{character:this.profile.character,reducedMotion})}catch(error){
         if(root.location?.hostname==='127.0.0.1')console.debug('[Teacher video] Using existing teacher',error);

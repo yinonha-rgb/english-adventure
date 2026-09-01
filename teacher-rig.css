@@ -37,19 +37,19 @@
 .teacher-presence-rig.mouth-active .rig-mouth-shape{animation:rigMouth .18s ease-in-out 1;transform-origin:50% 58%}
 
 /* Micro-motion is scheduled by TeacherController, avoiding an obvious repeating loop. */
-.teacher-rig[data-motion="breathe"]{transform:translateY(calc(-1.15px * var(--motion-intensity,1))) scale(calc(1 + .0025 * var(--motion-intensity,1)))}
+.teacher-rig[data-motion="breathe"]{transform:translateY(calc(-2.8px * var(--motion-intensity,1))) scale(calc(1 + .006 * var(--motion-intensity,1)))}
 .teacher-rig[data-motion="blink"] .teacher-rig-blink{opacity:.58;transform:scaleY(1);transition:opacity .04s,transform .06s}
-.teacher-rig[data-motion="gaze-left"] .rig-expression,.teacher-rig[data-motion="talk-left"] .rig-expression{transform:translateX(-1.2px) rotate(-.18deg)}
-.teacher-rig[data-motion="gaze-right"] .rig-expression,.teacher-rig[data-motion="talk-right"] .rig-expression{transform:translateX(1.2px) rotate(.18deg)}
-.teacher-rig[data-motion="gaze-up"] .rig-expression{transform:translateY(-1px) rotate(.2deg)}
-.teacher-rig[data-motion="head-left"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-left"] .teacher-rig-canvas{transform:rotate(calc(-.38deg * var(--motion-intensity,1))) translateX(calc(-.5px * var(--motion-intensity,1)))}
-.teacher-rig[data-motion="head-right"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-right"] .teacher-rig-canvas{transform:rotate(calc(.38deg * var(--motion-intensity,1))) translateX(calc(.5px * var(--motion-intensity,1)))}
-.teacher-rig[data-motion="shoulder"]{transform:translateY(calc(-.8px * var(--motion-intensity,1))) scaleX(calc(1 + .0015 * var(--motion-intensity,1)))}
-.teacher-rig[data-motion="weight-left"] .teacher-rig-canvas{transform:translateX(calc(-1.4px * var(--motion-intensity,1))) rotate(calc(-.22deg * var(--motion-intensity,1)))}
-.teacher-rig[data-motion="weight-right"] .teacher-rig-canvas{transform:translateX(calc(1.4px * var(--motion-intensity,1))) rotate(calc(.22deg * var(--motion-intensity,1)))}
-.teacher-rig[data-motion="listen-nod"] .teacher-rig-canvas{transform:translateY(calc(1.15px * var(--motion-intensity,1))) rotate(calc(-.22deg * var(--motion-intensity,1)))}
-.teacher-rig[data-motion="brow"] .rig-expression{transform:translateY(-.8px) scaleY(1.008)}
-.teacher-rig[data-motion="happy-bounce"]{transform:translateY(-4px) scale(1.008)}
+.teacher-rig[data-motion="gaze-left"] .rig-expression,.teacher-rig[data-motion="talk-left"] .rig-expression{transform:translateX(-2.6px) rotate(-.42deg)}
+.teacher-rig[data-motion="gaze-right"] .rig-expression,.teacher-rig[data-motion="talk-right"] .rig-expression{transform:translateX(2.6px) rotate(.42deg)}
+.teacher-rig[data-motion="gaze-up"] .rig-expression{transform:translateY(-2.2px) rotate(.42deg)}
+.teacher-rig[data-motion="head-left"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-left"] .teacher-rig-canvas{transform:rotate(calc(-1.6deg * var(--motion-intensity,1))) translateX(calc(-3.2px * var(--motion-intensity,1)))}
+.teacher-rig[data-motion="head-right"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-right"] .teacher-rig-canvas{transform:rotate(calc(1.6deg * var(--motion-intensity,1))) translateX(calc(3.2px * var(--motion-intensity,1)))}
+.teacher-rig[data-motion="shoulder"]{transform:translateY(calc(-2.2px * var(--motion-intensity,1))) scaleX(calc(1 + .004 * var(--motion-intensity,1)))}
+.teacher-rig[data-motion="weight-left"] .teacher-rig-canvas{transform:translateX(calc(-4.2px * var(--motion-intensity,1))) rotate(calc(-.85deg * var(--motion-intensity,1)))}
+.teacher-rig[data-motion="weight-right"] .teacher-rig-canvas{transform:translateX(calc(4.2px * var(--motion-intensity,1))) rotate(calc(.85deg * var(--motion-intensity,1)))}
+.teacher-rig[data-motion="listen-nod"] .teacher-rig-canvas{transform:translateY(calc(3px * var(--motion-intensity,1))) rotate(calc(-.6deg * var(--motion-intensity,1)))}
+.teacher-rig[data-motion="brow"] .rig-expression{transform:translateY(-1.6px) scaleY(1.016)}
+.teacher-rig[data-motion="happy-bounce"]{transform:translateY(-9px) scale(1.018)}
 
 /* Deliberate gestures remain small enough to feel human, never puppet-like. */
 .teacher-rig[data-gesture="wave"]{animation:rigWaveBody 1.05s cubic-bezier(.34,.05,.22,1) 1}
@@ -75,18 +75,18 @@
 .teacher-presence-rig[data-controller-state="celebrate"] .teacher-rig-stars{opacity:1;animation:rigStars .72s ease-out 2 alternate}
 .teacher-presence-rig[data-controller-state="celebrate"] .rig-puppet{animation:rigCelebrate 1.15s cubic-bezier(.2,.8,.2,1) 1}
 
-@keyframes rigWave{0%,100%{transform:rotate(0) translateY(0)}28%{transform:rotate(-.55deg) translateY(-1.5px)}58%{transform:rotate(.45deg) translateY(-.7px)}82%{transform:rotate(-.22deg)}}
-@keyframes rigWaveBody{0%,100%{transform:rotate(0) translateY(0)}28%{transform:rotate(-.35deg) translateY(-2px)}58%{transform:rotate(.25deg) translateY(-1px)}82%{transform:rotate(-.15deg)}}
-@keyframes rigClap{0%,100%{transform:scaleX(1) translateY(0)}50%{transform:scaleX(.988) translateY(-2px)}}
-@keyframes rigCelebrate{0%,100%{transform:translateY(0) scale(1)}38%{transform:translateY(-5px) scale(1.01)}68%{transform:translateY(-1px) scale(1.004)}}
+@keyframes rigWave{0%,100%{transform:rotate(0) translateY(0)}28%{transform:rotate(-1.3deg) translateY(-3.5px)}58%{transform:rotate(1.05deg) translateY(-1.6px)}82%{transform:rotate(-.5deg)}}
+@keyframes rigWaveBody{0%,100%{transform:rotate(0) translateY(0)}28%{transform:rotate(-.9deg) translateY(-5px)}58%{transform:rotate(.65deg) translateY(-2.4px)}82%{transform:rotate(-.35deg)}}
+@keyframes rigClap{0%,100%{transform:scaleX(1) translateY(0)}50%{transform:scaleX(.965) translateY(-4.5px)}}
+@keyframes rigCelebrate{0%,100%{transform:translateY(0) scale(1)}38%{transform:translateY(-11px) scale(1.022)}68%{transform:translateY(-2.5px) scale(1.008)}}
 @keyframes rigMouth{from{transform:scale(.95,.92)}to{transform:scale(1,1.035)}}
 @keyframes rigTrail{from{opacity:.7;transform:scale(.8) rotate(-6deg)}to{opacity:0;transform:scale(1.08) rotate(7deg)}}
 @keyframes rigStars{to{transform:translateY(-8px) scale(1.14);filter:drop-shadow(0 3px 3px #704d19aa)}}
-@keyframes rigAlive{0%,100%{transform:translateY(0) rotate(0) scale(1)}35%{transform:translateY(-2px) rotate(-.18deg) scale(1.002)}68%{transform:translateY(-1px) rotate(.16deg) scale(1.001)}}
-@keyframes rigSpeaking{0%,100%{transform:translateY(0) rotate(-.12deg)}45%{transform:translateY(-2.5px) rotate(.22deg)}72%{transform:translateY(-1px) rotate(-.08deg)}}
-@keyframes rigListening{0%,100%{transform:translateY(0) rotate(0)}42%{transform:translateY(1.5px) rotate(.28deg)}58%{transform:translateY(0) rotate(.12deg)}}
-@keyframes rigThinking{0%,100%{transform:translateX(0) rotate(0)}50%{transform:translateX(1.5px) rotate(.3deg)}}
-@keyframes rigBodyCelebrate{0%,100%{transform:translateY(0) scale(1)}45%{transform:translateY(-7px) scale(1.012)}72%{transform:translateY(-2px) scale(1.006)}}
+@keyframes rigAlive{0%,100%{transform:translateY(0) rotate(0) scale(1)}35%{transform:translateY(-3.2px) rotate(-.29deg) scale(1.0032)}68%{transform:translateY(-1.6px) rotate(.26deg) scale(1.0016)}}
+@keyframes rigSpeaking{0%,100%{transform:translateY(0) rotate(-.2deg)}45%{transform:translateY(-4px) rotate(.35deg)}72%{transform:translateY(-1.6px) rotate(-.13deg)}}
+@keyframes rigListening{0%,100%{transform:translateY(0) rotate(0)}42%{transform:translateY(2.4px) rotate(.45deg)}58%{transform:translateY(0) rotate(.19deg)}}
+@keyframes rigThinking{0%,100%{transform:translateX(0) rotate(0)}50%{transform:translateX(2.4px) rotate(.48deg)}}
+@keyframes rigBodyCelebrate{0%,100%{transform:translateY(0) scale(1)}45%{transform:translateY(-11px) scale(1.019)}72%{transform:translateY(-3.2px) scale(1.0096)}}
 
 @media(max-width:900px){.teacher-rig-canvas{aspect-ratio:38/100}}
 @media(max-width:600px){.teacher-rig-canvas{width:100%;height:100%;aspect-ratio:auto;transform:none;transform-origin:50% 45%}.teacher-rig[data-motion="head-left"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-left"] .teacher-rig-canvas{transform:rotate(-.35deg)}.teacher-rig[data-motion="head-right"] .teacher-rig-canvas,.teacher-rig[data-motion="talk-right"] .teacher-rig-canvas{transform:rotate(.35deg)}}
