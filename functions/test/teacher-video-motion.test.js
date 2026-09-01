@@ -36,3 +36,9 @@ test('preview can be disabled without touching the production teacher',()=>{
   const host={querySelector(){throw new Error('Production must not mount sample')}};
   assert.equal(Motion.attach(host,controller,{character:'female-young',preview:false}),controller);
 });
+test('active video hides every static rig descendant that can override inherited visibility',()=>{
+  const css=require('node:fs').readFileSync(require('node:path').resolve(__dirname,'../../teacher-video-motion.css'),'utf8');
+  assert.match(css,/teacher-rest-video-active>\.teacher-rig \*/);
+  assert.match(css,/teacher-rest-video-active>\.teacher-photo-wrap \*/);
+  assert.match(css,/visibility:hidden!important/);
+});

@@ -2,7 +2,7 @@
 .teacher-character{position:relative}
 .teacher-character>.teacher-rest-video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;border-radius:inherit;z-index:2}
 .teacher-character>.teacher-rest-video[hidden]{display:none!important}
-.teacher-rest-video-active>.teacher-rig,.teacher-rest-video-active>.teacher-photo-wrap{visibility:hidden}
-@media(prefers-reduced-motion:reduce){.teacher-character>.teacher-rest-video{display:none!important}.teacher-rest-video-active>.teacher-rig,.teacher-rest-video-active>.teacher-photo-wrap{visibility:visible}}
+.teacher-rest-video-active>.teacher-rig,.teacher-rest-video-active>.teacher-rig *,.teacher-rest-video-active>.teacher-photo-wrap,.teacher-rest-video-active>.teacher-photo-wrap *{visibility:hidden!important}
+@media(prefers-reduced-motion:reduce){.teacher-character>.teacher-rest-video{display:none!important}.teacher-rest-video-active>.teacher-rig,.teacher-rest-video-active>.teacher-rig *,.teacher-rest-video-active>.teacher-photo-wrap,.teacher-rest-video-active>.teacher-photo-wrap *{visibility:visible!important}}
 body.ea-reduce-motion .teacher-character>.teacher-rest-video{display:none!important}
-body.ea-reduce-motion .teacher-rest-video-active>.teacher-rig,body.ea-reduce-motion .teacher-rest-video-active>.teacher-photo-wrap{visibility:visible}
+body.ea-reduce-motion .teacher-rest-video-active>.teacher-rig,body.ea-reduce-motion .teacher-rest-video-active>.teacher-rig *,body.ea-reduce-motion .teacher-rest-video-active>.teacher-photo-wrap,body.ea-reduce-motion .teacher-rest-video-active>.teacher-photo-wrap *{visibility:visible!important}
