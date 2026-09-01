@@ -473,6 +473,10 @@
         const choice=Natural?.applyVoiceIdentity?.(utterance,{voices:speechSynthesis?.getVoices?.()||[],lang:segment.lang,preferred,gender:this.teacherProfile?.voiceGender||this.teacherGender,rate,volume:settings.speechVolume??1});
         if(!choice){utterance.lang=segment.lang;utterance.rate=rate}
         if(settings.developerDebug||new URLSearchParams(location.search).get('speechDebug')==='1')console.debug(`[EA Interactive Voice] teacher=${this.teacherProfile?.id||'unknown'} requested=${this.teacherProfile?.voiceGender||this.teacherGender} lang=${segment.lang} voice=${choice?.voice?.name||'browser-default'} actual=${choice?.actualGender||'unknown'} pitch=${utterance.pitch} fallback=${choice?.fallbackReason||'none'}`);
+        if(choice?.fallbackReason==='no-matching-gender-voice'){
+          this.visual?.stopMouth();
+          return next();
+        }
         utterance.onend=()=>{if(generation!==this.speechGeneration)return;this.visual?.stopMouth();next()};
         utterance.onerror=()=>{if(generation!==this.speechGeneration)return;this.visual?.stopMouth();next()};
         utterance.onboundary=event=>this.visual?.syncMouth?.(speechMouthShape(speechText,event.charIndex));
