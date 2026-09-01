@@ -42,7 +42,11 @@
     const observer=new win.MutationObserver(sync);
     observer.observe(doc.body,{attributes:true,attributeFilter:['class']});
     const setState=controller.setState.bind(controller),start=controller.startMouth.bind(controller),stop=controller.stopMouth.bind(controller),destroy=controller.destroy.bind(controller);
-    controller.setState=next=>{state=next;const result=setState(next);sync();return result};
+    controller.setState=next=>{
+      const leavingGreeting=active&&!VIDEO_STATES.includes(next)&&video.currentTime>0;
+      state=next;if(leavingGreeting)played=true;
+      const result=setState(next);sync();return result;
+    };
     controller.startMouth=()=>{
       speaking=true;
       // The real lesson starts speaking immediately, before it exposes a greeting
@@ -50,10 +54,7 @@
       introSpeaking=!played&&(state==='idle'||VIDEO_STATES.includes(state));
       sync();return start();
     };
-    controller.stopMouth=()=>{
-      if(introSpeaking){played=true;introSpeaking=false}
-      speaking=false;const result=stop();sync();return result;
-    };
+    controller.stopMouth=()=>{introSpeaking=false;speaking=false;const result=stop();sync();return result};
     controller.destroy=()=>{
       destroyed=true;active=false;++attempt;video.pause();conceal();
       doc.removeEventListener('visibilitychange',sync);media.removeEventListener('change',sync);observer.disconnect();

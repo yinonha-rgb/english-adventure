@@ -54,6 +54,16 @@ test('an explicitly male-only fallback is never assigned to the female teacher',
   assert.equal(utterance.voice,undefined);
   assert.ok(utterance.pitch>1&&utterance.pitch<1.1);
 });
+test('Hebrew never falls through to a male browser default for Emily',()=>{
+  const voices=[
+    {name:'Microsoft Asaf',gender:'male',lang:'he-IL',voiceURI:'asaf'},
+    {name:'Samantha',gender:'female',lang:'en-US',voiceURI:'samantha',localService:true}
+  ];
+  const choice=Natural.chooseVoice(voices,'he-IL','','female');
+  assert.equal(choice.voice.voiceURI,'samantha');
+  assert.equal(choice.actualGender,'female');
+  assert.equal(choice.fallbackReason,'cross-language-gender-match');
+});
 test('speech queue keeps female and male voices audibly distinct when browser gender is unknown',async()=>{
   const utterances=[],synth={cancel(){},speak(u){utterances.push(u);queueMicrotask(()=>u.onend())}},U=function(text){this.text=text};
   const speakFor=async teacherVoiceGender=>{const q=new Natural.SpeechQueue({synth,Utterance:U,pause:()=>Promise.resolve(),getSettings:()=>({teacherVoiceGender})});q.setVoices([{name:'Hebrew Local',lang:'he-IL',voiceURI:'he',localService:true}]);await q.speak([{text:'שלום',lang:'he-IL'}]);return utterances.at(-1)};
