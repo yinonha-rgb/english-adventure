@@ -5,10 +5,9 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const SRC='assets/emily-greeting-flow-v1.mp4';
-  const VIDEO_STATES=['greeting','waving','wave'];
+  const VIDEO_STATES=['idle','greeting','waving','wave','speaking','pointing','listening','waiting','thinking','encouraging','celebrating','paused','goodbye'];
   function eligible({character,state,reducedMotion,hidden,speaking,introSpeaking=false,played=false}){
-    const greetingState=VIDEO_STATES.includes(state)&&!speaking;
-    return character==='female-young'&&!played&&(greetingState||introSpeaking)&&!reducedMotion&&!hidden;
+    return character==='female-young'&&!reducedMotion&&!hidden;
   }
   function attach(host,controller,{character,reducedMotion=false,preview=true}={}){
     if(!preview)return controller;
@@ -17,7 +16,7 @@
     const doc=host.ownerDocument,win=doc.defaultView;
     const video=doc.createElement('video');
     video.className='teacher-rest-video';video.muted=true;video.defaultMuted=true;
-    video.loop=false;video.playsInline=true;video.preload='metadata';video.hidden=true;
+    video.loop=true;video.playsInline=true;video.preload='metadata';video.hidden=true;
     video.setAttribute('aria-hidden','true');video.setAttribute('tabindex','-1');
     button.append(video);
     const media=win.matchMedia('(prefers-reduced-motion: reduce)');
@@ -35,7 +34,7 @@
       }).catch(()=>{if(ticket===attempt){failed=true;active=false;conceal()}});
     }
     const onError=()=>{failed=true;sync()};
-    const onEnded=()=>{played=true;introSpeaking=false;active=false;conceal()};
+    const onEnded=()=>{video.currentTime=0;sync()};
     video.addEventListener('error',onError);
     video.addEventListener('ended',onEnded);
     doc.addEventListener('visibilitychange',sync);media.addEventListener('change',sync);
@@ -43,8 +42,7 @@
     observer.observe(doc.body,{attributes:true,attributeFilter:['class']});
     const setState=controller.setState.bind(controller),start=controller.startMouth.bind(controller),stop=controller.stopMouth.bind(controller),destroy=controller.destroy.bind(controller);
     controller.setState=next=>{
-      const leavingGreeting=active&&!VIDEO_STATES.includes(next)&&video.currentTime>0;
-      state=next;if(leavingGreeting)played=true;
+      state=next;
       const result=setState(next);sync();return result;
     };
     controller.startMouth=()=>{
