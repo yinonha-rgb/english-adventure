@@ -279,8 +279,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=5\.4\.6/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=5\.4\.6/);
+  assert.match(html,/interactive-activity-engine\.js\?v=5\.4\.10/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=5\.4\.10/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });

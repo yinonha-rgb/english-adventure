@@ -1,6 +1,7 @@
 /* Show a single complete frame; never layer extra faces or limbs over the clip. */
 .teacher-character{position:relative}
-.teacher-character>.teacher-rest-video{position:absolute;inset:-3% -8% -2%;width:116%;height:105%;object-fit:cover;object-position:50% 46%;pointer-events:none;border:0;border-radius:0;z-index:2;transform-origin:50% 72%;filter:saturate(.96) contrast(1.02) drop-shadow(0 18px 18px #12183a45);-webkit-mask-image:radial-gradient(ellipse 50% 57% at 52% 50%,#000 42%,#000e 59%,#0008 76%,transparent 100%);mask-image:radial-gradient(ellipse 50% 57% at 52% 50%,#000 42%,#000e 59%,#0008 76%,transparent 100%);animation:teacher-video-idle 5.8s ease-in-out infinite alternate}
+.stage-teacher{transform:translateX(-10%);overflow:visible!important;z-index:5}
+.teacher-character>.teacher-rest-video{position:absolute;inset:-2% -12% -1%;width:124%;height:103%;object-fit:contain;object-position:50% 64%;pointer-events:none;border:0;border-radius:0;z-index:2;transform-origin:50% 72%;filter:saturate(.96) contrast(1.02) drop-shadow(0 18px 18px #12183a45);-webkit-mask-image:radial-gradient(ellipse 50% 57% at 52% 50%,#000 42%,#000e 59%,#0008 76%,transparent 100%);mask-image:radial-gradient(ellipse 50% 57% at 52% 50%,#000 42%,#000e 59%,#0008 76%,transparent 100%);animation:teacher-video-idle 5.8s ease-in-out infinite alternate}
 .teacher-character>.teacher-rest-video[hidden]{display:none!important}
 .teacher-rest-video-active>.teacher-rig,.teacher-rest-video-active>.teacher-rig *,.teacher-rest-video-active>.teacher-photo-wrap,.teacher-rest-video-active>.teacher-photo-wrap *{visibility:hidden!important}
 @media(prefers-reduced-motion:reduce){.teacher-character>.teacher-rest-video{display:none!important}.teacher-rest-video-active>.teacher-rig,.teacher-rest-video-active>.teacher-rig *,.teacher-rest-video-active>.teacher-photo-wrap,.teacher-rest-video-active>.teacher-photo-wrap *{visibility:visible!important}}
@@ -13,6 +14,8 @@ body.ea-reduce-motion .teacher-rest-video-active>.teacher-rig,body.ea-reduce-mot
 .teacher-presence[data-state="encouraging"] .teacher-rest-video,.teacher-presence[data-state="praising"] .teacher-rest-video{animation:teacher-video-encouraging 1.35s ease-in-out infinite alternate;filter:saturate(1.08) brightness(1.03) drop-shadow(0 20px 22px #5137a64d)}
 .teacher-presence[data-state="celebrating"] .teacher-rest-video{animation:teacher-video-celebrating .7s cubic-bezier(.2,.8,.3,1) infinite alternate;filter:saturate(1.14) brightness(1.05) drop-shadow(0 22px 24px #ffc74c55)}
 .teacher-presence[data-state="paused"] .teacher-rest-video{animation-play-state:paused;filter:saturate(.72) opacity(.9)}
+.teacher-presence[data-state="waving"] .teacher-rest-video,.teacher-presence[data-state="wave"] .teacher-rest-video{animation:teacher-video-wave .9s cubic-bezier(.2,.8,.3,1) infinite alternate}
+.teacher-presence[data-state="goodbye"] .teacher-rest-video{animation:teacher-video-goodbye 1.4s ease-in-out infinite alternate;filter:saturate(.9) brightness(.98)}
 @keyframes teacher-video-idle{0%{transform:translate3d(-.4%,.2%,0) rotate(-.25deg) scale(1.005)}100%{transform:translate3d(.45%,-.45%,0) rotate(.28deg) scale(1.012)}}
 @keyframes teacher-video-speaking{0%{transform:translate3d(-.6%,.15%,0) rotate(-.35deg) scale(1.012)}55%{transform:translate3d(.3%,-.55%,0) rotate(.25deg) scale(1.022)}100%{transform:translate3d(.7%,-.15%,0) rotate(.42deg) scale(1.016)}}
 @keyframes teacher-video-listening{0%{transform:translate3d(0,0,0) rotate(-.2deg) scale(1.008)}100%{transform:translate3d(-.8%,-.35%,0) rotate(-1.15deg) scale(1.014)}}
@@ -20,3 +23,6 @@ body.ea-reduce-motion .teacher-rest-video-active>.teacher-rig,body.ea-reduce-mot
 @keyframes teacher-video-pointing{0%{transform:translate3d(-.8%,0,0) rotate(-.45deg) scale(1.01)}100%{transform:translate3d(1.6%,-.45%,0) rotate(.7deg) scale(1.022)}}
 @keyframes teacher-video-encouraging{0%{transform:translate3d(0,.2%,0) rotate(-.3deg) scale(1.012)}100%{transform:translate3d(0,-1.05%,0) rotate(.35deg) scale(1.026)}}
 @keyframes teacher-video-celebrating{0%{transform:translate3d(-.5%,.4%,0) rotate(-.8deg) scale(1.015)}100%{transform:translate3d(.6%,-1.8%,0) rotate(.9deg) scale(1.04)}}
+@keyframes teacher-video-wave{0%{transform:translate3d(-.7%,.1%,0) rotate(-.65deg) scale(1.012)}100%{transform:translate3d(.8%,-.65%,0) rotate(.8deg) scale(1.025)}}
+@keyframes teacher-video-goodbye{0%{transform:translate3d(0,0,0) rotate(-.25deg) scale(1.01);opacity:1}100%{transform:translate3d(-.5%,-.6%,0) rotate(.45deg) scale(1.018);opacity:.94}}
+@media(max-width:700px){.stage-teacher{transform:translateX(-4%)}.teacher-character>.teacher-rest-video{inset:0 -6%;width:112%;height:100%;object-position:50% 58%}}
