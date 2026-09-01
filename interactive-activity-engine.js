@@ -245,6 +245,7 @@
       this.autoListeningActivityId=null;
       this.lastSpokenText='';
       this.lastSpeechEndedAt=0;
+      this.speechGeneration=0;
       this.difficulty=root.EAClassroomTools?.difficultyForChild?.(child,progress?.load?.(`${lesson.id}:difficulty`)?.value)||'easy';
       this.speechDebug={microphone:'STOPPED',recognition:'STOPPED',lastTranscript:'—',lessonState:'idle',events:[]};
       this.selectedWord=null;
@@ -446,6 +447,7 @@
     speakSegments(text,rate=.85,onend=()=>{}){
       const Natural=root.EANaturalVoice;
       const segments=Natural?.splitSpeechSegments?.(text,'en-US')||[{text:Natural?.normalizeTextForSpeech?.(text,'en-US')||String(text||''),lang:'en-US'}];
+      const generation=++this.speechGeneration;
       speechSynthesis?.cancel();
       this.lastSpokenText=String(text||'');
       this.lastSpeechEndedAt=0;
@@ -457,6 +459,7 @@
       }
       let index=0;
       const next=()=>{
+        if(this.closed||generation!==this.speechGeneration)return;
         const segment=segments[index++];
         if(!segment){this.lastSpeechEndedAt=Date.now();return onend()}
         const speechText=Natural?.normalizeTextForSpeech?.(segment.text,segment.lang)||segment.text;
@@ -470,8 +473,8 @@
         const choice=Natural?.applyVoiceIdentity?.(utterance,{voices:speechSynthesis?.getVoices?.()||[],lang:segment.lang,preferred,gender:this.teacherProfile?.voiceGender||this.teacherGender,rate,volume:settings.speechVolume??1});
         if(!choice){utterance.lang=segment.lang;utterance.rate=rate}
         if(settings.developerDebug||new URLSearchParams(location.search).get('speechDebug')==='1')console.debug(`[EA Interactive Voice] teacher=${this.teacherProfile?.id||'unknown'} requested=${this.teacherProfile?.voiceGender||this.teacherGender} lang=${segment.lang} voice=${choice?.voice?.name||'browser-default'} actual=${choice?.actualGender||'unknown'} pitch=${utterance.pitch} fallback=${choice?.fallbackReason||'none'}`);
-        utterance.onend=()=>{this.visual?.stopMouth();next()};
-        utterance.onerror=()=>{this.visual?.stopMouth();next()};
+        utterance.onend=()=>{if(generation!==this.speechGeneration)return;this.visual?.stopMouth();next()};
+        utterance.onerror=()=>{if(generation!==this.speechGeneration)return;this.visual?.stopMouth();next()};
         utterance.onboundary=event=>this.visual?.syncMouth?.(speechMouthShape(speechText,event.charIndex));
         root.speechSynthesis.speak(utterance);
       };
@@ -755,9 +758,8 @@
       this.modal.querySelector('#interactiveInstruction').textContent=`${quest?.completeEn||'Mission complete!'} Magic words collected: dog, cat and bird.`;
       this.modal.querySelector('#interactiveState').textContent='המורה חוגגת';
       this.setVisualState('success');
-      this.speakSegments(`כל הכבוד ${this.child.name}! ${quest?.completeEn||'Mission complete!'} Magic words: dog, cat and bird.`,.82);
       this.setInstruction('המשימה הושלמה. לחצו על סיום.');
-      this.speakSegments('המשימה הושלמה. לחצו על סיום.',.9);
+      this.speakSegments(`כל הכבוד ${this.child.name}! ${quest?.completeEn||'Mission complete!'} Magic words: dog, cat and bird. המשימה הושלמה. לחצו על סיום.`,.86);
       host.querySelector('#interactiveHome').onclick=()=>this.close();
       host.querySelector('#interactiveHome').focus();
       this.onComplete?.();
@@ -767,6 +769,7 @@
     }
     close(){
       this.closed=true;
+      this.speechGeneration++;
       clearTimeout(this.timer);
       this.stopLessonTimer();
       clearInterval(this.animationMonitor);
@@ -776,6 +779,7 @@
       this.camera?.destroy?.();this.camera=null;
       this.modal.classList.remove('open');
       document.body.style.overflow='';
+      if(activeTeacher===this)activeTeacher=null;
     }
   }
 
@@ -790,9 +794,14 @@
     StoryChoiceActivity:TYPES.STORY
   };
 
+  let activeTeacher=null;
   function startAnimals(options){
+    // A double tap, resume callback or stale home action must never leave two
+    // teacher instances speaking through the shared browser synthesizer.
+    if(activeTeacher&&!activeTeacher.closed)activeTeacher.close();
     const lesson=createAnimalsLesson(options.child.name);
     const teacher=new InteractiveTeacher({...options,lesson});
+    activeTeacher=teacher;
     teacher.start();
     return teacher;
   }

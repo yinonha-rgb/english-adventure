@@ -146,7 +146,7 @@ test('natural correct speech is accepted instead of receiving retry feedback',()
 test('interactive completion speaks and focuses an explicit Finish action',()=>{
   assert.match(source,/המשימה הושלמה\. לחצו על סיום\./);
   assert.match(source,/id="interactiveHome" aria-label="סיום השיעור וחזרה למסך הבית">סיום ✓/);
-  assert.match(source,/speakSegments\('המשימה הושלמה\. לחצו על סיום\.'/);
+  assert.match(source,/speakSegments\(`[^`]*המשימה הושלמה\. לחצו על סיום\.`/);
   assert.match(source,/querySelector\('#interactiveHome'\)\.focus\(\)/);
 });
 
@@ -279,8 +279,8 @@ test('automatic listening ignores synthesized-teacher echo without rejecting sho
 });
 
 test('interactive engine is offline cached and makes zero OpenAI calls',()=>{
-  assert.match(html,/interactive-activity-engine\.js\?v=5\.3\.2/);
-  assert.match(sw,/interactive-activity-engine\.js\?v=5\.3\.2/);
+  assert.match(html,/interactive-activity-engine\.js\?v=5\.4\.4/);
+  assert.match(sw,/interactive-activity-engine\.js\?v=5\.4\.4/);
   assert.equal([...html.matchAll(/interactive-activity-engine\.js\?v=/g)].length,1,'activity engine must load exactly once');
   assert.doesNotMatch(source,/\bfetch\s*\(|openai|backendEndpoint|Authorization/i);
 });
@@ -350,6 +350,14 @@ test('interactive speech replaces content and stays at two visible lines',()=>{
   assert.match(html,/interactive-speech strong\[lang="en"\]\{direction:ltr/);
   assert.match(html,/interactive-speech small\[lang="he"\]\{direction:rtl/);
   assert.match(html,/-webkit-line-clamp:1/);
+});
+
+test('only one interactive teacher and one speech generation may remain active',()=>{
+  assert.match(source,/this\.speechGeneration=0/);
+  assert.match(source,/const generation=\+\+this\.speechGeneration/);
+  assert.match(source,/generation!==this\.speechGeneration/);
+  assert.match(source,/let activeTeacher=null/);
+  assert.match(source,/if\(activeTeacher&&!activeTeacher\.closed\)activeTeacher\.close\(\)/);
 });
 
 test('spoken words drive calibrated mouth shapes and one visible message channel',()=>{
