@@ -1,6 +1,14 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const Motion=require('../../teacher-video-motion.js');
+test('speech and listening use distinct full-frame video performances',()=>{
+  assert.notEqual(Motion.SOURCES.speaking,Motion.SOURCES.listening);
+  assert.equal(Motion.sourceFor({state:'speaking'}),Motion.SOURCES.speaking);
+  assert.equal(Motion.sourceFor({state:'waiting'}),Motion.SOURCES.listening);
+  assert.equal(Motion.sourceFor({state:'idle'}),Motion.SOURCES.listening);
+  assert.equal(Motion.sourceFor({state:'listening',speaking:true}),Motion.SOURCES.speaking);
+  assert.equal(Motion.labelFor({state:'thinking'}),'אמילי חושבת');
+});
 test('Emily clip remains eligible throughout every lesson state',()=>{
   const base={character:'female-young',state:'greeting',reducedMotion:false,hidden:false,speaking:false};
   for(const state of Motion.VIDEO_STATES)assert.equal(Motion.eligible({...base,state}),true);
@@ -11,19 +19,20 @@ test('Emily clip remains eligible throughout every lesson state',()=>{
 test('video lifecycle is silent, recovers to existing artwork and stops on teardown',async()=>{
   const classes=new Set(),events={},attrs={};let plays=0,pauses=0,removed=false,disconnected=false,destroyed=false;
   const video={hidden:true,currentTime:0,setAttribute:(k,v)=>attrs[k]=v,getAttribute:k=>attrs[k],removeAttribute:k=>delete attrs[k],addEventListener:(k,f)=>events[k]=f,removeEventListener:()=>{},play:()=>{plays++;video.currentTime=.5;return Promise.resolve()},pause:()=>pauses++,load:()=>{},remove:()=>removed=true};
+  const status={textContent:'',className:'',setAttribute:()=>{},remove:()=>{}};
   const button={append:()=>{},classList:{add:k=>classes.add(k),remove:k=>classes.delete(k)}};
   const media={matches:false,addEventListener:()=>{},removeEventListener:()=>{}};
-  const doc={hidden:false,createElement:()=>video,body:{classList:{contains:()=>false}},addEventListener:()=>{},removeEventListener:()=>{},defaultView:{matchMedia:()=>media,MutationObserver:class{observe(){}disconnect(){disconnected=true}}}};
+  const doc={hidden:false,createElement:tag=>tag==='video'?video:status,body:{classList:{contains:()=>false}},addEventListener:()=>{},removeEventListener:()=>{},defaultView:{matchMedia:()=>media,MutationObserver:class{observe(){}disconnect(){disconnected=true}}}};
   const host={ownerDocument:doc,querySelector:()=>button};
   const controller={setState:s=>s,startMouth(){},stopMouth(){},destroy(){destroyed=true}};
   Motion.attach(host,controller,{character:'female-young',preview:true});await Promise.resolve();
   assert.equal(video.muted,true);assert.equal(video.loop,true);await Promise.resolve();assert.equal(video.hidden,false);assert.equal(plays,1);
-  controller.setState('greeting');controller.startMouth();await Promise.resolve();assert.equal(video.hidden,false);assert.equal(plays,1);
+  controller.setState('greeting');controller.startMouth();await Promise.resolve();assert.equal(video.hidden,false);assert.ok(plays>=2);assert.equal(status.textContent,'אמילי מדברת');
   controller.stopMouth();assert.equal(video.hidden,false);
   controller.startMouth();await Promise.resolve();assert.equal(video.hidden,false);
   controller.stopMouth();assert.equal(video.hidden,false);
-  controller.setState('listening');assert.equal(video.hidden,false);
-  controller.setState('greeting');await Promise.resolve();assert.equal(video.hidden,false);assert.equal(plays,1);
+  controller.setState('listening');await Promise.resolve();assert.equal(video.hidden,false);assert.equal(status.textContent,'אמילי מקשיבה');
+  controller.setState('greeting');await Promise.resolve();assert.equal(video.hidden,false);assert.ok(plays>=3);
   events.error();assert.equal(video.hidden,true);assert.equal(classes.size,0);
   controller.destroy();assert.ok(removed&&disconnected&&destroyed&&pauses>0);
 });
@@ -53,3 +62,4 @@ test('video blends into the lesson world and reacts to teaching states',()=>{
   assert.match(css,/object-fit:contain/);
   assert.match(css,/stage-teacher\{transform:translateX\(-10%\)/);
 });
+

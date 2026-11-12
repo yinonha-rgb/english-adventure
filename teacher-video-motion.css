@@ -1,5 +1,6 @@
 /* Show a single complete frame; never layer extra faces or limbs over the clip. */
 .teacher-character{position:relative}
+.teacher-motion-status{position:absolute;inset:auto 50% 3% auto;transform:translateX(50%);z-index:4;white-space:nowrap;padding:6px 11px;border-radius:999px;background:#17172dcc;color:#fff;font-size:.72rem;font-weight:850;box-shadow:0 5px 14px #12183a38;pointer-events:none}.teacher-rest-video-active~.teacher-motion-status:before{content:"";display:inline-block;width:7px;height:7px;margin-inline-end:6px;border-radius:50%;background:#63e6be;box-shadow:0 0 0 4px #63e6be22;animation:teacher-status-pulse 1.25s ease-in-out infinite}
 .stage-teacher{transform:translateX(-10%);overflow:visible!important;z-index:5}
 .teacher-character>.teacher-rest-video{position:absolute;inset:-2% -12% -1%;width:124%;height:103%;object-fit:contain;object-position:50% 64%;pointer-events:none;border:0;border-radius:0;z-index:2;transform-origin:50% 72%;filter:saturate(.96) contrast(1.02) drop-shadow(0 18px 18px #12183a45);-webkit-mask-image:radial-gradient(ellipse 50% 57% at 52% 50%,#000 42%,#000e 59%,#0008 76%,transparent 100%);mask-image:radial-gradient(ellipse 50% 57% at 52% 50%,#000 42%,#000e 59%,#0008 76%,transparent 100%);animation:teacher-video-idle 5.8s ease-in-out infinite alternate}
 .teacher-character>.teacher-rest-video[hidden]{display:none!important}
@@ -25,4 +26,7 @@ body.ea-reduce-motion .teacher-rest-video-active>.teacher-rig,body.ea-reduce-mot
 @keyframes teacher-video-celebrating{0%{transform:translate3d(-.5%,.4%,0) rotate(-.8deg) scale(1.015)}100%{transform:translate3d(.6%,-1.8%,0) rotate(.9deg) scale(1.04)}}
 @keyframes teacher-video-wave{0%{transform:translate3d(-.7%,.1%,0) rotate(-.65deg) scale(1.012)}100%{transform:translate3d(.8%,-.65%,0) rotate(.8deg) scale(1.025)}}
 @keyframes teacher-video-goodbye{0%{transform:translate3d(0,0,0) rotate(-.25deg) scale(1.01);opacity:1}100%{transform:translate3d(-.5%,-.6%,0) rotate(.45deg) scale(1.018);opacity:.94}}
-@media(max-width:700px){.stage-teacher{transform:translateX(-4%)}.teacher-character>.teacher-rest-video{inset:0 -6%;width:112%;height:100%;object-position:50% 58%}}
+@keyframes teacher-status-pulse{50%{opacity:.55;transform:scale(.72)}}
+@media(max-width:700px){.stage-teacher{transform:translateX(-4%)}.teacher-character>.teacher-rest-video{inset:0 -6%;width:112%;height:100%;object-position:50% 58%}.teacher-motion-status{bottom:1%;font-size:.66rem;padding:5px 8px}}
+@media(prefers-reduced-motion:reduce){.teacher-motion-status:before{animation:none!important}}
+
